@@ -1,0 +1,107 @@
+- [ ] Root
+- [ ] ContainerMembers
+- [ ] ContainerDeclarations
+- [x] TestDecl
+- [x] TopLevelComptime
+- [x] TopLevelDecl
+- [x] TopLevelFn
+- [x] TopLevelVar
+- [x] Usingnamespace
+- [x] FnProto
+- [x] VarDecl
+- [ ] ContainerField
+- [ ] Statement
+- [ ] IfStatement
+- [ ] LabeledStatement
+- [ ] LoopStatement
+- [ ] ForStatement
+- [ ] WhileStatement
+- [ ] BlockExprStatement
+- [ ] BlockExpr
+- [ ] AssignExpr
+- [ ] Expr
+- [x] BoolOrExpr
+- [x] BoolAndExpr
+- [x] CompareExpr
+- [x] BitwiseExpr
+- [x] BitShiftExpr
+- [x] AdditionExpr
+- [x] MultiplyExpr
+- [x] PrefixExpr
+- [ ] PrimaryExpr
+- [x] IfExpr
+- [ ] Block
+- [ ] LoopExpr
+- [ ] ForExpr
+- [ ] WhileExpr
+- [x] CurlySuffixExpr
+- [x] InitList
+- [ ] TypeExpr
+- [ ] ErrorUnionExpr
+- [ ] SuffixExpr
+- [ ] PrimaryTypeExpr
+- [ ] ContainerDecl
+- [ ] ErrorSetDecl
+- [ ] GroupedExpr
+- [ ] IfTypeExpr
+- [ ] LabeledTypeExpr
+- [ ] LoopTypeExpr
+- [ ] ForTypeExpr
+- [ ] WhileTypeExpr
+- [ ] SwitchExpr
+- [x] AsmExpr
+- [x] AsmOutput
+- [x] AsmOutputItem
+- [x] AsmInput
+- [x] AsmInputItem
+- [x] AsmClobbers
+- [ ] BreakLabel
+- [ ] BlockLabel
+- [ ] FieldInit
+- [ ] WhileContinueExpr
+- [ ] LinkSection
+- [x] CallConv
+- [ ] ParamDecl
+- [ ] ParamType
+- [x] IfPrefix
+- [ ] WhilePrefix
+- [ ] ForPrefix
+- [ ] Payload
+- [ ] PtrPayload
+- [ ] PtrIndexPayload
+- [ ] SwitchProng
+- [ ] SwitchCase
+- [ ] SwitchItem
+- [ ] AssignOp
+- [x] CompareOp
+- [x] BitwiseOp
+- [x] BitShiftOp
+- [x] AdditionOp
+- [x] MultiplyOp
+- [ ] PrefixOp
+- [ ] PrefixTypeOp
+- [ ] SuffixOp
+- [ ] FnCallArguments
+- [ ] SliceTypeStart
+- [ ] PtrTypeStart
+- [ ] ArrayTypeStart
+- [ ] ContainerDeclAuto
+- [ ] ContainerDeclType
+- [ ] ByteAlign
+- [ ] IdentifierList
+- [ ] SwitchProngList
+- [x] AsmOutputList
+- [x] AsmInputList
+- [x] StringList
+- [ ] ParamDeclList
+- [ ] ExprList
+- [ ] mb_utf8_literal
+- [ ] ascii_char_not_nl_slash_squote
+- [ ] char_escape
+- [ ] char_char
+- [ ] string_char
+- [ ] container_doc_comment
+- [ ] doc_comment
+- [ ] line_comment
+- [ ] line_string
+- [ ] skip
