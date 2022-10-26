@@ -84,7 +84,7 @@ defmodule Zig.Parser.Asm do
   end
 
   def process_clobbers(asm, [{:string, string} | rest]) do
-    process_clobbers(%{asm | clobbers: [string | asm.clobbers] }, rest)
+    process_clobbers(%{asm | clobbers: [string | asm.clobbers]}, rest)
   end
 
   def process_clobbers(asm, [:COMMA | rest]) do

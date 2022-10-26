@@ -10,7 +10,8 @@ defmodule Zig.Parser.Var do
                 extern: false,
                 export: false,
                 pub: false,
-                threadlocal: false
+                threadlocal: false,
+                comptime: false
               ]
 
   def from_args([name | rest], position) when is_binary(name) do

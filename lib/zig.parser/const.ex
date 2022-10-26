@@ -1,6 +1,6 @@
 defmodule Zig.Parser.Const do
   @enforce_keys [:name, :line, :column]
-  defstruct @enforce_keys ++ [:doc_comment, :pub, :type, :value]
+  defstruct @enforce_keys ++ [:doc_comment, :pub, :type, :value, comptime: false]
 
   def from_args([name | rest], position) when is_binary(name) do
     decorate(

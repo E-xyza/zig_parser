@@ -17,7 +17,7 @@
 - [ ] ForStatement
 - [ ] WhileStatement
 - [ ] BlockExprStatement
-- [ ] BlockExpr
+- [x] BlockExpr
 - [ ] AssignExpr
 - [ ] Expr
 - [x] BoolOrExpr
@@ -31,9 +31,9 @@
 - [ ] PrimaryExpr
 - [x] IfExpr
 - [ ] Block
-- [ ] LoopExpr
-- [ ] ForExpr
-- [ ] WhileExpr
+- [x] LoopExpr
+- [x] ForExpr
+- [x] WhileExpr
 - [x] CurlySuffixExpr
 - [x] InitList
 - [ ] TypeExpr
@@ -70,7 +70,7 @@
 - [ ] PtrPayload
 - [ ] PtrIndexPayload
 - [ ] SwitchProng
-- [ ] SwitchCase
+- [x] SwitchCase
 - [ ] SwitchItem
 - [ ] AssignOp
 - [x] CompareOp

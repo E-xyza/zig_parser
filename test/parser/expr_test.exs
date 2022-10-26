@@ -48,27 +48,61 @@ defmodule Zig.Parser.Test.ExprTest do
 
     test "one output expression" do
       assert %Parser{decls: [%Const{value: %Asm{outputs: [{"ret", "={rax}", %{expr: "usize"}}]}}]} =
-               Parser.parse(~S|const foo = asm volatile("syscall" : [ret] "={rax}" (-> usize) : : );|)
+               Parser.parse(
+                 ~S|const foo = asm volatile("syscall" : [ret] "={rax}" (-> usize) : : );|
+               )
     end
 
     test "one output expression with an identifier" do
       assert %Parser{decls: [%Const{value: %Asm{outputs: [{"ret", "={rax}", "identifier"}]}}]} =
-               Parser.parse(~S|const foo = asm volatile("syscall" : [ret] "={rax}" (identifier) : : );|)
+               Parser.parse(
+                 ~S|const foo = asm volatile("syscall" : [ret] "={rax}" (identifier) : : );|
+               )
     end
 
     test "two output expressions" do
-      assert %Parser{decls: [%Const{value: %Asm{outputs: [{"ret", "={rax}", %{expr: "usize"}}, {"ret", "={rax}", %{expr: "usize"}}]}}]} =
-               Parser.parse(~S|const foo = asm volatile("syscall" : [ret] "={rax}" (-> usize), [ret] "={rax}" (-> usize) : : );|)
+      assert %Parser{
+               decls: [
+                 %Const{
+                   value: %Asm{
+                     outputs: [
+                       {"ret", "={rax}", %{expr: "usize"}},
+                       {"ret", "={rax}", %{expr: "usize"}}
+                     ]
+                   }
+                 }
+               ]
+             } =
+               Parser.parse(
+                 ~S|const foo = asm volatile("syscall" : [ret] "={rax}" (-> usize), [ret] "={rax}" (-> usize) : : );|
+               )
     end
 
     test "one input expression" do
-      assert %Parser{decls: [%Const{value: %Asm{inputs: [{"number", "{rax}", %{expr: "number"}}]}}]} =
-               Parser.parse(~S|const foo = asm volatile("syscall" : : [number] "{rax}" (number) : );|)
+      assert %Parser{
+               decls: [%Const{value: %Asm{inputs: [{"number", "{rax}", %{expr: "number"}}]}}]
+             } =
+               Parser.parse(
+                 ~S|const foo = asm volatile("syscall" : : [number] "{rax}" (number) : );|
+               )
     end
 
     test "two input expressions" do
-      assert %Parser{decls: [%Const{value: %Asm{inputs: [{"number", "{rax}", %{expr: "number"}}, {"arg1", "{rdi}", %{expr: "arg1"}}]}}]} =
-               Parser.parse(~S|const foo = asm volatile("syscall" : : [number] "{rax}" (number), [arg1] "{rdi}" (arg1) : );|)
+      assert %Parser{
+               decls: [
+                 %Const{
+                   value: %Asm{
+                     inputs: [
+                       {"number", "{rax}", %{expr: "number"}},
+                       {"arg1", "{rdi}", %{expr: "arg1"}}
+                     ]
+                   }
+                 }
+               ]
+             } =
+               Parser.parse(
+                 ~S|const foo = asm volatile("syscall" : : [number] "{rax}" (number), [arg1] "{rdi}" (arg1) : );|
+               )
     end
 
     test "one clobber register" do
@@ -90,107 +124,126 @@ defmodule Zig.Parser.Test.ExprTest do
 
     test "basic if statement only" do
       assert %Parser{decls: [%Const{value: {:if, %{expr: "foo"}, %{expr: "bar"}}}]} =
-        Parser.parse("const foo = if (foo) bar;")
+               Parser.parse("const foo = if (foo) bar;")
     end
 
     test "basic if statement with payload paramater" do
-      assert %Parser{decls: [%Const{value: {:if, %{expr: "foo"}, {:payload, "bar", %{expr: "bar"}}}}]} =
-        Parser.parse("const foo = if (foo) |bar| bar;")
+      assert %Parser{
+               decls: [%Const{value: {:if, %{expr: "foo"}, {:payload, :bar, %{expr: "bar"}}}}]
+             } = Parser.parse("const foo = if (foo) |bar| bar;")
     end
 
     test "basic if statement with pointer payload paramater" do
-      assert %Parser{decls: [%Const{value: {:if, %{expr: "foo"}, {:ptr_payload, "bar", %{expr: "bar"}}}}]} =
-        Parser.parse("const foo = if (foo) |*bar| bar;")
+      assert %Parser{
+               decls: [
+                 %Const{value: {:if, %{expr: "foo"}, {:ptr_payload, :bar, %{expr: "bar"}}}}
+               ]
+             } = Parser.parse("const foo = if (foo) |*bar| bar;")
     end
 
     test "basic else statement" do
-      assert %Parser{decls: [%Const{value: {:if, %{expr: "foo"}, %{expr: "bar"}, %{expr: "baz"}}}]} =
-        Parser.parse("const foo = if (foo) bar else baz;")
+      assert %Parser{
+               decls: [%Const{value: {:if, %{expr: "foo"}, %{expr: "bar"}, %{expr: "baz"}}}]
+             } = Parser.parse("const foo = if (foo) bar else baz;")
     end
 
     test "else statement with payload" do
-      assert %Parser{decls: [%Const{value: {:if, %{expr: "foo"}, %{expr: "bar"}, {:payload, "baz", %{expr: "baz"}}}}]} =
-        Parser.parse("const foo = if (foo) bar else |baz| baz;")
+      assert %Parser{
+               decls: [
+                 %Const{
+                   value: {:if, %{expr: "foo"}, %{expr: "bar"}, {:payload, :baz, %{expr: "baz"}}}
+                 }
+               ]
+             } = Parser.parse("const foo = if (foo) bar else |baz| baz;")
     end
   end
 
   describe "break/continue expr" do
     # note these are a misuse of the const and are probably a semantic error.
     test "break" do
-      assert %Parser{decls: [%Const{value: :break}]} =
-        Parser.parse("const foo = break;")
+      assert %Parser{decls: [%Const{value: :break}]} = Parser.parse("const foo = break;")
     end
 
     test "break with tag" do
       assert %Parser{decls: [%Const{value: {:break, :foo}}]} =
-        Parser.parse("const foo = break :foo;")
+               Parser.parse("const foo = break :foo;")
     end
 
     test "break with tag and value" do
       assert %Parser{decls: [%Const{value: {:break, :foo, %{expr: "bar"}}}]} =
-        Parser.parse("const foo = break :foo bar;")
+               Parser.parse("const foo = break :foo bar;")
     end
 
     test "continue" do
-      assert %Parser{decls: [%Const{value: :continue}]} =
-        Parser.parse("const foo = continue;")
+      assert %Parser{decls: [%Const{value: :continue}]} = Parser.parse("const foo = continue;")
     end
 
     test "continue with tag" do
       assert %Parser{decls: [%Const{value: {:continue, :foo}}]} =
-        Parser.parse("const foo = continue :foo;")
+               Parser.parse("const foo = continue :foo;")
     end
   end
 
   describe "tagged exprs" do
     test "comptime" do
       assert %Parser{decls: [%Const{value: {:comptime, %{expr: "bar"}}}]} =
-        Parser.parse("const foo = comptime bar;")
+               Parser.parse("const foo = comptime bar;")
     end
 
     test "nosuspend" do
       assert %Parser{decls: [%Const{value: {:nosuspend, %{expr: "bar"}}}]} =
-        Parser.parse("const foo = nosuspend bar;")
+               Parser.parse("const foo = nosuspend bar;")
     end
 
     test "resume" do
       assert %Parser{decls: [%Const{value: {:resume, %{expr: "bar"}}}]} =
-        Parser.parse("const foo = resume bar;")
+               Parser.parse("const foo = resume bar;")
     end
 
     test "return" do
       assert %Parser{decls: [%Const{value: {:return, %{expr: "bar"}}}]} =
-        Parser.parse("const foo = return bar;")
+               Parser.parse("const foo = return bar;")
     end
   end
 
   describe "blocks" do
     # note this is probably a semantic error
     test "work" do
-      assert %Parser{decls: [%Const{value: %Block{code: []}}]} =
-        Parser.parse("const foo = {};")
+      assert %Parser{decls: [%Const{value: %Block{code: []}}]} = Parser.parse("const foo = {};")
     end
   end
 
   describe "curly suffix init" do
     test "with an empty curly struct" do
       assert %Parser{decls: [%Const{value: {:empty, %{expr: "MyStruct"}}}]} =
-        Parser.parse("const foo = MyStruct{};")
+               Parser.parse("const foo = MyStruct{};")
     end
 
     test "with a struct definer" do
-      assert %Parser{decls: [%Const{value: {:struct, %{expr: "MyStruct"}, %{foo: {:integer, 1}}}}]} =
-        Parser.parse("const foo = MyStruct{.foo = 1};")
+      assert %Parser{
+               decls: [%Const{value: {:struct, %{expr: "MyStruct"}, %{foo: {:integer, 1}}}}]
+             } = Parser.parse("const foo = MyStruct{.foo = 1};")
     end
 
     test "with a struct definer with two terms" do
-      assert %Parser{decls: [%Const{value: {:struct, %{expr: "MyStruct"}, %{foo: {:integer, 1}, bar: {:integer, 2}}}}]} =
-        Parser.parse("const foo = MyStruct{.foo = 1, .bar = 2};")
+      assert %Parser{
+               decls: [
+                 %Const{
+                   value:
+                     {:struct, %{expr: "MyStruct"}, %{foo: {:integer, 1}, bar: {:integer, 2}}}
+                 }
+               ]
+             } = Parser.parse("const foo = MyStruct{.foo = 1, .bar = 2};")
     end
 
     test "with an array definer" do
-      assert %Parser{decls: [%Const{value: {:array, %{expr: "MyArrayType"}, [integer: 1, integer: 2, integer: 3]}}]} =
-        Parser.parse("const foo = MyArrayType{1, 2, 3};")
+      assert %Parser{
+               decls: [
+                 %Const{
+                   value: {:array, %{expr: "MyArrayType"}, [integer: 1, integer: 2, integer: 3]}
+                 }
+               ]
+             } = Parser.parse("const foo = MyArrayType{1, 2, 3};")
     end
   end
 end

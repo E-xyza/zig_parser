@@ -12,7 +12,9 @@ defmodule Zig.Parser do
   import NimbleParsec
 
   alias Zig.Parser.Asm
+  alias Zig.Parser.AssignExpr
   alias Zig.Parser.Block
+  alias Zig.Parser.BlockExpr
   alias Zig.Parser.Const
   alias Zig.Parser.Collected
   alias Zig.Parser.Expr
@@ -21,6 +23,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.TopLevelComptime
   alias Zig.Parser.TopLevelDecl
   alias Zig.Parser.Function
+  alias Zig.Parser.Statement
   alias Zig.Parser.TopLevelFn
   alias Zig.Parser.TopLevelVar
   alias Zig.Parser.TypeExpr
@@ -47,6 +50,10 @@ defmodule Zig.Parser do
                       collect: true
                     ],
                     doc_comment: [post_traverse: :doc_comment, tag: true, collect: true],
+                    AssignExpr: [
+                      tag: AssignExpr,
+                      post_traverse: {AssignExpr, :post_traverse, []}
+                    ],
                     TestDecl: [
                       tag: TestDecl,
                       start_position: true,
@@ -57,6 +64,11 @@ defmodule Zig.Parser do
                       tag: true,
                       post_traverse: :string_literal_single,
                       collect: true
+                    ],
+                    Statement: [
+                      tag: Statement,
+                      start_position: true,
+                      post_traverse: {Statement, :post_traverse, []}
                     ],
                     TopLevelComptime: [
                       tag: :toplevelcomptime,
@@ -95,6 +107,7 @@ defmodule Zig.Parser do
                     ParamDeclList: [tag: true],
                     ParamDecl: [tag: ParamDecl],
                     AsmExpr: [tag: Asm, post_traverse: {Asm, :post_traverse, []}],
+                    BlockExpr: [tag: BlockExpr, post_traverse: {BlockExpr, :post_traverse, []}],
                     Block: [tag: Block, post_traverse: {Block, :post_traverse, []}],
                     Root: [post_traverse: :post_traverse]
                   ] ++ @keyword_mapping ++ @operator_mapping ++ @collected_mapping
