@@ -6,52 +6,13 @@ defmodule Zig.Parser.Expr do
     {rest, [analyze_args(args) | rest_args], context}
   end
 
-  @binaryoperators %{
-    or: :or,
-    and: :and,
-    EQUALEQUAL: :==,
-    EXCLAMATIONMARKEQUAL: :!=,
-    LARROW: :<,
-    RARROW: :>,
-    LARROWEQUAL: :<=,
-    RARROWEQUAL: :>=,
-    AMPERSAND: :&,
-    CARET: :^,
-    PIPE: :|,
-    orelse: :orelse,
-    LARROW2: :"<<",
-    RARROW2: :">>",
-    PLUS: :+,
-    MINUS: :-,
-    PLUS2: :++,
-    PLUSPERCENT: :"+%",
-    MINUSPERCENT: :"-%",
-    PIPE2: :||,
-    ASTERISK: :*,
-    SLASH: :/,
-    PERCENT: :%,
-    ASTERISK2: :**,
-    ASTERISKPERCENT: :"*%"
-  }
+  @binaryoperators ~w(or and == != < > <= >= & ^ | orelse << >> + - ++ +% -% || * / % ** *%)a
 
-  for {opname, atom} <- @binaryoperators do
-    defp analyze_args([a, unquote(opname) | rest]), do: {unquote(atom), a, analyze_args(rest)}
-  end
+  defp analyze_args([a, op | rest]) when op in @binaryoperators, do: {op, a, analyze_args(rest)}
 
-  @prefixoperators %{
-    EXCLAMATIONMARK: :!,
-    MINUS: :-,
-    TILDE: :"~",
-    MINUSPERCENT: :"-%",
-    AMPERSAND: :&,
-    try: :try,
-    await: :await
-  }
+  @prefixoperators ~w(! - ~ -% & try await)a
 
-  for {opname, atom} <- @prefixoperators do
-    defp analyze_args([unquote(opname) | rest]), do: {unquote(atom), analyze_args(rest)}
-  end
-
+  defp analyze_args([op | rest]) when op in @prefixoperators, do: {op, analyze_args(rest)}
   defp analyze_args([:if | rest]), do: Control.parse_if(rest)
   defp analyze_args([:break | rest]), do: parse_break(rest)
   defp analyze_args([:continue | rest]), do: parse_continue(rest)

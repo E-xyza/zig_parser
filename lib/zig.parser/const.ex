@@ -13,7 +13,7 @@ defmodule Zig.Parser.Const do
     decorate(%{const | type: type}, rest)
   end
 
-  defp decorate(const, [:EQUAL, value | rest]) do
+  defp decorate(const, [:=, value | rest]) do
     decorate(%{const | value: value}, rest)
   end
 

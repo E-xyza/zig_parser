@@ -9,7 +9,7 @@ defmodule Zig.Parser.InitList do
 
   defp get_init_list([:LBRACE | rest]), do: get_array(rest, [])
 
-  defp get_struct([:DOT, identifier, :EQUAL, expr | rest], so_far) do
+  defp get_struct([:DOT, identifier, :=, expr | rest], so_far) do
     get_struct(rest, Map.put(so_far, String.to_atom(identifier), expr))
   end
 

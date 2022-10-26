@@ -10,15 +10,15 @@
 - [x] FnProto
 - [x] VarDecl
 - [ ] ContainerField
-- [ ] Statement
-- [ ] IfStatement
-- [ ] LabeledStatement
-- [ ] LoopStatement
-- [ ] ForStatement
-- [ ] WhileStatement
-- [ ] BlockExprStatement
+- [x] Statement
+- [x]] IfStatement
+- [x] LabeledStatement
+- [x] LoopStatement
+- [x] ForStatement
+- [x] WhileStatement
+- [x] BlockExprStatement
 - [x] BlockExpr
-- [ ] AssignExpr
+- [x] AssignExpr
 - [ ] Expr
 - [x] BoolOrExpr
 - [x] BoolAndExpr
@@ -55,24 +55,24 @@
 - [x] AsmInput
 - [x] AsmInputItem
 - [x] AsmClobbers
-- [ ] BreakLabel
-- [ ] BlockLabel
-- [ ] FieldInit
-- [ ] WhileContinueExpr
-- [ ] LinkSection
+- [x] BreakLabel
+- [x] BlockLabel
+- [x] FieldInit
+- [x] WhileContinueExpr
+- [x] LinkSection
 - [x] CallConv
 - [ ] ParamDecl
 - [ ] ParamType
 - [x] IfPrefix
-- [ ] WhilePrefix
-- [ ] ForPrefix
-- [ ] Payload
-- [ ] PtrPayload
-- [ ] PtrIndexPayload
-- [ ] SwitchProng
+- [x] WhilePrefix
+- [x] ForPrefix
+- [x] Payload
+- [x] PtrPayload
+- [x] PtrIndexPayload
+- [x] SwitchProng
 - [x] SwitchCase
-- [ ] SwitchItem
-- [ ] AssignOp
+- [x] SwitchItem
+- [x] AssignOp
 - [x] CompareOp
 - [x] BitwiseOp
 - [x] BitShiftOp

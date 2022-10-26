@@ -34,7 +34,54 @@ defmodule Zig.Parser do
   @keywords ~w(align allowzero and anyframe anytype asm async await break callconv catch comptime const continue defer else enum errdefer error export extern fn for if inline noalias nosuspend noinline opaque or orelse packed pub resume return linksection struct suspend switch test threadlocal try union unreachable usingnamespace var volatile while)a
   @keyword_mapping Enum.map(@keywords, &{:"KEYWORD_#{&1}", [token: &1]})
 
-  @operators ~w(AMPERSAND AMPERSANDEQUAL ASTERISK ASTERISK2 ASTERISKEQUAL ASTERISKPERCENT ASTERISKPERCENTEQUAL CARET CARETEQUAL COLON COMMA DOT DOT2 DOT3 DOTASTERISK DOTQUESTIONMARK EQUAL EQUALEQUAL EQUALRARROW EXCLAMATIONMARK EXCLAMATIONMARKEQUAL LARROW LARROW2 LARROW2EQUAL LARROWEQUAL LBRACE LBRACKET LPAREN MINUS MINUSEQUAL MINUSPERCENT MINUSPERCENTEQUAL MINUSRARROW PERCENT PERCENTEQUAL PIPE PIPE2 PIPEEQUAL PLUS PLUS2 PLUSEQUAL PLUSPERCENT PLUSPERCENTEQUAL LETTERC QUESTIONMARK RARROW RARROW2 RARROW2EQUAL RARROWEQUAL RBRACE RBRACKET RPAREN SEMICOLON SLASH SLASHEQUAL TILDE)a
+  @sub_operators %{
+    AMPERSAND: :&,
+    AMPERSANDEQUAL: :"&=",
+    ASTERISK: :*,
+    ASTERISK2: :**,
+    ASTERISKEQUAL: :"*=",
+    ASTERISKPERCENT: :"*%",
+    ASTERISKPERCENTEQUAL: :"*%=",
+    CARET: :^,
+    CARETEQUAL: :"^=",
+    DOT3: :...,
+    DOTASTERISK: :".*",
+    DOTQUESTIONMARK: :".?",
+    EQUAL: :=,
+    EQUALEQUAL: :==,
+    EQUALRARROW: :"=>",
+    EXCLAMATIONMARK: :!,
+    EXCLAMATIONMARKEQUAL: :!=,
+    LARROW: :<,
+    LARROW2: :"<<",
+    LARROW2EQUAL: :"<<=",
+    LARROWEQUAL: :<=,
+    MINUS: :-,
+    MINUSEQUAL: :"-=",
+    MINUSPERCENT: :"-%",
+    MINUSPERCENTEQUAL: :"-%=",
+    PERCENT: :%,
+    PERCENTEQUAL: :"%=",
+    PIPE: :|,
+    PIPE2: :||,
+    PIPEEQUAL: :"|=",
+    PLUS: :+,
+    PLUS2: :++,
+    PLUSEQUAL: :"+=",
+    PLUSPERCENT: :"+%",
+    PLUSPERCENTEQUAL: :"+%=",
+    RARROW: :>,
+    RARROW2: :">>",
+    RARROW2EQUAL: :">>=",
+    RARROWEQUAL: :>=,
+    SLASH: :/,
+    SLASHEQUAL: :"/=",
+    TILDE: :"~"
+  }
+
+  @sub_operator_mapping Enum.map(@sub_operators, fn {name, op} -> {name, [token: op]} end)
+
+  @operators ~w(COMMA DOT DOT2 COLON LBRACE LBRACKET LPAREN MINUSRARROW LETTERC QUESTIONMARK RBRACE RBRACKET RPAREN SEMICOLON)a
   @operator_mapping Enum.map(@operators, &{&1, [token: true]})
 
   @collecteds ~w(IDENTIFIER INTEGER CHAR_LITERAL FLOAT INTEGER STRINGLITERAL)a
@@ -110,7 +157,9 @@ defmodule Zig.Parser do
                     BlockExpr: [tag: BlockExpr, post_traverse: {BlockExpr, :post_traverse, []}],
                     Block: [tag: Block, post_traverse: {Block, :post_traverse, []}],
                     Root: [post_traverse: :post_traverse]
-                  ] ++ @keyword_mapping ++ @operator_mapping ++ @collected_mapping
+                  ] ++
+                    @keyword_mapping ++
+                    @operator_mapping ++ @sub_operator_mapping ++ @collected_mapping
 
   Pegasus.parser_from_file(Path.join(__DIR__, "grammar/grammar.y"), @parser_options)
 

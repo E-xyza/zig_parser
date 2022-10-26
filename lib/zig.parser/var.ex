@@ -27,7 +27,7 @@ defmodule Zig.Parser.Var do
     |> decorate(rest)
   end
 
-  defp decorate(var, [:EQUAL, value | rest]) do
+  defp decorate(var, [:=, value | rest]) do
     var
     |> struct(value: value)
     |> decorate(rest)
