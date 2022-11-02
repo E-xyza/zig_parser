@@ -47,14 +47,14 @@ defmodule Zig.Parser.Test.ExprTest do
     end
 
     test "one output expression" do
-      assert %Parser{decls: [%Const{value: %Asm{outputs: [{"ret", "={rax}", %{expr: "usize"}}]}}]} =
+      assert %Parser{decls: [%Const{value: %Asm{outputs: [{:ret, "={rax}", :usize}]}}]} =
                Parser.parse(
                  ~S|const foo = asm volatile("syscall" : [ret] "={rax}" (-> usize) : : );|
                )
     end
 
     test "one output expression with an identifier" do
-      assert %Parser{decls: [%Const{value: %Asm{outputs: [{"ret", "={rax}", "identifier"}]}}]} =
+      assert %Parser{decls: [%Const{value: %Asm{outputs: [{:ret, "={rax}", :identifier}]}}]} =
                Parser.parse(
                  ~S|const foo = asm volatile("syscall" : [ret] "={rax}" (identifier) : : );|
                )
@@ -66,8 +66,8 @@ defmodule Zig.Parser.Test.ExprTest do
                  %Const{
                    value: %Asm{
                      outputs: [
-                       {"ret", "={rax}", %{expr: "usize"}},
-                       {"ret", "={rax}", %{expr: "usize"}}
+                       {:ret, "={rax}", :usize},
+                       {:ret, "={rax}", :usize}
                      ]
                    }
                  }
@@ -80,7 +80,7 @@ defmodule Zig.Parser.Test.ExprTest do
 
     test "one input expression" do
       assert %Parser{
-               decls: [%Const{value: %Asm{inputs: [{"number", "{rax}", %{expr: "number"}}]}}]
+               decls: [%Const{value: %Asm{inputs: [{:number, "{rax}", :number}]}}]
              } =
                Parser.parse(
                  ~S|const foo = asm volatile("syscall" : : [number] "{rax}" (number) : );|
@@ -93,8 +93,8 @@ defmodule Zig.Parser.Test.ExprTest do
                  %Const{
                    value: %Asm{
                      inputs: [
-                       {"number", "{rax}", %{expr: "number"}},
-                       {"arg1", "{rdi}", %{expr: "arg1"}}
+                       {:number, "{rax}", :number},
+                       {:arg1, "{rdi}", :arg1}
                      ]
                    }
                  }
@@ -123,27 +123,27 @@ defmodule Zig.Parser.Test.ExprTest do
     # IfPrefix <- KEYWORD_if LPAREN Expr RPAREN PtrPayload?
 
     test "basic if statement only" do
-      assert %Parser{decls: [%Const{value: {:if, %{expr: "foo"}, %{expr: "bar"}}}]} =
+      assert %Parser{decls: [%Const{value: {:if, :foo, :bar}}]} =
                Parser.parse("const foo = if (foo) bar;")
     end
 
     test "basic if statement with payload paramater" do
       assert %Parser{
-               decls: [%Const{value: {:if, %{expr: "foo"}, {:payload, :bar, %{expr: "bar"}}}}]
+               decls: [%Const{value: {:if, :foo, {:payload, :bar, :bar}}}]
              } = Parser.parse("const foo = if (foo) |bar| bar;")
     end
 
     test "basic if statement with pointer payload paramater" do
       assert %Parser{
                decls: [
-                 %Const{value: {:if, %{expr: "foo"}, {:ptr_payload, :bar, %{expr: "bar"}}}}
+                 %Const{value: {:if, :foo, {:ptr_payload, :bar, :bar}}}
                ]
              } = Parser.parse("const foo = if (foo) |*bar| bar;")
     end
 
     test "basic else statement" do
       assert %Parser{
-               decls: [%Const{value: {:if, %{expr: "foo"}, %{expr: "bar"}, %{expr: "baz"}}}]
+               decls: [%Const{value: {:if, :foo, :bar, :baz}}]
              } = Parser.parse("const foo = if (foo) bar else baz;")
     end
 
@@ -151,7 +151,7 @@ defmodule Zig.Parser.Test.ExprTest do
       assert %Parser{
                decls: [
                  %Const{
-                   value: {:if, %{expr: "foo"}, %{expr: "bar"}, {:payload, :baz, %{expr: "baz"}}}
+                   value: {:if, :foo, :bar, {:payload, :baz, :baz}}
                  }
                ]
              } = Parser.parse("const foo = if (foo) bar else |baz| baz;")
@@ -170,7 +170,7 @@ defmodule Zig.Parser.Test.ExprTest do
     end
 
     test "break with tag and value" do
-      assert %Parser{decls: [%Const{value: {:break, :foo, %{expr: "bar"}}}]} =
+      assert %Parser{decls: [%Const{value: {:break, :foo, :bar}}]} =
                Parser.parse("const foo = break :foo bar;")
     end
 
@@ -186,22 +186,22 @@ defmodule Zig.Parser.Test.ExprTest do
 
   describe "tagged exprs" do
     test "comptime" do
-      assert %Parser{decls: [%Const{value: {:comptime, %{expr: "bar"}}}]} =
+      assert %Parser{decls: [%Const{value: {:comptime, :bar}}]} =
                Parser.parse("const foo = comptime bar;")
     end
 
     test "nosuspend" do
-      assert %Parser{decls: [%Const{value: {:nosuspend, %{expr: "bar"}}}]} =
+      assert %Parser{decls: [%Const{value: {:nosuspend, :bar}}]} =
                Parser.parse("const foo = nosuspend bar;")
     end
 
     test "resume" do
-      assert %Parser{decls: [%Const{value: {:resume, %{expr: "bar"}}}]} =
+      assert %Parser{decls: [%Const{value: {:resume, :bar}}]} =
                Parser.parse("const foo = resume bar;")
     end
 
     test "return" do
-      assert %Parser{decls: [%Const{value: {:return, %{expr: "bar"}}}]} =
+      assert %Parser{decls: [%Const{value: {:return, :bar}}]} =
                Parser.parse("const foo = return bar;")
     end
   end
@@ -215,13 +215,13 @@ defmodule Zig.Parser.Test.ExprTest do
 
   describe "curly suffix init" do
     test "with an empty curly struct" do
-      assert %Parser{decls: [%Const{value: {:empty, %{expr: "MyStruct"}}}]} =
+      assert %Parser{decls: [%Const{value: {:empty, :MyStruct}}]} =
                Parser.parse("const foo = MyStruct{};")
     end
 
     test "with a struct definer" do
       assert %Parser{
-               decls: [%Const{value: {:struct, %{expr: "MyStruct"}, %{foo: {:integer, 1}}}}]
+               decls: [%Const{value: {:struct, :MyStruct, %{foo: {:integer, 1}}}}]
              } = Parser.parse("const foo = MyStruct{.foo = 1};")
     end
 
@@ -230,7 +230,7 @@ defmodule Zig.Parser.Test.ExprTest do
                decls: [
                  %Const{
                    value:
-                     {:struct, %{expr: "MyStruct"}, %{foo: {:integer, 1}, bar: {:integer, 2}}}
+                     {:struct, :MyStruct, %{foo: {:integer, 1}, bar: {:integer, 2}}}
                  }
                ]
              } = Parser.parse("const foo = MyStruct{.foo = 1, .bar = 2};")
@@ -240,7 +240,7 @@ defmodule Zig.Parser.Test.ExprTest do
       assert %Parser{
                decls: [
                  %Const{
-                   value: {:array, %{expr: "MyArrayType"}, [integer: 1, integer: 2, integer: 3]}
+                   value: {:array, :MyArrayType, [integer: 1, integer: 2, integer: 3]}
                  }
                ]
              } = Parser.parse("const foo = MyArrayType{1, 2, 3};")

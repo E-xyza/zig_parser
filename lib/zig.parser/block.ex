@@ -19,8 +19,8 @@ defmodule Zig.Parser.BlockExpr do
     {rest, [parse_block(block_args) | rest_args], context}
   end
 
-  defp parse_block([label, :COLON, block = %Block{}]) do
-    Map.put(block, :label, String.to_atom(label))
+  defp parse_block([tag, :COLON, block = %Block{}]) do
+    Map.put(block, :label, tag)
   end
 
   defp parse_block([block]), do: block

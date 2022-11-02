@@ -1,7 +1,4 @@
 defmodule Zig.Parser.TypeExpr do
-  @enforce_keys [:expr]
-  defstruct @enforce_keys
-
   @literals Zig.Parser.Collected.literals()
 
   def post_traverse(rest, [{__MODULE__, [literalterm = {literal, _}]} | rest_args], context, _, _)
@@ -14,6 +11,6 @@ defmodule Zig.Parser.TypeExpr do
   end
 
   def post_traverse(rest, [{__MODULE__, [expr]} | rest_args], context, _, _) do
-    {rest, [%__MODULE__{expr: expr} | rest_args], context}
+    {rest, [expr | rest_args], context}
   end
 end

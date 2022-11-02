@@ -4,7 +4,7 @@ defmodule Zig.Parser.Collected do
   def literals, do: @literals
 
   def post_traverse(rest, [collected | args_rest], context, _, _, :IDENTIFIER) do
-    {rest, [collected | args_rest], context}
+    {rest, [String.to_atom(collected) | args_rest], context}
   end
 
   def post_traverse(rest, ["0x" <> hex | args_rest], context, _, _, :INTEGER) do
@@ -33,6 +33,15 @@ defmodule Zig.Parser.Collected do
 
   def post_traverse(rest, [string | args_rest], context, _, _, :STRINGLITERAL) do
     {rest, [{:string, String.trim(string, ~S("))} | args_rest], context}
+  end
+
+  def post_traverse(rest, [string | args_rest], context, _, _, :BUILTINIDENTIFIER) do
+    builtin =
+      string
+      |> String.trim_leading("@")
+      |> String.to_atom()
+
+    {rest, [{:builtin, builtin} | args_rest], context}
   end
 
   defp remove_underscore(string), do: String.replace(string, "_", "")

@@ -102,55 +102,55 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [%Block{code: [var]}]} =
                Parser.parse("comptime {comptime if (x) y;}")
 
-      assert {:comptime, {:if, %{expr: "x"}, %{expr: "y"}}} = var
+      assert {:comptime, {:if, :x, :y}} = var
     end
 
     test "can be nosuspend" do
       assert %Parser{toplevelcomptime: [%Block{code: [var]}]} =
                Parser.parse("comptime {nosuspend if (x) y;}")
 
-      assert {:nosuspend, {:if, %{expr: "x"}, %{expr: "y"}}} = var
+      assert {:nosuspend, {:if, :x, :y}} = var
     end
 
     test "can be suspend" do
       assert %Parser{toplevelcomptime: [%Block{code: [var]}]} =
                Parser.parse("comptime {suspend if (x) y;}")
 
-      assert {:suspend, {:if, %{expr: "x"}, %{expr: "y"}}} = var
+      assert {:suspend, {:if, :x, :y}} = var
     end
 
     test "can be defer" do
       assert %Parser{toplevelcomptime: [%Block{code: [var]}]} =
                Parser.parse("comptime {defer if (x) y;}")
 
-      assert {:defer, {:if, %{expr: "x"}, %{expr: "y"}}} = var
+      assert {:defer, {:if, :x, :y}} = var
     end
 
     test "can be errdefer" do
       assert %Parser{toplevelcomptime: [%Block{code: [var]}]} =
                Parser.parse("comptime {errdefer if (x) y;}")
 
-      assert {:errdefer, {:if, %{expr: "x"}, %{expr: "y"}}} = var
+      assert {:errdefer, {:if, :x, :y}} = var
     end
 
     test "can be errdefer with paylod" do
       assert %Parser{toplevelcomptime: [%Block{code: [var]}]} =
                Parser.parse("comptime {errdefer |err| if (x) y;}")
 
-      assert {:errdefer, {:payload, :err, {:if, %{expr: "x"}, %{expr: "y"}}}} = var
+      assert {:errdefer, {:payload, :err, {:if, :x, :y}}} = var
     end
   end
 
   describe "statement can be if" do
     test "with basic" do
-      assert %Parser{toplevelcomptime: [%Block{code: [{:if, %{expr: "x"}, %{expr: "y"}}]}]} =
+      assert %Parser{toplevelcomptime: [%Block{code: [{:if, :x, :y}]}]} =
                Parser.parse("comptime {if (x) y;}")
     end
 
     test "with payload" do
       assert %Parser{
                toplevelcomptime: [
-                 %Block{code: [{:if, %{expr: "x"}, {:payload, :arg, %{expr: "y"}}}]}
+                 %Block{code: [{:if, :x, {:payload, :arg, :y}}]}
                ]
              } = Parser.parse("comptime {if (x) |arg| y;}")
     end
@@ -158,14 +158,14 @@ defmodule Zig.Parser.Test.StatementTest do
     test "with pointer payload" do
       assert %Parser{
                toplevelcomptime: [
-                 %Block{code: [{:if, %{expr: "x"}, {:ptr_payload, :arg, %{expr: "y"}}}]}
+                 %Block{code: [{:if, :x, {:ptr_payload, :arg, :y}}]}
                ]
              } = Parser.parse("comptime {if (x) |*arg| y;}")
     end
 
     test "with else" do
       assert %Parser{
-               toplevelcomptime: [%Block{code: [{:if, %{expr: "x"}, %{expr: "y"}, %{expr: "z"}}]}]
+               toplevelcomptime: [%Block{code: [{:if, :x, :y, :z}]}]
              } = Parser.parse("comptime {if (x) y else z; }")
     end
   end
@@ -175,35 +175,35 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [%Block{code: [forast]}]} =
                Parser.parse("comptime {for (x) |value| {}}")
 
-      assert {:for, %{expr: "x"}, :value, %{code: []}} = forast
+      assert {:for, :x, :value, %{code: []}} = forast
     end
 
     test "with label" do
       assert %Parser{toplevelcomptime: [%Block{code: [forast]}]} =
                Parser.parse("comptime {loop: for (x) |value| {}}")
 
-      assert {{:for, :loop}, %{expr: "x"}, :value, %{code: []}} = forast
+      assert {{:for, :loop}, :x, :value, %{code: []}} = forast
     end
 
     test "with inline" do
       assert %Parser{toplevelcomptime: [%Block{code: [forast]}]} =
                Parser.parse("comptime {inline for (x) |value| {}}")
 
-      assert {:inline_for, %{expr: "x"}, :value, %{code: []}} = forast
+      assert {:inline_for, :x, :value, %{code: []}} = forast
     end
 
     test "with label and inline" do
       assert %Parser{toplevelcomptime: [%Block{code: [forast]}]} =
                Parser.parse("comptime {loop: inline for (x) |value| {}}")
 
-      assert {{:inline_for, :loop}, %{expr: "x"}, :value, %{code: []}} = forast
+      assert {{:inline_for, :loop}, :x, :value, %{code: []}} = forast
     end
 
     test "with a single statement" do
       assert %Parser{toplevelcomptime: [%Block{code: [forast]}]} =
                Parser.parse("comptime {inline for (x) |value| this;}")
 
-      assert {:inline_for, %{expr: "x"}, :value, %{expr: "this"}} = forast
+      assert {:inline_for, :x, :value, :this} = forast
     end
   end
 
@@ -212,35 +212,35 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [%Block{code: [whileast]}]} =
                Parser.parse("comptime {while (x) {}}")
 
-      assert {:while, %{expr: "x"}, %{code: []}} = whileast
+      assert {:while, :x, %{code: []}} = whileast
     end
 
     test "with label" do
       assert %Parser{toplevelcomptime: [%Block{code: [whileast]}]} =
                Parser.parse("comptime {loop: while (x) {}}")
 
-      assert {{:while, :loop}, %{expr: "x"}, %{code: []}} = whileast
+      assert {{:while, :loop}, :x, %{code: []}} = whileast
     end
 
     test "with inline" do
       assert %Parser{toplevelcomptime: [%Block{code: [whileast]}]} =
                Parser.parse("comptime {inline while (x) {}}")
 
-      assert {:inline_while, %{expr: "x"}, %{code: []}} = whileast
+      assert {:inline_while, :x, %{code: []}} = whileast
     end
 
     test "with label and inline" do
       assert %Parser{toplevelcomptime: [%Block{code: [whileast]}]} =
                Parser.parse("comptime {loop: inline while (x) {}}")
 
-      assert {{:inline_while, :loop}, %{expr: "x"}, %{code: []}} = whileast
+      assert {{:inline_while, :loop}, :x, %{code: []}} = whileast
     end
 
     test "with a single statement" do
       assert %Parser{toplevelcomptime: [%Block{code: [whileast]}]} =
                Parser.parse("comptime {while (x) this;}")
 
-      assert {:while, %{expr: "x"}, %{expr: "this"}} = whileast
+      assert {:while, :x, :this} = whileast
     end
   end
 
@@ -249,14 +249,14 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {switch (expr) {}}")
 
-      assert {:switch, %{expr: "expr"}, []} = switchast
+      assert {:switch, :expr, []} = switchast
     end
 
     test "with one prong" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {switch (expr) {a => b}}")
 
-      assert {:switch, %{expr: "expr"}, [{%{expr: "a"}, %{expr: "b"}}]} = switchast
+      assert {:switch, :expr, [{:a, :b}]} = switchast
     end
 
     test "with else" do
@@ -265,7 +265,7 @@ defmodule Zig.Parser.Test.StatementTest do
                 a => b,
                else => c}}")
 
-      assert {:switch, %{expr: "expr"}, [{%{expr: "a"}, %{expr: "b"}}, {:else, %{expr: "c"}}]} =
+      assert {:switch, :expr, [{:a, :b}, {:else, :c}]} =
                switchast
     end
   end
@@ -291,98 +291,98 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a *= b;}")
 
-      assert {:"*=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"*=", :a, :b} = switchast
     end
 
     test "SLASHEQUAL => /=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a /= b;}")
 
-      assert {:"/=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"/=", :a, :b} = switchast
     end
 
     test "PERCENTEQUAL => %=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a %= b;}")
 
-      assert {:"%=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"%=", :a, :b} = switchast
     end
 
     test "PLUSEQUAL => +=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a += b;}")
 
-      assert {:"+=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"+=", :a, :b} = switchast
     end
 
     test "MINUSEQUAL => -=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a -= b;}")
 
-      assert {:"-=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"-=", :a, :b} = switchast
     end
 
     test "LARROW2EQUAL => <<=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a <<= b;}")
 
-      assert {:"<<=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"<<=", :a, :b} = switchast
     end
 
     test "RARROW2SEQUAL => >>=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a >>= b;}")
 
-      assert {:">>=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:">>=", :a, :b} = switchast
     end
 
     test "AMPERSANDEQUAL => &=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a &= b;}")
 
-      assert {:"&=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"&=", :a, :b} = switchast
     end
 
     test "CARETEQUAL => ^=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a ^= b;}")
 
-      assert {:"^=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"^=", :a, :b} = switchast
     end
 
     test "PIPEEQUAL => |=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a |= b;}")
 
-      assert {:"|=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"|=", :a, :b} = switchast
     end
 
     test "ASTERISKPERCENTEQUAL => *%=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a *%= b;}")
 
-      assert {:"*%=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"*%=", :a, :b} = switchast
     end
 
     test "PLUSPERCENTEQUAL => +%=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a +%= b;}")
 
-      assert {:"+%=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"+%=", :a, :b} = switchast
     end
 
     test "MINUSPERCENTEQUAL => -%=" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a -%= b;}")
 
-      assert {:"-%=", %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:"-%=", :a, :b} = switchast
     end
 
     test "EQUAL => =" do
       assert %Parser{toplevelcomptime: [%Block{code: [switchast]}]} =
                Parser.parse("comptime {a = b;}")
 
-      assert {:=, %{expr: "a"}, %{expr: "b"}} = switchast
+      assert {:=, :a, :b} = switchast
     end
   end
 end

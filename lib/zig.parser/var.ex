@@ -14,9 +14,9 @@ defmodule Zig.Parser.Var do
                 comptime: false
               ]
 
-  def from_args([name | rest], position) when is_binary(name) do
+  def from_args([name | rest], position)do
     decorate(
-      %__MODULE__{name: String.to_atom(name), line: position.line, column: position.column},
+      %__MODULE__{name: name, line: position.line, column: position.column},
       rest
     )
   end

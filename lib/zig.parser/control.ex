@@ -8,15 +8,15 @@ defmodule Zig.Parser.Control do
   end
 
   defp parse_for_payload(inline?, expr, [:|, :*, item | rest]) do
-    parse_for_index(inline?, expr, {:ptr, String.to_atom(item)}, rest)
+    parse_for_index(inline?, expr, {:ptr, item}, rest)
   end
 
   defp parse_for_payload(inline?, expr, [:|, item | rest]) do
-    parse_for_index(inline?, expr, String.to_atom(item), rest)
+    parse_for_index(inline?, expr, item, rest)
   end
 
   defp parse_for_index(inline?, expr, item, [:COMMA, index, :| | rest]) do
-    parse_for_body(inline?, expr, {item, String.to_atom(index)}, rest)
+    parse_for_body(inline?, expr, {item, index}, rest)
   end
 
   defp parse_for_index(inline?, expr, item, [:| | rest]) do
@@ -37,11 +37,11 @@ defmodule Zig.Parser.Control do
 
   # for parsing if statements
   def parse_if([:LPAREN, arg, :RPAREN, :|, :*, payload, :|, consequence | rest]) do
-    parse_else(arg, {:ptr_payload, String.to_atom(payload), consequence}, rest)
+    parse_else(arg, {:ptr_payload, payload, consequence}, rest)
   end
 
   def parse_if([:LPAREN, arg, :RPAREN, :|, payload, :|, consequence | rest]) do
-    parse_else(arg, {:payload, String.to_atom(payload), consequence}, rest)
+    parse_else(arg, {:payload, payload, consequence}, rest)
   end
 
   def parse_if([:LPAREN, arg, :RPAREN, consequence | rest]) do
@@ -58,7 +58,7 @@ defmodule Zig.Parser.Control do
   end
 
   defp parse_else(arg, consequence, [:else, :|, payload, :|, contrast]) do
-    {:if, arg, consequence, {:payload, String.to_atom(payload), contrast}}
+    {:if, arg, consequence, {:payload, payload, contrast}}
   end
 
   # while loop parsing
@@ -67,11 +67,11 @@ defmodule Zig.Parser.Control do
   end
 
   defp parse_while_payload(inline?, condition, [:|, payload, :| | rest]) do
-    parse_while_body(inline?, condition, String.to_atom(payload), rest)
+    parse_while_body(inline?, condition, payload, rest)
   end
 
   defp parse_while_payload(inline?, condition, [:|, :*, payload, :| | rest]) do
-    parse_while_continue(inline?, condition, {:ptr, String.to_atom(payload)}, rest)
+    parse_while_continue(inline?, condition, {:ptr, payload}, rest)
   end
 
   defp parse_while_payload(inline?, condition, rest) do
@@ -111,7 +111,7 @@ defmodule Zig.Parser.Control do
          else_body
        ]) do
     {@inline_while[inline?], condition_and_continue, add_payload(body, payload),
-     add_payload(else_body, String.to_atom(else_payload))}
+     add_payload(else_body, else_payload)}
   end
 
   defp add_payload(body, payload) do

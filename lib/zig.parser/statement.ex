@@ -18,11 +18,11 @@ defmodule Zig.Parser.Statement do
   end
 
   defp parse_statement([_position, :errdefer, :|, name, :|, block]) do
-    {:errdefer, {:payload, String.to_atom(name), block}}
+    {:errdefer, {:payload, name, block}}
   end
 
   defp parse_statement([_position, :errdefer, :|, name, :|, expr, :SEMICOLON]) do
-    {:errdefer, {:payload, String.to_atom(name), expr}}
+    {:errdefer, {:payload, name, expr}}
   end
 
   defp parse_statement([_position, :if | rest]) do
@@ -47,20 +47,18 @@ defmodule Zig.Parser.Statement do
   @while_types [:while, :inline_while]
 
   defp parse_statement([position, label, :COLON | rest_args]) do
-    label_atom = String.to_atom(label)
-
     case parse_statement([position | rest_args]) do
       {loop_type, iterator, payload, code, else_code} when loop_type in @for_types ->
-        {{loop_type, label_atom}, iterator, payload, code, else_code}
+        {{loop_type, label}, iterator, payload, code, else_code}
 
       {loop_type, iterator, payload, code} when loop_type in @for_types ->
-        {{loop_type, label_atom}, iterator, payload, code}
+        {{loop_type, label}, iterator, payload, code}
 
       {loop_type, condition, code, else_code} when loop_type in @while_types ->
-        {{loop_type, label_atom}, condition, code, else_code}
+        {{loop_type, label}, condition, code, else_code}
 
       {loop_type, condition, code} when loop_type in @while_types ->
-        {{loop_type, label_atom}, condition, code}
+        {{loop_type, label}, condition, code}
     end
   end
 

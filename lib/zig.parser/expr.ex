@@ -33,23 +33,21 @@ defmodule Zig.Parser.Expr do
 
   defp analyze_args([arg]), do: arg
 
-  defp analyze_args([e = %TypeExpr{}, :empty]) do
+  defp analyze_args([e, :empty]) do
     {:empty, e}
   end
 
-  defp analyze_args([e = %TypeExpr{}, list]) when is_list(list) do
+  defp analyze_args([e, list]) when is_list(list) do
     {:array, e, list}
   end
 
-  defp analyze_args([e = %TypeExpr{}, map]) when is_map(map) do
+  defp analyze_args([e, map]) when is_map(map) do
     {:struct, e, map}
   end
 
   defp parse_break([]), do: :break
 
-  defp parse_break([:COLON, identifier | rest]) do
-    tag = String.to_atom(identifier)
-
+  defp parse_break([:COLON, tag | rest]) do
     case rest do
       [] -> {:break, tag}
       [expr] -> {:break, tag, expr}
@@ -58,7 +56,7 @@ defmodule Zig.Parser.Expr do
 
   defp parse_continue([]), do: :continue
 
-  defp parse_continue([:COLON, identifier]) do
-    {:continue, String.to_atom(identifier)}
+  defp parse_continue([:COLON, tag]) do
+    {:continue, tag}
   end
 end

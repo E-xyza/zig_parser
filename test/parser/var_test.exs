@@ -121,7 +121,7 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
     end
 
     test "extern is flagged" do
-      assert %Parser{decls: [%Var{linksection: {:enumliteral, "foo"}}]} =
+      assert %Parser{decls: [%Var{linksection: {:enum_literal, :foo}}]} =
                Parser.parse("var foo: u32 linksection(.foo) = undefined;")
     end
   end

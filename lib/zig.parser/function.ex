@@ -56,8 +56,8 @@ defmodule Zig.Parser.Function do
   end
 
   # identifiers are required in top level fn declarations.
-  defp from_args([:fn, identifier, :LPAREN, _paramdecl, :RPAREN | rest], function) do
-    from_args(rest, Map.merge(function, %{name: String.to_atom(identifier), params: []}))
+  defp from_args([:fn, name, :LPAREN, _paramdecl, :RPAREN | rest], function) do
+    from_args(rest, Map.merge(function, %{name: name, params: []}))
   end
 
   defp from_args([:align, :LPAREN, alignexpr, :RPAREN | rest], function) do
@@ -78,13 +78,13 @@ defmodule Zig.Parser.Function do
     |> struct(callconv: callconv)
   end
 
-  defp from_args([typeexpr = %TypeExpr{} | rest], function) do
-    rest
-    |> from_args(function)
-    |> struct(type: typeexpr)
-  end
-
   defp from_args([:SEMICOLON], function), do: function
 
   defp from_args([block = %Block{}], function), do: struct(function, block: block)
+
+  defp from_args([expr | rest], function) do
+    rest
+    |> from_args(function)
+    |> struct(type: expr)
+  end
 end

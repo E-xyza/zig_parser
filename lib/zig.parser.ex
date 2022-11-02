@@ -23,6 +23,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.TopLevelComptime
   alias Zig.Parser.TopLevelDecl
   alias Zig.Parser.Function
+  alias Zig.Parser.PrimaryTypeExpr
   alias Zig.Parser.Statement
   alias Zig.Parser.TopLevelFn
   alias Zig.Parser.TopLevelVar
@@ -84,7 +85,7 @@ defmodule Zig.Parser do
   @operators ~w(COMMA DOT DOT2 COLON LBRACE LBRACKET LPAREN MINUSRARROW LETTERC QUESTIONMARK RBRACE RBRACKET RPAREN SEMICOLON)a
   @operator_mapping Enum.map(@operators, &{&1, [token: true]})
 
-  @collecteds ~w(IDENTIFIER INTEGER CHAR_LITERAL FLOAT INTEGER STRINGLITERAL)a
+  @collecteds ~w(IDENTIFIER INTEGER FLOAT INTEGER STRINGLITERAL BUILTINIDENTIFIER)a
   @collected_mapping Enum.map(
                        @collecteds,
                        &{&1, [collect: true, post_traverse: {Collected, :post_traverse, [&1]}]}
@@ -92,7 +93,11 @@ defmodule Zig.Parser do
 
   @parser_options [
                     container_doc_comment: [
-                      post_traverse: :container_doc_comment,
+                      tag: true,
+                      collect: true
+                    ],
+                    char_escape: [
+                      post_traverse: :char_escape,
                       tag: true,
                       collect: true
                     ],
@@ -153,6 +158,10 @@ defmodule Zig.Parser do
                     ],
                     ParamDeclList: [tag: true],
                     ParamDecl: [tag: ParamDecl],
+                    PrimaryTypeExpr: [
+                      tag: true,
+                      post_traverse: {PrimaryTypeExpr, :post_traverse, []}
+                    ],
                     AsmExpr: [tag: Asm, post_traverse: {Asm, :post_traverse, []}],
                     BlockExpr: [tag: BlockExpr, post_traverse: {BlockExpr, :post_traverse, []}],
                     Block: [tag: Block, post_traverse: {Block, :post_traverse, []}],
@@ -182,18 +191,12 @@ defmodule Zig.Parser do
     {code, args, struct(__MODULE__, context)}
   end
 
-  defp container_doc_comment(
-         rest,
-         [{:container_doc_comment, [comment]} | rest_args],
-         context,
-         _,
-         _
-       ) do
-    {rest, rest_args, %{context | doc_comment: trim_doc_comment(comment, "//!")}}
-  end
-
   defp doc_comment(rest, [{:doc_comment, [comment]} | rest_args], context, _, _) do
     {rest, [{:doc_comment, trim_doc_comment(comment, "///")} | rest_args], context}
+  end
+
+  defp char_escape(rest, [{:char_escape, [escape_string]} | rest_args], context, _, _) do
+    {rest, [process_escape(escape_string) | rest_args], context}
   end
 
   defp trim_doc_comment(comment, separator) do
@@ -228,4 +231,17 @@ defmodule Zig.Parser do
 
   defp value_for({tag, block}) when tag in @block_tags, do: block
   defp value_for(other), do: other
+
+  @escaped %{?t => ?\t, ?n => ?\n, ?' => ?', ?" => ?", ?\\ => ?\\}
+  defp process_escape(<<92, char>>), do: @escaped[char]
+
+  defp process_escape("\\u{" <> what) do
+    what
+    |> String.trim_trailing("}")
+    |> String.to_integer(16)
+  end
+
+  defp process_escape(<<"\\x"::binary, number::binary-2>>) do
+    String.to_integer(number)
+  end
 end

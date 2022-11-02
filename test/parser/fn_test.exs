@@ -78,7 +78,7 @@ defmodule Zig.Parser.Test.FunctionTest do
                    align: nil,
                    linksection: nil,
                    callconv: nil,
-                   type: %{expr: "void"}
+                   type: :void
                  }
                ]
              } = Parser.parse("fn foo() void {}")
@@ -90,12 +90,12 @@ defmodule Zig.Parser.Test.FunctionTest do
     end
 
     test "can obtain link section" do
-      assert %Parser{functions: [%Function{linksection: {:enumliteral, "foo"}}]} =
+      assert %Parser{functions: [%Function{linksection: {:enum_literal, :foo}}]} =
                Parser.parse("fn foo() linksection(.foo) void {}")
     end
 
     test "can obtain call convention" do
-      assert %Parser{functions: [%Function{callconv: {:enumliteral, "C"}}]} =
+      assert %Parser{functions: [%Function{callconv: {:enum_literal, :C}}]} =
                Parser.parse("fn foo() callconv(.C) void {}")
     end
   end
