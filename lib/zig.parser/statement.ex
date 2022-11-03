@@ -1,8 +1,15 @@
+defmodule Zig.Parser.StatementOptions do
+  defstruct [:position]
+end
+
+
 defmodule Zig.Parser.Statement do
   alias Zig.Parser
   alias Zig.Parser.Const
   alias Zig.Parser.Control
   alias Zig.Parser.Var
+
+  alias Zig.Parser.StatementOptions
 
   def post_traverse(rest, [{__MODULE__, args} | rest_args], context, _, _) do
     {rest, [parse(args) | rest_args], context}
@@ -17,19 +24,19 @@ defmodule Zig.Parser.Statement do
   end
 
   defp parse([tag, block]) when tag in @tagged_content do
-    {tag, block}
+    {tag, %StatementOptions{}, block}
   end
 
   defp parse([tag, expr, :SEMICOLON]) when tag in @tagged_content do
-    {tag, expr}
+    {tag, %StatementOptions{}, expr}
   end
 
   defp parse([:errdefer, :|, name, :|, block]) do
-    {:errdefer, {:payload, name, block}}
+    {:errdefer, %StatementOptions{}, {:payload, name, block}}
   end
 
   defp parse([:errdefer, :|, name, :|, expr, :SEMICOLON]) do
-    {:errdefer, {:payload, name, expr}}
+    {:errdefer, %StatementOptions{}, {:payload, name, expr}}
   end
 
   defp parse([:if | rest]) do

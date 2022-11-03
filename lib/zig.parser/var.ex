@@ -7,7 +7,7 @@ defmodule Zig.Parser.Var do
 
   def from_args([name | rest]) do
     {opts, type, value} = parse(rest)
-    {:var, opts, name, type, value}
+    {:var, opts, {name, type, value}}
   end
 
   defp parse([:COLON, type | rest]) do

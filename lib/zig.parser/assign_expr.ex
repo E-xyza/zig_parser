@@ -1,4 +1,6 @@
 defmodule Zig.Parser.AssignExpr do
+  alias Zig.Parser.OperatorOptions
+  
   def post_traverse(
         rest,
         [{__MODULE__, args} | args_rest],
@@ -12,7 +14,7 @@ defmodule Zig.Parser.AssignExpr do
   @assign_operators ~w(*= /= %= += -= <<= >>= &= ^= |= *%= +%= -%= =)a
 
   defp parse_assign([left, operator, right]) when operator in @assign_operators do
-    {operator, left, right}
+    {operator, %OperatorOptions{}, [left, right]}
   end
 
   defp parse_assign([singleton]), do: singleton

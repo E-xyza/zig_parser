@@ -3,7 +3,7 @@ defmodule Zig.Parser.OperatorOptions do
 end
 
 defmodule Zig.Parser.Expr do
-  alias Zig.Parser.TypeExpr
+  alias Zig.Parser
   alias Zig.Parser.Control
   alias Zig.Parser.OperatorOptions
 
@@ -32,11 +32,19 @@ defmodule Zig.Parser.Expr do
 
   defp analyze_args([:for | rest]), do: Control.parse_for(rest)
 
-  defp analyze_args([:inline, :for | rest]), do: Control.parse_for(rest, true)
+  defp analyze_args([:inline, :for | rest]) do
+    rest
+    |> Control.parse_for()
+    |> Parser.put_opt(:inline, true)
+  end
 
   defp analyze_args([:while | rest]), do: Control.parse_while(rest)
 
-  defp analyze_args([:inline, :while | rest]), do: Control.parse_while(rest, true)
+  defp analyze_args([:inline, :while | rest]) do
+    rest
+    |> Control.parse_while()
+    |> Parser.put_opt(:inline, true)
+  end
 
   defp analyze_args([arg]), do: arg
 

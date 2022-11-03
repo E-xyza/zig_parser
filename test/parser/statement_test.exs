@@ -248,14 +248,14 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {switch (expr) {}}")
 
-      assert {:switch, :expr, []} = switchast
+      assert {:switch, _, [condition: :expr, switches: []]} = switchast
     end
 
     test "with one prong" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {switch (expr) {a => b}}")
 
-      assert {:switch, :expr, [{:a, :b}]} = switchast
+      assert {:switch, _, [condition: :expr, switches: [{_, [:a, :b]}]]} = switchast
     end
 
     test "with else" do
@@ -264,7 +264,7 @@ defmodule Zig.Parser.Test.StatementTest do
                 a => b,
                else => c}}")
 
-      assert {:switch, :expr, [{:a, :b}, {:else, :c}]} =
+      assert {:switch, _, [condition: :expr, switches: [{_, [:a, :b]}, {:else, :c}]]} =
                switchast
     end
   end
@@ -290,98 +290,98 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a *= b;}")
 
-      assert {:"*=", :a, :b} = switchast
+      assert {:"*=", _, [:a, :b]} = switchast
     end
 
     test "SLASHEQUAL => /=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a /= b;}")
 
-      assert {:"/=", :a, :b} = switchast
+      assert {:"/=", _, [:a, :b]} = switchast
     end
 
     test "PERCENTEQUAL => %=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a %= b;}")
 
-      assert {:"%=", :a, :b} = switchast
+      assert {:"%=", _, [:a, :b]} = switchast
     end
 
     test "PLUSEQUAL => +=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a += b;}")
 
-      assert {:"+=", :a, :b} = switchast
+      assert {:"+=", _, [:a, :b]} = switchast
     end
 
     test "MINUSEQUAL => -=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a -= b;}")
 
-      assert {:"-=", :a, :b} = switchast
+      assert {:"-=", _, [:a, :b]} = switchast
     end
 
     test "LARROW2EQUAL => <<=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a <<= b;}")
 
-      assert {:"<<=", :a, :b} = switchast
+      assert {:"<<=", _, [:a, :b]} = switchast
     end
 
     test "RARROW2SEQUAL => >>=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a >>= b;}")
 
-      assert {:">>=", :a, :b} = switchast
+      assert {:">>=", _, [:a, :b]} = switchast
     end
 
     test "AMPERSANDEQUAL => &=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a &= b;}")
 
-      assert {:"&=", :a, :b} = switchast
+      assert {:"&=", _, [:a, :b]} = switchast
     end
 
     test "CARETEQUAL => ^=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a ^= b;}")
 
-      assert {:"^=", :a, :b} = switchast
+      assert {:"^=", _, [:a, :b]} = switchast
     end
 
     test "PIPEEQUAL => |=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a |= b;}")
 
-      assert {:"|=", :a, :b} = switchast
+      assert {:"|=", _, [:a, :b]} = switchast
     end
 
     test "ASTERISKPERCENTEQUAL => *%=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a *%= b;}")
 
-      assert {:"*%=", :a, :b} = switchast
+      assert {:"*%=", _, [:a, :b]} = switchast
     end
 
     test "PLUSPERCENTEQUAL => +%=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a +%= b;}")
 
-      assert {:"+%=", :a, :b} = switchast
+      assert {:"+%=", _, [:a, :b]} = switchast
     end
 
     test "MINUSPERCENTEQUAL => -%=" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a -%= b;}")
 
-      assert {:"-%=", :a, :b} = switchast
+      assert {:"-%=", _, [:a, :b]} = switchast
     end
 
     test "EQUAL => =" do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {a = b;}")
 
-      assert {:=, :a, :b} = switchast
+      assert {:=, _, [:a, :b]} = switchast
     end
   end
 end

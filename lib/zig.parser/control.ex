@@ -3,13 +3,18 @@ defmodule Zig.Parser.IfOptions do
 end
 
 defmodule Zig.Parser.ForOptions do
-  defstruct [:position, inline: false]
+  defstruct [:position, :label, inline: false]
+end
+
+defmodule Zig.Parser.SwitchOptions do
+  defstruct [:position, :label, comptime: false]
 end
 
 defmodule Zig.Parser.Control do
   @moduledoc false
   alias Zig.Parser.IfOptions
   alias Zig.Parser.ForOptions
+  alias Zig.Parser.SwitchOptions
 
   # control flow parsers:  if, for, while, switch
 
@@ -130,8 +135,8 @@ defmodule Zig.Parser.Control do
     end
   end
 
-  def parse_switch([:LPAREN, expr, :RPAREN, :LBRACE | rest]) do
-    {:switch, expr, parse_switch_prongs(rest, [])}
+  def parse_switch([:LPAREN, condition, :RPAREN, :LBRACE | rest]) do
+    {:switch, %SwitchOptions{}, Keyword.merge([condition: condition], parse_switch_prongs(rest, []))}
   end
 
   defp parse_switch_prongs([expr, :"=>", expr2 | rest], so_far) do
@@ -140,5 +145,5 @@ defmodule Zig.Parser.Control do
 
   defp parse_switch_prongs([:COMMA | rest], so_far), do: parse_switch_prongs(rest, so_far)
 
-  defp parse_switch_prongs([:RBRACE], so_far), do: Enum.reverse(so_far)
+  defp parse_switch_prongs([:RBRACE], so_far), do: [switches: Enum.reverse(so_far)]
 end
