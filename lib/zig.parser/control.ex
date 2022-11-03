@@ -71,7 +71,7 @@ defmodule Zig.Parser.Control do
   end
 
   defp parse_else([:else, :|, payload, :|, contrast], parts) do
-    {:if, %IfOptions{}, Keyword.merge(parts, else: contrast, else_payload: payload)}
+    {:if, %IfOptions{}, Keyword.merge(parts, else_payload: payload, else: contrast)}
   end
 
   defp parse_else([:else, contrast | _], parts) do

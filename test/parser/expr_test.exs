@@ -4,7 +4,6 @@ defmodule Zig.Parser.Test.ExprTest do
   alias Zig.Parser
   alias Zig.Parser.Asm
   alias Zig.Parser
-  alias Zig.Parser.Const
 
   # tests:
   # PrimaryExpr
@@ -33,7 +32,7 @@ defmodule Zig.Parser.Test.ExprTest do
     test "basic asm expression" do
       assert %Parser{
                decls: [
-                 {:const,
+                 {:const, _,
                   {:foo, _,
                    %Asm{
                      volatile: false,
@@ -123,34 +122,43 @@ defmodule Zig.Parser.Test.ExprTest do
     # IfPrefix <- KEYWORD_if LPAREN Expr RPAREN PtrPayload?
 
     test "basic if statement only" do
-      assert %Parser{decls: [{:const, _, {_, _, {:if, :foo, :bar}}}]} =
+      assert %Parser{decls: [{:const, _, {_, _, {:if, _, condition: :foo, consequence: :bar}}}]} =
                Parser.parse("const foo = if (foo) bar;")
     end
 
     test "basic if statement with payload paramater" do
       assert %Parser{
-               decls: [{:const, _, {_, _, {:if, :foo, {:payload, :bar, :bar}}}}]
-             } = Parser.parse("const foo = if (foo) |bar| bar;")
+               decls: [
+                 {:const, _, {_, _, {:if, _, condition: :foo, payload: :bar, consequence: :bar}}}
+               ]
+             } =
+               Parser.parse("const foo = if (foo) |bar| bar;")
     end
 
-    test "basic if statement with pointer payload paramater" do
+    test "basic if statement with pointer payload parameter" do
       assert %Parser{
                decls: [
-                 {:const, _, {_, _, {:if, :foo, {:ptr_payload, :bar, :bar}}}}
+                 {:const, _,
+                  {_, _, {:if, _, condition: :foo, ptr_payload: :bar, consequence: :bar}}}
                ]
-             } = Parser.parse("const foo = if (foo) |*bar| bar;")
+             } =
+               Parser.parse("const foo = if (foo) |*bar| bar;")
     end
 
     test "basic else statement" do
       assert %Parser{
-               decls: [{:const, _, {_, _, {:if, :foo, :bar, :baz}}}]
+               decls: [
+                 {:const, _, {_, _, {:if, _, condition: :foo, consequence: :bar, else: :baz}}}
+               ]
              } = Parser.parse("const foo = if (foo) bar else baz;")
     end
 
     test "else statement with payload" do
       assert %Parser{
                decls: [
-                 {:const, _, {_, _, {:if, :foo, :bar, {:payload, :baz, :baz}}}}
+                 {:const, _,
+                  {_, _,
+                   {:if, _, condition: :foo, consequence: :bar, else_payload: :baz, else: :baz}}}
                ]
              } = Parser.parse("const foo = if (foo) bar else |baz| baz;")
     end

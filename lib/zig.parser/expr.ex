@@ -8,55 +8,62 @@ defmodule Zig.Parser.Expr do
   alias Zig.Parser.OperatorOptions
 
   def post_traverse(rest, [{__MODULE__, args} | rest_args], context, _, _) do
-    {rest, [analyze_args(args) | rest_args], context}
+    {rest, [parse(args) | rest_args], context}
   end
 
   @binaryoperators ~w(or and == != < > <= >= & ^ | orelse << >> + - ++ +% -% || * / % ** *%)a
 
-  defp analyze_args([position, left, op | right]) when op in @binaryoperators do
-    {op, %OperatorOptions{position: position}, [left, analyze_args(right)]}
+  defp parse([position | rest]) when is_map(position) and not is_struct(position) do
+    rest
+    |> parse
+    |> Parser.put_opt(:position, position)
+  end
+
+  defp parse([left, op | right]) when op in @binaryoperators do
+    {op, %OperatorOptions{}, [left, parse(right)]}
   end
 
   @prefixoperators ~w(! - ~ -% & try await)a
 
-  defp analyze_args([op | rest]) when op in @prefixoperators, do: {op, analyze_args(rest)}
-  defp analyze_args([:if | rest]), do: Control.parse_if(rest)
-  defp analyze_args([:break | rest]), do: parse_break(rest)
-  defp analyze_args([:continue | rest]), do: parse_continue(rest)
+  defp parse([op | rest]) when op in @prefixoperators, do: {op, %OperatorOptions{}, parse(rest)}
+
+  defp parse([:if | rest]), do: Control.parse_if(rest)
+  defp parse([:break | rest]), do: parse_break(rest)
+  defp parse([:continue | rest]), do: parse_continue(rest)
 
   @expr_tags ~w(comptime nosuspend return resume)a
 
   for tag <- @expr_tags do
-    defp analyze_args([unquote(tag), expr]), do: {unquote(tag), expr}
+    defp parse([unquote(tag), expr]), do: {unquote(tag), expr}
   end
 
-  defp analyze_args([:for | rest]), do: Control.parse_for(rest)
+  defp parse([:for | rest]), do: Control.parse_for(rest)
 
-  defp analyze_args([:inline, :for | rest]) do
+  defp parse([:inline, :for | rest]) do
     rest
     |> Control.parse_for()
     |> Parser.put_opt(:inline, true)
   end
 
-  defp analyze_args([:while | rest]), do: Control.parse_while(rest)
+  defp parse([:while | rest]), do: Control.parse_while(rest)
 
-  defp analyze_args([:inline, :while | rest]) do
+  defp parse([:inline, :while | rest]) do
     rest
     |> Control.parse_while()
     |> Parser.put_opt(:inline, true)
   end
 
-  defp analyze_args([arg]), do: arg
+  defp parse([arg]), do: arg
 
-  defp analyze_args([e, :empty]) do
+  defp parse([e, :empty]) do
     {:empty, e}
   end
 
-  defp analyze_args([e, list]) when is_list(list) do
+  defp parse([e, list]) when is_list(list) do
     {:array, e, list}
   end
 
-  defp analyze_args([e, map]) when is_map(map) do
+  defp parse([e, map]) when is_map(map) do
     {:struct, e, map}
   end
 
