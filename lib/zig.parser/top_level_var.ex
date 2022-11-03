@@ -1,44 +1,71 @@
 defmodule Zig.Parser.TopLevelVar do
+  alias Zig.Parser
   alias Zig.Parser.Const
   alias Zig.Parser.Var
 
-  def post_traverse(rest, [{__MODULE__, [position | args]} | rest_args], context, _, _) do
-    {rest, [from_args(args, position) | rest_args], context}
-  end
-
-  defp from_args([{:doc_comment, comment} | rest], position) do
+  def post_traverse(
+        rest,
+        [{__MODULE__, [{:doc_comment, comment}, position | args]} | rest_args],
+        context,
+        _,
+        _
+      ) do
     comment_lines =
       comment
       |> String.split("\n")
       |> length
 
-    %{
-      from_args(rest, %{position | line: position.line + comment_lines - 1, column: 1})
-      | doc_comment: comment
-    }
+    ast =
+      args
+      |> parse
+      |> Parser.put_opt(:position, %{
+        position
+        | line: position.line + comment_lines - 1,
+          column: 1
+      })
+      |> Parser.put_opt(:comment, comment)
+
+    {rest, [ast | rest_args], context}
   end
 
-  defp from_args([:extern, form | rest], position) when is_binary(form) do
-    %{from_args(rest, position) | extern: form}
+  def post_traverse(rest, [{__MODULE__, [position | args]} | rest_args], context, _, _) do
+    ast =
+      args
+      |> parse
+      |> Parser.put_opt(:position, position)
+
+    {rest, [ast | rest_args], context}
   end
 
-  defp from_args([:extern | rest], position) do
-    %{from_args(rest, position) | extern: true}
+  defp parse([:extern, form | rest]) when is_binary(form) do
+    rest
+    |> parse()
+    |> Parser.put_opt(:extern, form)
   end
 
-  defp from_args([:export | rest], position) do
-    %{from_args(rest, position) | export: true}
+  defp parse([:extern | rest]) do
+    rest
+    |> parse()
+    |> Parser.put_opt(:extern, true)
   end
 
-  defp from_args([:threadlocal | rest], position) do
-    %{from_args(rest, position) | threadlocal: true}
+  defp parse([:export | rest]) do
+    rest
+    |> parse()
+    |> Parser.put_opt(:export, true)
   end
 
-  defp from_args([:var | args], position) do
-    Var.from_args(args, position)
+  defp parse([:threadlocal | rest]) do
+    rest
+    |> parse()
+    |> Parser.put_opt(:threadlocal, true)
   end
 
-  defp from_args([:const | args], position) do
-    Const.from_args(args, position)
+  defp parse([:var | args]) do
+    Var.from_args(args)
+  end
+
+  defp parse([:const | args]) do
+    Const.from_args(args)
   end
 end

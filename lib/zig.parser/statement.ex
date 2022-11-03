@@ -2,7 +2,6 @@ defmodule Zig.Parser.StatementOptions do
   defstruct [:position]
 end
 
-
 defmodule Zig.Parser.Statement do
   alias Zig.Parser
   alias Zig.Parser.Const
@@ -74,7 +73,7 @@ defmodule Zig.Parser.Statement do
   end
 
   defp parse([:while | rest_args]) do
-    Control.parse_while(rest_args, true)
+    Control.parse_while(rest_args)
   end
 
   defp parse([:switch | rest_args]) do

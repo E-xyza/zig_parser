@@ -11,7 +11,7 @@ defmodule Zig.Parser.EnumOptions do
 end
 
 defmodule Zig.Parser.UnionOptions do
-  defstruct [extern: false, packed: false, comment: nil, tagtype: nil, tagged: false]
+  defstruct extern: false, packed: false, comment: nil, tagtype: nil, tagged: false
 end
 
 defmodule Zig.Parser.PrimaryTypeExpr do
@@ -29,7 +29,12 @@ defmodule Zig.Parser.PrimaryTypeExpr do
   end
 
   @containers ~w(struct opaque enum union)a
-  @container_opts %{struct: %StructOptions{}, opaque: %OpaqueOptions{}, enum: %EnumOptions{}, union: %UnionOptions{}}
+  @container_opts %{
+    struct: %StructOptions{},
+    opaque: %OpaqueOptions{},
+    enum: %EnumOptions{},
+    union: %UnionOptions{}
+  }
 
   defp parse([:DOT, enum_literal]) do
     {:enum_literal, enum_literal}

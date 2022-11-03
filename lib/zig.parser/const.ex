@@ -1,21 +1,24 @@
+defmodule Zig.Parser.ConstOptions do
+  defstruct [:position, :comment, pub: false, comptime: false]
+end
+
 defmodule Zig.Parser.Const do
-  @enforce_keys [:name, :line, :column]
-  defstruct @enforce_keys ++ [:doc_comment, :pub, :type, :value, comptime: false]
+  alias Zig.Parser.ConstOptions
 
-  defp decorate(const, [:COLON, type | rest]) do
-    decorate(%{const | type: type}, rest)
+  def from_args([name | rest]) do
+    {opts, type, value} = parse(rest)
+    {:const, opts, {name, type, value}}
   end
 
-  defp decorate(const, [:=, value | rest]) do
-    decorate(%{const | value: value}, rest)
+  defp parse([:COLON, type | rest]) do
+    {opts, _, value} = parse(rest)
+    {opts, type, value}
   end
 
-  defp decorate(const, [:SEMICOLON]), do: const
-
-  def from_args([name | rest], position) do
-    decorate(
-      %__MODULE__{name: name, line: position.line, column: position.column},
-      rest
-    )
+  defp parse([:=, value | rest]) do
+    {opts, type, _} = parse(rest)
+    {opts, type, value}
   end
+
+  defp parse([:SEMICOLON]), do: {%ConstOptions{}, nil, nil}
 end

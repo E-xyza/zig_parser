@@ -2,8 +2,6 @@ defmodule Zig.Parser.Test.StatementTest do
   use ExUnit.Case, async: true
 
   alias Zig.Parser
-  alias Zig.Parser.Const
-  alias Zig.Parser.Var
 
   # this test (ab)uses the comptime block to track statement information
   #
@@ -25,30 +23,30 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [{:block, _, [var]}]} =
                Parser.parse("comptime {var x = 1;}")
 
-      assert {:var, _, :x, {:integer, 1}, _} = var
+      assert {:var, _, {:x, _, {:integer, 1}}} = var
     end
 
     test "can be comptime" do
       assert %Parser{toplevelcomptime: [{:block, _, [var]}]} =
                Parser.parse("comptime {comptime var x = 1;}")
 
-      assert {:var, %{comptime: true}, :x, _, _} = var
+      assert {:var, %{comptime: true}, {:x, _, _}} = var
     end
   end
 
   describe "const declarations" do
     test "can be empty" do
-      assert %Parser{toplevelcomptime: [{:block, _, [var]}]} =
+      assert %Parser{toplevelcomptime: [{:block, _, [const]}]} =
                Parser.parse("comptime {const x = 1;}")
 
-      assert %Const{name: :x, value: {:integer, 1}} = var
+      assert {:const, _, {:x, _, {:integer, 1}}} = const
     end
 
     test "can be comptime" do
-      assert %Parser{toplevelcomptime: [{:block, _, [var]}]} =
+      assert %Parser{toplevelcomptime: [{:block, _, [const]}]} =
                Parser.parse("comptime {comptime const x = 1;}")
 
-      assert %Const{name: :x, comptime: true} = var
+      assert {:const, %{comptime: true}, {:x, _, _}} = const
     end
   end
 
@@ -75,10 +73,9 @@ defmodule Zig.Parser.Test.StatementTest do
     end
 
     test "can be defer" do
-      assert %Parser{toplevelcomptime: [{:block, _, [var]}]} =
-               Parser.parse("comptime {defer {}}")
+      assert %Parser{toplevelcomptime: [{:block, _, [var]}]} = Parser.parse("comptime {defer {}}")
 
-      assert {:defer, _,  {:block, _, []}} = var
+      assert {:defer, _, {:block, _, []}} = var
     end
 
     test "can be errdefer" do
@@ -122,7 +119,7 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [{:block, _, [var]}]} =
                Parser.parse("comptime {defer if (x) y;}")
 
-      assert {:defer, _,  {:if, _, _}} = var
+      assert {:defer, _, {:if, _, _}} = var
     end
 
     test "can be errdefer" do
@@ -142,8 +139,9 @@ defmodule Zig.Parser.Test.StatementTest do
 
   describe "statement can be if" do
     test "with basic" do
-      assert %Parser{toplevelcomptime: [{:block, _, [{:if, _, [condition: :x, consequence: :y]}]}]} =
-               Parser.parse("comptime {if (x) y;}")
+      assert %Parser{
+               toplevelcomptime: [{:block, _, [{:if, _, [condition: :x, consequence: :y]}]}]
+             } = Parser.parse("comptime {if (x) y;}")
     end
 
     test "with payload" do
@@ -157,14 +155,16 @@ defmodule Zig.Parser.Test.StatementTest do
     test "with pointer payload" do
       assert %Parser{
                toplevelcomptime: [
-                 {:block, _, [{:if, :_, [condition: :x, ptr_payload: :arg, consequence: :y]}]}
+                 {:block, _, [{:if, _, [condition: :x, ptr_payload: :arg, consequence: :y]}]}
                ]
              } = Parser.parse("comptime {if (x) |*arg| y;}")
     end
 
     test "with else" do
       assert %Parser{
-               toplevelcomptime: [{:block, _, [{:if, _, [condition: :x, consequence: :y, else: :z]}]}]
+               toplevelcomptime: [
+                 {:block, _, [{:if, _, [condition: :x, consequence: :y, else: :z]}]}
+               ]
              } = Parser.parse("comptime {if (x) y else z; }")
     end
   end
@@ -174,14 +174,14 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [{:block, _, [forast]}]} =
                Parser.parse("comptime {for (x) |value| {}}")
 
-      assert {:for, _, [enum: :x, payload: :value, code: {:block, _, _}]} = forast
+      assert {:for, _, [enum: :x, payload: :value, do: {:block, _, _}]} = forast
     end
 
     test "with label" do
       assert %Parser{toplevelcomptime: [{:block, _, [forast]}]} =
                Parser.parse("comptime {loop: for (x) |value| {}}")
 
-      assert {:for, %{name: :loop}, _} = forast
+      assert {:for, %{label: :loop}, _} = forast
     end
 
     test "with inline" do
@@ -202,7 +202,7 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [{:block, _, [forast]}]} =
                Parser.parse("comptime {for (x) |value| this;}")
 
-      assert {:for, _, [enum: :x, iter: :value, code: :this]} = forast
+      assert {:for, _, [enum: :x, payload: :value, do: :this]} = forast
     end
   end
 
@@ -211,35 +211,36 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [{:block, _, [whileast]}]} =
                Parser.parse("comptime {while (x) {}}")
 
-      assert {:while, :x, %{code: []}} = whileast
+      assert {:while, %{label: nil, inline: false}, condition: :x, do: {:block, _, []}} = whileast
     end
 
     test "with label" do
       assert %Parser{toplevelcomptime: [{:block, _, [whileast]}]} =
                Parser.parse("comptime {loop: while (x) {}}")
 
-      assert {{:while, :loop}, :x, %{code: []}} = whileast
+      assert {:while, %{label: :loop}, condition: :x, do: {:block, _, []}} = whileast
     end
 
     test "with inline" do
       assert %Parser{toplevelcomptime: [{:block, _, [whileast]}]} =
                Parser.parse("comptime {inline while (x) {}}")
 
-      assert {:inline_while, :x, %{code: []}} = whileast
+      assert {:while, %{inline: true}, condition: :x, do: {:block, _, []}} = whileast
     end
 
     test "with label and inline" do
       assert %Parser{toplevelcomptime: [{:block, _, [whileast]}]} =
                Parser.parse("comptime {loop: inline while (x) {}}")
 
-      assert {{:inline_while, :loop}, :x, %{code: []}} = whileast
+      assert {:while, %{inline: true, label: :loop}, condition: :x, do: {:block, _, []}} =
+               whileast
     end
 
     test "with a single statement" do
       assert %Parser{toplevelcomptime: [{:block, _, [whileast]}]} =
                Parser.parse("comptime {while (x) this;}")
 
-      assert {:while, :x, :this} = whileast
+      assert {:while, _, condition: :x, do: :this} = whileast
     end
   end
 
@@ -255,7 +256,7 @@ defmodule Zig.Parser.Test.StatementTest do
       assert %Parser{toplevelcomptime: [{:block, _, [switchast]}]} =
                Parser.parse("comptime {switch (expr) {a => b}}")
 
-      assert {:switch, _, [condition: :expr, switches: [{_, [:a, :b]}]]} = switchast
+      assert {:switch, _, [condition: :expr, switches: [a: :b]]} = switchast
     end
 
     test "with else" do
@@ -264,8 +265,7 @@ defmodule Zig.Parser.Test.StatementTest do
                 a => b,
                else => c}}")
 
-      assert {:switch, _, [condition: :expr, switches: [{_, [:a, :b]}, {:else, :c}]]} =
-               switchast
+      assert {:switch, _, [condition: :expr, switches: [a: :b, else: :c]]} = switchast
     end
   end
 

@@ -6,6 +6,10 @@ defmodule Zig.Parser.ForOptions do
   defstruct [:position, :label, inline: false]
 end
 
+defmodule Zig.Parser.WhileOptions do
+  defstruct [:position, :label, inline: false]
+end
+
 defmodule Zig.Parser.SwitchOptions do
   defstruct [:position, :label, comptime: false]
 end
@@ -15,6 +19,7 @@ defmodule Zig.Parser.Control do
   alias Zig.Parser.IfOptions
   alias Zig.Parser.ForOptions
   alias Zig.Parser.SwitchOptions
+  alias Zig.Parser.WhileOptions
 
   # control flow parsers:  if, for, while, switch
 
@@ -38,14 +43,14 @@ defmodule Zig.Parser.Control do
     parse_for_code(rest, parts)
   end
 
-  @stop_loop [[], [:SEMICOLON]]
+  @stop [[], [:SEMICOLON]]
 
-  defp parse_for_code([body | stop], parts) when stop in @stop_loop do
-    {:for, %ForOptions{}, Keyword.merge(parts, code: body)}
+  defp parse_for_code([body | stop], parts) when stop in @stop do
+    {:for, %ForOptions{}, Keyword.merge(parts, do: body)}
   end
 
   defp parse_for_code([body, :else, elsebody], parts) do
-    {:for, %ForOptions{}, Keyword.merge(parts, code: body, else: elsebody)}
+    {:for, %ForOptions{}, Keyword.merge(parts, do: body, else: elsebody)}
   end
 
   # for parsing if statements
@@ -61,8 +66,7 @@ defmodule Zig.Parser.Control do
     parse_else(rest, condition: condition, consequence: consequence)
   end
 
-  @if_enders [[], [:SEMICOLON]]
-  defp parse_else(tail, parts) when tail in @if_enders do
+  defp parse_else(tail, parts) when tail in @stop do
     {:if, %IfOptions{}, parts}
   end
 
@@ -75,68 +79,50 @@ defmodule Zig.Parser.Control do
   end
 
   # while loop parsing
-  def parse_while([:LPAREN, condition, :RPAREN | rest], inline? \\ false) do
-    parse_while_payload(inline?, condition, rest)
+  def parse_while([:LPAREN, condition, :RPAREN | rest]) do
+    parse_while_payload(rest, condition: condition)
   end
 
-  defp parse_while_payload(inline?, condition, [:|, payload, :| | rest]) do
-    parse_while_body(inline?, condition, payload, rest)
+  defp parse_while_payload([:|, payload, :| | rest], parts) do
+    parse_while_continue(rest, Keyword.merge(parts, payload: payload))
   end
 
-  defp parse_while_payload(inline?, condition, [:|, :*, payload, :| | rest]) do
-    parse_while_continue(inline?, condition, {:ptr, payload}, rest)
+  defp parse_while_payload([:|, :*, payload, :| | rest], parts) do
+    parse_while_continue(rest, Keyword.merge(parts, ptr_payload: payload))
   end
 
-  defp parse_while_payload(inline?, condition, rest) do
-    parse_while_continue(inline?, condition, nil, rest)
+  defp parse_while_payload(rest, parts) do
+    parse_while_continue(rest, parts)
   end
 
-  defp parse_while_continue(inline?, condition, payload, [
-         :COLON,
-         :LPAREN,
-         continue,
-         :RPAREN | rest
-       ]) do
-    parse_while_body(inline?, {condition, continue}, payload, rest)
+  defp parse_while_continue([:LPAREN, continue, :RPAREN | rest], parts) do
+    parse_while_body(rest, Keyword.merge(parts, continue: continue))
   end
 
-  defp parse_while_continue(inline?, condition, payload, rest) do
-    parse_while_body(inline?, condition, payload, rest)
+  defp parse_while_continue(rest, parts) do
+    parse_while_body(rest, parts)
   end
 
-  @inline_while %{false: :while, true: :inline_while}
-
-  defp parse_while_body(inline?, condition_and_continue, payload, [body | stop])
-       when stop in @stop_loop do
-    {@inline_while[inline?], condition_and_continue, add_payload(body, payload)}
+  defp parse_while_body([:COLON, :LPAREN, next, :RPAREN | rest], parts) do
+    parse_while_body(rest, Keyword.merge(parts, next: next))
   end
 
-  defp parse_while_body(inline?, condition_and_continue, payload, [body, :else, else_body]) do
-    {@inline_while[inline?], condition_and_continue, add_payload(body, payload), else_body}
+  defp parse_while_body([body | stop], parts) when stop in @stop do
+    {:while, %WhileOptions{}, Keyword.merge(parts, do: body)}
   end
 
-  defp parse_while_body(inline?, condition_and_continue, payload, [
-         body,
-         :else,
-         :|,
-         else_payload,
-         :|,
-         else_body
-       ]) do
-    {@inline_while[inline?], condition_and_continue, add_payload(body, payload),
-     add_payload(else_body, else_payload)}
+  defp parse_while_body([body, :else, else_body], parts) do
+    {:while, %WhileOptions{}, Keyword.merge(parts, do: body, else: else_body)}
   end
 
-  defp add_payload(body, payload) do
-    case payload do
-      nil -> body
-      {:ptr, payload} when is_atom(payload) -> {:ptr_payload, payload, body}
-      payload when is_atom(payload) -> {:payload, payload, body}
-    end
+  defp parse_while_body([body, :else, :|, else_payload, :|, else_body], parts) do
+    {:while, %WhileOptions{},
+     Keyword.merge(parts, do: body, else_payload: else_payload, else: else_body)}
   end
 
   def parse_switch([:LPAREN, condition, :RPAREN, :LBRACE | rest]) do
-    {:switch, %SwitchOptions{}, Keyword.merge([condition: condition], parse_switch_prongs(rest, []))}
+    {:switch, %SwitchOptions{},
+     Keyword.merge([condition: condition], parse_switch_prongs(rest, []))}
   end
 
   defp parse_switch_prongs([expr, :"=>", expr2 | rest], so_far) do

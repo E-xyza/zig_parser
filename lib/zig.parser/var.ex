@@ -1,5 +1,15 @@
 defmodule Zig.Parser.VarOptions do
-  defstruct [:comment, :align, :linksection, :position, extern: false, export: false, pub: false, threadlocal: false, comptime: false]
+  defstruct [
+    :comment,
+    :align,
+    :linksection,
+    :position,
+    extern: false,
+    export: false,
+    pub: false,
+    threadlocal: false,
+    comptime: false
+  ]
 end
 
 defmodule Zig.Parser.Var do

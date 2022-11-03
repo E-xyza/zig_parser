@@ -1,6 +1,6 @@
 defmodule Zig.Parser.AssignExpr do
   alias Zig.Parser.OperatorOptions
-  
+
   def post_traverse(
         rest,
         [{__MODULE__, args} | args_rest],

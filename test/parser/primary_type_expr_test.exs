@@ -31,17 +31,21 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
 
   describe "builtin function" do
     test "with no arguments" do
-      assert %Parser{decls: [%Const{value: expr}]} = Parser.parse("const foo = @builtin_fn();")
+      assert %Parser{decls: [{:const, _, {_, _, expr}}]} =
+               Parser.parse("const foo = @builtin_fn();")
+
       assert {:builtin, :builtin_fn, []} = expr
     end
 
     test "with one arguments" do
-      assert %Parser{decls: [%Const{value: expr}]} = Parser.parse("const foo = @builtin_fn(foo);")
+      assert %Parser{decls: [{:const, _, {_, _, expr}}]} =
+               Parser.parse("const foo = @builtin_fn(foo);")
+
       assert {:builtin, :builtin_fn, [:foo]} = expr
     end
 
     test "with two arguments" do
-      assert %Parser{decls: [%Const{value: expr}]} =
+      assert %Parser{decls: [{:const, _, {_, _, expr}}]} =
                Parser.parse("const foo = @builtin_fn(foo, bar);")
 
       assert {:builtin, :builtin_fn, [:foo, :bar]} = expr
@@ -50,20 +54,20 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
 
   describe "char literal" do
     test "basic ascii" do
-      assert %Parser{decls: [%Const{value: ?a}]} = Parser.parse("const foo = 'a';")
+      assert %Parser{decls: [{:const, _, {_, _, ?a}}]} = Parser.parse("const foo = 'a';")
     end
 
     @tag :skip
     test "utf-8 literal" do
-      assert %Parser{decls: [%Const{value: ?🚀}]} = Parser.parse("const foo = '🚀';")
+      assert %Parser{decls: [{:const, _, {_, _, ?🚀}}]} = Parser.parse("const foo = '🚀';")
     end
 
     test "escaped char" do
-      assert %Parser{decls: [%Const{value: ?\t}]} = Parser.parse("const foo = '\\t';")
+      assert %Parser{decls: [{:const, _, {_, _, ?\t}}]} = Parser.parse("const foo = '\\t';")
     end
 
     test "escaped hex" do
-      assert %Parser{decls: [%Const{value: ?🚀}]} =
+      assert %Parser{decls: [{:const, _, {_, _, ?🚀}}]} =
                Parser.parse("const foo = '\\u{1F680}';")
     end
   end

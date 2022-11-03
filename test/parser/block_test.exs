@@ -19,13 +19,15 @@ defmodule Zig.Parser.Test.BlockTest do
     end
 
     test "can have one statement" do
-      assert %Parser{toplevelcomptime: [{:block, %{label: :foo}, [%Const{name: :a}]}]} =
+      assert %Parser{toplevelcomptime: [{:block, %{label: :foo}, [{:const, {:a, _, _}}]}]} =
                Parser.parse("comptime foo: { const a = 1; }")
     end
 
     test "can have multiple statements" do
       assert %Parser{
-               toplevelcomptime: [{:block, %{label: :foo}, [%Const{name: :a}, %Const{name: :b}]}]
+               toplevelcomptime: [
+                 {:block, %{label: :foo}, [{:const, {:a, _, _}}, {:const, {:b, _, _}}]}
+               ]
              } = Parser.parse("comptime foo: { const a = 1; const b = 2; }")
     end
   end
