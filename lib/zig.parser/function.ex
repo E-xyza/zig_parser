@@ -80,7 +80,7 @@ defmodule Zig.Parser.Function do
 
   defp from_args([:SEMICOLON], function), do: function
 
-  defp from_args([block = %Block{}], function), do: struct(function, block: block)
+  defp from_args([block], function), do: struct(function, block: block)
 
   defp from_args([expr | rest], function) do
     rest

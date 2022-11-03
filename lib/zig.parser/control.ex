@@ -1,64 +1,72 @@
+defmodule Zig.Parser.IfOptions do
+  defstruct [:position]
+end
+
+defmodule Zig.Parser.ForOptions do
+  defstruct [:position, inline: false]
+end
+
 defmodule Zig.Parser.Control do
   @moduledoc false
+  alias Zig.Parser.IfOptions
+  alias Zig.Parser.ForOptions
 
   # control flow parsers:  if, for, while, switch
 
-  def parse_for([:LPAREN, expr, :RPAREN | rest], inline? \\ false) do
-    parse_for_payload(inline?, expr, rest)
+  def parse_for([:LPAREN, expr, :RPAREN | rest]) do
+    parse_for_payload(rest, enum: expr)
   end
 
-  defp parse_for_payload(inline?, expr, [:|, :*, item | rest]) do
-    parse_for_index(inline?, expr, {:ptr, item}, rest)
+  defp parse_for_payload([:|, :*, payload | rest], parts) do
+    parse_for_index(rest, Keyword.merge(parts, ptr_payload: payload))
   end
 
-  defp parse_for_payload(inline?, expr, [:|, item | rest]) do
-    parse_for_index(inline?, expr, item, rest)
+  defp parse_for_payload([:|, payload | rest], parts) do
+    parse_for_index(rest, Keyword.merge(parts, payload: payload))
   end
 
-  defp parse_for_index(inline?, expr, item, [:COMMA, index, :| | rest]) do
-    parse_for_body(inline?, expr, {item, index}, rest)
+  defp parse_for_index([:COMMA, index, :| | rest], parts) do
+    parse_for_code(rest, Keyword.merge(parts, index: index))
   end
 
-  defp parse_for_index(inline?, expr, item, [:| | rest]) do
-    parse_for_body(inline?, expr, item, rest)
+  defp parse_for_index([:| | rest], parts) do
+    parse_for_code(rest, parts)
   end
-
-  @inline_for %{false: :for, true: :inline_for}
 
   @stop_loop [[], [:SEMICOLON]]
 
-  defp parse_for_body(inline?, expr, item, [body | stop]) when stop in @stop_loop do
-    {@inline_for[inline?], expr, item, body}
+  defp parse_for_code([body | stop], parts) when stop in @stop_loop do
+    {:for, %ForOptions{}, Keyword.merge(parts, code: body)}
   end
 
-  defp parse_for_body(inline?, expr, item, [body, :else, elsebody]) do
-    {@inline_for[inline?], expr, item, body, elsebody}
+  defp parse_for_code([body, :else, elsebody], parts) do
+    {:for, %ForOptions{}, Keyword.merge(parts, code: body, else: elsebody)}
   end
 
   # for parsing if statements
-  def parse_if([:LPAREN, arg, :RPAREN, :|, :*, payload, :|, consequence | rest]) do
-    parse_else(arg, {:ptr_payload, payload, consequence}, rest)
+  def parse_if([:LPAREN, condition, :RPAREN, :|, :*, payload, :|, consequence | rest]) do
+    parse_else(rest, condition: condition, ptr_payload: payload, consequence: consequence)
   end
 
-  def parse_if([:LPAREN, arg, :RPAREN, :|, payload, :|, consequence | rest]) do
-    parse_else(arg, {:payload, payload, consequence}, rest)
+  def parse_if([:LPAREN, condition, :RPAREN, :|, payload, :|, consequence | rest]) do
+    parse_else(rest, condition: condition, payload: payload, consequence: consequence)
   end
 
-  def parse_if([:LPAREN, arg, :RPAREN, consequence | rest]) do
-    parse_else(arg, consequence, rest)
+  def parse_if([:LPAREN, condition, :RPAREN, consequence | rest]) do
+    parse_else(rest, condition: condition, consequence: consequence)
   end
 
   @if_enders [[], [:SEMICOLON]]
-  defp parse_else(arg, consequence, tail) when tail in @if_enders do
-    {:if, arg, consequence}
+  defp parse_else(tail, parts) when tail in @if_enders do
+    {:if, %IfOptions{}, parts}
   end
 
-  defp parse_else(arg, consequence, [:else, contrast]) do
-    {:if, arg, consequence, contrast}
+  defp parse_else([:else, :|, payload, :|, contrast], parts) do
+    {:if, %IfOptions{}, Keyword.merge(parts, else: contrast, else_payload: payload)}
   end
 
-  defp parse_else(arg, consequence, [:else, :|, payload, :|, contrast]) do
-    {:if, arg, consequence, {:payload, payload, contrast}}
+  defp parse_else([:else, contrast | _], parts) do
+    {:if, %IfOptions{}, Keyword.merge(parts, else: contrast)}
   end
 
   # while loop parsing

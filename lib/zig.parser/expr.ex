@@ -1,6 +1,11 @@
+defmodule Zig.Parser.OperatorOptions do
+  defstruct [:position]
+end
+
 defmodule Zig.Parser.Expr do
   alias Zig.Parser.TypeExpr
   alias Zig.Parser.Control
+  alias Zig.Parser.OperatorOptions
 
   def post_traverse(rest, [{__MODULE__, args} | rest_args], context, _, _) do
     {rest, [analyze_args(args) | rest_args], context}
@@ -8,7 +13,9 @@ defmodule Zig.Parser.Expr do
 
   @binaryoperators ~w(or and == != < > <= >= & ^ | orelse << >> + - ++ +% -% || * / % ** *%)a
 
-  defp analyze_args([a, op | rest]) when op in @binaryoperators, do: {op, a, analyze_args(rest)}
+  defp analyze_args([position, left, op | right]) when op in @binaryoperators do
+    {op, %OperatorOptions{position: position}, [left, analyze_args(right)]}
+  end
 
   @prefixoperators ~w(! - ~ -% & try await)a
 

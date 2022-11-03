@@ -6,14 +6,14 @@ defmodule Zig.Parser.Test.TopLevelComptimeTest do
 
   describe "when given a basic comptime block" do
     test "it can be found" do
-      assert %Parser{toplevelcomptime: [%Block{doc_comment: nil, code: []}]} =
+      assert %Parser{toplevelcomptime: [{:block, %{comment: nil}, []}]} =
                Parser.parse("comptime {}")
     end
 
     test "doc comments are attached" do
       assert %Parser{
                toplevelcomptime: [
-                 %Block{doc_comment: " this does something\n", code: []}
+                 {:block, %{comment: " this does something\n"}, []}
                ]
              } =
                Parser.parse("""

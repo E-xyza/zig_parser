@@ -1,27 +1,31 @@
+defmodule Zig.Parser.BlockOptions do
+  defstruct [:doc_comment, :label]
+end
+
 defmodule Zig.Parser.Block do
-  defstruct [:doc_comment, :name, :label, code: []]
+  alias Zig.Parser.BlockOptions
 
   def post_traverse(rest, [{__MODULE__, block_parts} | rest_args], context, _, _) do
-    {rest, [parse_block(block_parts) | rest_args], context}
+    {rest, [parse(block_parts) | rest_args], context}
   end
 
-  defp parse_block([:LBRACE | rest]), do: parse_block(rest, [])
+  defp parse([:LBRACE | rest]), do: parse(rest, [])
 
-  defp parse_block([:RBRACE], so_far), do: %__MODULE__{code: Enum.reverse(so_far)}
+  defp parse([:RBRACE], so_far), do: {:block, %BlockOptions{}, Enum.reverse(so_far)}
 
-  defp parse_block([statement | rest], so_far), do: parse_block(rest, [statement | so_far])
+  defp parse([statement | rest], so_far), do: parse(rest, [statement | so_far])
 end
 
 defmodule Zig.Parser.BlockExpr do
-  alias Zig.Parser.Block
+  alias Zig.Parser
 
   def post_traverse(rest, [{__MODULE__, block_args} | rest_args], context, _, _) do
-    {rest, [parse_block(block_args) | rest_args], context}
+    {rest, [parse(block_args) | rest_args], context}
   end
 
-  defp parse_block([tag, :COLON, block = %Block{}]) do
-    Map.put(block, :label, tag)
+  defp parse([tag, :COLON, block]) do
+    Parser.put_opt(block, :label, tag)
   end
 
-  defp parse_block([block]), do: block
+  defp parse([block]), do: block
 end

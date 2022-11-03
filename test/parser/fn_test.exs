@@ -18,7 +18,7 @@ defmodule Zig.Parser.Test.FunctionTest do
                    extern: false,
                    inline: :maybe,
                    name: :foo,
-                   block: %Block{code: []}
+                   block: {:block, _, []}
                  }
                ]
              } = Parser.parse("fn foo() void {}")

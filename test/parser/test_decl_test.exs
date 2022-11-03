@@ -11,7 +11,7 @@ defmodule Zig.Parser.Test.TestDeclTest do
                tests: [
                  %TestDecl{
                    name: nil,
-                   block: %Block{code: []},
+                   block: {:block, _, []},
                    line: 1,
                    column: 1
                  }
@@ -24,7 +24,7 @@ defmodule Zig.Parser.Test.TestDeclTest do
                tests: [
                  %TestDecl{
                    name: "foobar",
-                   block: %Block{code: []},
+                   block: {:block, _, []},
                    line: 1,
                    column: 1
                  }

@@ -11,9 +11,7 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
     test "get doc comment for vars" do
       assert %Parser{
                decls: [
-                 %Var{
-                   doc_comment: " this is a doc comment\n"
-                 }
+                {:var, %{comment: " this is a doc comment\n"}, _, _, _}
                ]
              } =
                Parser.parse("""
@@ -24,11 +22,7 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
 
     test "can identify pub for var" do
       assert %Parser{
-               decls: [
-                 %Var{
-                   pub: true
-                 }
-               ]
+               decls: [{:var, %{pub: true}, _, _, _}]
              } =
                Parser.parse("""
                pub var foo: u32 = undefined;
@@ -72,33 +66,33 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
     test "it can be found" do
       assert %Parser{
                decls: [
-                 %Var{
+                {:var,
+                 %{
                    export: false,
                    extern: false,
-                   threadlocal: false,
-                   name: :foo
-                 }
+                   threadlocal: false
+                 }, _, _, _, _}
                ]
              } = Parser.parse("var foo: u32 = undefined;")
     end
 
     test "export is flagged" do
-      assert %Parser{decls: [%Var{export: true}]} =
+      assert %Parser{decls: [{:var, %{export: true}, _, _, _}]} =
                Parser.parse("export var foo: u32 = undefined;")
     end
 
     test "extern is flagged" do
-      assert %Parser{decls: [%Var{extern: true}]} =
+      assert %Parser{decls: [{:var, %{extern: true}, _, _, _}]} =
                Parser.parse("extern var foo: u32 = undefined;")
     end
 
     test "extern can be typed" do
-      assert %Parser{decls: [%Var{extern: "C"}]} =
+      assert %Parser{decls: [{:var, %{extern: "C"}, _, _, _}]} =
                Parser.parse(~S|extern "C" var foo: u32 = undefined;|)
     end
 
     test "threadlocal is flagged" do
-      assert %Parser{decls: [%Var{threadlocal: true}]} =
+      assert %Parser{decls: [{:var, %{threadlocal: true}, _, _, _}]} =
                Parser.parse("threadlocal var foo: u32 = undefined;")
     end
   end
@@ -116,12 +110,12 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
     # var and const
 
     test "adds byte alignment" do
-      assert %Parser{decls: [%Var{align: {:integer, 8}}]} =
+      assert %Parser{decls: [{:var, %{align: {:integer, 8}}, _, _, _}]} =
                Parser.parse("var foo: u32 align(8) = undefined;")
     end
 
     test "extern is flagged" do
-      assert %Parser{decls: [%Var{linksection: {:enum_literal, :foo}}]} =
+      assert %Parser{decls: [{:var, %{linksection: {:enum_literal, :foo}}, _, _, _}]} =
                Parser.parse("var foo: u32 linksection(.foo) = undefined;")
     end
   end

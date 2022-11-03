@@ -3,7 +3,7 @@ defmodule Zig.Parser.Test.ExprTest do
 
   alias Zig.Parser
   alias Zig.Parser.Asm
-  alias Zig.Parser.Block
+  alias Zig.Parser
   alias Zig.Parser.Const
 
   # tests:
@@ -209,7 +209,7 @@ defmodule Zig.Parser.Test.ExprTest do
   describe "blocks" do
     # note this is probably a semantic error
     test "work" do
-      assert %Parser{decls: [%Const{value: %Block{code: []}}]} = Parser.parse("const foo = {};")
+      assert %Parser{decls: [%Const{value: {:block, _, []}}]} = Parser.parse("const foo = {};")
     end
   end
 

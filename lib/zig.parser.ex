@@ -80,7 +80,7 @@ defmodule Zig.Parser do
     TILDE: :"~"
   }
 
-  @sub_operator_mapping Enum.map(@sub_operators, fn {name, op} -> {name, [token: op]} end)
+  @sub_operator_mapping Enum.map(@sub_operators, fn {name, op} -> {name, [token: op, start_position: true]} end)
 
   @operators ~w(COMMA DOT DOT2 COLON LBRACE LBRACKET LPAREN MINUSRARROW LETTERC QUESTIONMARK RBRACE RBRACKET RPAREN SEMICOLON)a
   @operator_mapping Enum.map(@operators, &{&1, [token: true]})
@@ -162,6 +162,7 @@ defmodule Zig.Parser do
                       tag: true,
                       post_traverse: {PrimaryTypeExpr, :post_traverse, []}
                     ],
+                    IfStatement: [start_position: true],
                     AsmExpr: [tag: Asm, post_traverse: {Asm, :post_traverse, []}],
                     BlockExpr: [tag: BlockExpr, post_traverse: {BlockExpr, :post_traverse, []}],
                     Block: [tag: Block, post_traverse: {Block, :post_traverse, []}],
@@ -226,7 +227,7 @@ defmodule Zig.Parser do
   defp group_for(%TestDecl{}), do: :tests
   defp group_for(%Function{}), do: :functions
   defp group_for(%Const{}), do: :decls
-  defp group_for(%Var{}), do: :decls
+  defp group_for({:var, _}), do: :decls
   defp group_for({tag, _}) when tag in @block_tags, do: tag
 
   defp value_for({tag, block}) when tag in @block_tags, do: block
@@ -243,5 +244,10 @@ defmodule Zig.Parser do
 
   defp process_escape(<<"\\x"::binary, number::binary-2>>) do
     String.to_integer(number)
+  end
+
+  @doc false
+  def put_opt({identifier, options, params}, key, value) do
+    {identifier, %{options | key => value}, params}
   end
 end

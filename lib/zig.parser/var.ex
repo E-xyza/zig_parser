@@ -1,49 +1,34 @@
+defmodule Zig.Parser.VarOptions do
+  defstruct [:comment, :align, :linksection, :position, extern: false, export: false, pub: false, threadlocal: false, comptime: false]
+end
+
 defmodule Zig.Parser.Var do
-  @enforce_keys [:name, :line, :column]
-  defstruct @enforce_keys ++
-              [
-                :doc_comment,
-                :type,
-                :align,
-                :linksection,
-                :value,
-                extern: false,
-                export: false,
-                pub: false,
-                threadlocal: false,
-                comptime: false
-              ]
+  alias Zig.Parser.VarOptions
 
-  def from_args([name | rest], position)do
-    decorate(
-      %__MODULE__{name: name, line: position.line, column: position.column},
-      rest
-    )
+  def from_args([name | rest]) do
+    {opts, type, value} = parse(rest)
+    {:var, opts, name, type, value}
   end
 
-  defp decorate(var, [:COLON, type | rest]) do
-    var
-    |> struct(type: type)
-    |> decorate(rest)
+  defp parse([:COLON, type | rest]) do
+    {opts, _, value} = parse(rest)
+    {opts, type, value}
   end
 
-  defp decorate(var, [:=, value | rest]) do
-    var
-    |> struct(value: value)
-    |> decorate(rest)
+  defp parse([:=, value | rest]) do
+    {opts, type, _} = parse(rest)
+    {opts, type, value}
   end
 
-  defp decorate(var, [:linksection, :LPAREN, section, :RPAREN | rest]) do
-    var
-    |> struct(linksection: section)
-    |> decorate(rest)
+  defp parse([:linksection, :LPAREN, section, :RPAREN | rest]) do
+    {opts, type, value} = parse(rest)
+    {%{opts | linksection: section}, type, value}
   end
 
-  defp decorate(var, [:align, :LPAREN, align, :RPAREN | rest]) do
-    var
-    |> struct(align: align)
-    |> decorate(rest)
+  defp parse([:align, :LPAREN, align, :RPAREN | rest]) do
+    {opts, type, value} = parse(rest)
+    {%{opts | align: align}, type, value}
   end
 
-  defp decorate(var, [:SEMICOLON]), do: var
+  defp parse([:SEMICOLON]), do: {%VarOptions{}, nil, nil}
 end
