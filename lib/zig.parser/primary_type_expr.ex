@@ -119,7 +119,7 @@ defmodule Zig.Parser.PrimaryTypeExpr do
     end)
   end
 
-  defp parse_container_body([identifier |rest], parts) do
+  defp parse_container_body([identifier | rest], parts) do
     # this is for enum fields
     new_parts = Keyword.update(parts, :fields, [identifier], &[identifier | &1])
     parse_container_body(rest, new_parts)
