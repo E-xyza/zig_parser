@@ -150,7 +150,7 @@ defmodule Zig.Parser do
                       post_traverse: {Usingnamespace, :post_traverse, []}
                     ],
                     ParamDeclList: [tag: true],
-                    ParamDecl: [tag: ParamDecl],
+                    ParamDecl: [tag: ParamDecl, post_traverse: {ParamDecl, :post_traverse, []}],
                     PrimaryTypeExpr: [
                       tag: true,
                       post_traverse: {PrimaryTypeExpr, :post_traverse, []}

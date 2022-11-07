@@ -11,7 +11,7 @@
 - [x] VarDecl
 - [ ] ContainerField
 - [x] Statement
-- [x]] IfStatement
+- [x] IfStatement
 - [x] LabeledStatement
 - [x] LoopStatement
 - [x] ForStatement
@@ -61,7 +61,7 @@
 - [x] WhileContinueExpr
 - [x] LinkSection
 - [x] CallConv
-- [ ] ParamDecl
+- [X] ParamDecl
 - [ ] ParamType
 - [x] IfPrefix
 - [x] WhilePrefix
@@ -93,7 +93,7 @@
 - [x] AsmOutputList
 - [x] AsmInputList
 - [x] StringList
-- [ ] ParamDeclList
+- [X] ParamDeclList
 - [ ] ExprList
 - [ ] mb_utf8_literal
 - [ ] ascii_char_not_nl_slash_squote

@@ -57,8 +57,8 @@ defmodule Zig.Parser.Function do
   end
 
   # identifiers are required in top level fn declarations.
-  defp parse([:fn, name, :LPAREN, _paramdecl, :RPAREN | rest], parts) do
-    parse(rest, Keyword.merge(parts, name: name, params: []))
+  defp parse([:fn, name, :LPAREN, {:ParamDeclList, params}, :RPAREN | rest], parts) do
+    parse(rest, Keyword.merge(parts, name: name, params: parse_params(params)))
   end
 
   defp parse([:align, :LPAREN, alignexpr, :RPAREN | rest], parts) do
@@ -85,5 +85,10 @@ defmodule Zig.Parser.Function do
 
   defp parse([expr | rest], parts) do
     parse(rest, Keyword.merge(parts, type: expr))
+  end
+
+  # parameters should have commas filtered
+  defp parse_params(params) do
+    Enum.filter(params, &(&1 != :COMMA))
   end
 end
