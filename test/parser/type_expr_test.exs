@@ -3,8 +3,5 @@ defmodule Zig.Parser.Test.TypeExprTest do
 
   alias Zig.Parser
 
-  alias Zig.Parser
-  alias Zig.Parser.Const
-
   test "write type expr tests"
 end

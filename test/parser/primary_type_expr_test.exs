@@ -4,7 +4,6 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
   alias Zig.Parser
 
   alias Zig.Parser
-  alias Zig.Parser.Const
 
   # TESTS:
   #
@@ -31,22 +30,19 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
 
   describe "builtin function" do
     test "with no arguments" do
-      assert %Parser{decls: [{:const, _, {_, _, expr}}]} =
-               Parser.parse("const foo = @builtin_fn();")
+      assert [{:const, _, {_, _, expr}}] = Parser.parse("const foo = @builtin_fn();").code
 
       assert {:builtin, :builtin_fn, []} = expr
     end
 
     test "with one arguments" do
-      assert %Parser{decls: [{:const, _, {_, _, expr}}]} =
-               Parser.parse("const foo = @builtin_fn(foo);")
+      assert [{:const, _, {_, _, expr}}] = Parser.parse("const foo = @builtin_fn(foo);").code
 
       assert {:builtin, :builtin_fn, [:foo]} = expr
     end
 
     test "with two arguments" do
-      assert %Parser{decls: [{:const, _, {_, _, expr}}]} =
-               Parser.parse("const foo = @builtin_fn(foo, bar);")
+      assert [{:const, _, {_, _, expr}}] = Parser.parse("const foo = @builtin_fn(foo, bar);").code
 
       assert {:builtin, :builtin_fn, [:foo, :bar]} = expr
     end
@@ -54,21 +50,20 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
 
   describe "char literal" do
     test "basic ascii" do
-      assert %Parser{decls: [{:const, _, {_, _, ?a}}]} = Parser.parse("const foo = 'a';")
+      assert [{:const, _, {_, _, ?a}}] = Parser.parse("const foo = 'a';").code
     end
 
     @tag :skip
     test "utf-8 literal" do
-      assert %Parser{decls: [{:const, _, {_, _, ?🚀}}]} = Parser.parse("const foo = '🚀';")
+      assert [{:const, _, {_, _, ?🚀}}] = Parser.parse("const foo = '🚀';").code
     end
 
     test "escaped char" do
-      assert %Parser{decls: [{:const, _, {_, _, ?\t}}]} = Parser.parse("const foo = '\\t';")
+      assert [{:const, _, {_, _, ?\t}}] = Parser.parse("const foo = '\\t';").code
     end
 
     test "escaped hex" do
-      assert %Parser{decls: [{:const, _, {_, _, ?🚀}}]} =
-               Parser.parse("const foo = '\\u{1F680}';")
+      assert [{:const, _, {_, _, ?🚀}}] = Parser.parse("const foo = '\\u{1F680}';").code
     end
   end
 

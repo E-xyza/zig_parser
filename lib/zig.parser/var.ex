@@ -1,6 +1,6 @@
 defmodule Zig.Parser.VarOptions do
   defstruct [
-    :comment,
+    :doc_comment,
     :align,
     :linksection,
     :position,
@@ -15,30 +15,30 @@ end
 defmodule Zig.Parser.Var do
   alias Zig.Parser.VarOptions
 
-  def from_args([name | rest]) do
-    {opts, type, value} = parse(rest)
+  def parse([name | rest]) do
+    {opts, type, value} = do_parse(rest)
     {:var, opts, {name, type, value}}
   end
 
-  defp parse([:COLON, type | rest]) do
-    {opts, _, value} = parse(rest)
+  defp do_parse([:COLON, type | rest]) do
+    {opts, _, value} = do_parse(rest)
     {opts, type, value}
   end
 
-  defp parse([:=, value | rest]) do
-    {opts, type, _} = parse(rest)
+  defp do_parse([:=, value | rest]) do
+    {opts, type, _} = do_parse(rest)
     {opts, type, value}
   end
 
-  defp parse([:linksection, :LPAREN, section, :RPAREN | rest]) do
-    {opts, type, value} = parse(rest)
+  defp do_parse([:linksection, :LPAREN, section, :RPAREN | rest]) do
+    {opts, type, value} = do_parse(rest)
     {%{opts | linksection: section}, type, value}
   end
 
-  defp parse([:align, :LPAREN, align, :RPAREN | rest]) do
-    {opts, type, value} = parse(rest)
+  defp do_parse([:align, :LPAREN, align, :RPAREN | rest]) do
+    {opts, type, value} = do_parse(rest)
     {%{opts | align: align}, type, value}
   end
 
-  defp parse([:SEMICOLON]), do: {%VarOptions{}, nil, nil}
+  defp do_parse([:SEMICOLON]), do: {%VarOptions{}, nil, nil}
 end

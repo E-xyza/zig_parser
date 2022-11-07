@@ -1,21 +1,13 @@
 defmodule Zig.Parser do
-  defstruct [
-    :doc_comment,
-    tests: [],
-    functions: [],
-    usingnamespace: [],
-    decls: [],
-    toplevelcomptime: []
-  ]
-
   require Pegasus
   import NimbleParsec
+
+  defstruct [:doc_comment, code: []]
 
   alias Zig.Parser.Asm
   alias Zig.Parser.AssignExpr
   alias Zig.Parser.Block
   alias Zig.Parser.BlockExpr
-  alias Zig.Parser.Const
   alias Zig.Parser.Collected
   alias Zig.Parser.Expr
   alias Zig.Parser.InitList
@@ -29,7 +21,6 @@ defmodule Zig.Parser do
   alias Zig.Parser.TopLevelVar
   alias Zig.Parser.TypeExpr
   alias Zig.Parser.Usingnamespace
-  alias Zig.Parser.Var
   alias Zig.Parser.ParamDecl
 
   @keywords ~w(align allowzero and anyframe anytype asm async await break callconv catch comptime const continue defer else enum errdefer error export extern fn for if inline noalias nosuspend noinline opaque or orelse packed pub resume return linksection struct suspend switch test threadlocal try union unreachable usingnamespace var volatile while)a
@@ -95,7 +86,7 @@ defmodule Zig.Parser do
 
   @parser_options [
                     container_doc_comment: [
-                      tag: true,
+                      tag: :doc_comment,
                       collect: true
                     ],
                     char_escape: [
@@ -168,7 +159,7 @@ defmodule Zig.Parser do
                     AsmExpr: [tag: Asm, post_traverse: {Asm, :post_traverse, []}],
                     BlockExpr: [tag: BlockExpr, post_traverse: {BlockExpr, :post_traverse, []}],
                     Block: [tag: Block, post_traverse: {Block, :post_traverse, []}],
-                    Root: [post_traverse: :post_traverse]
+                    Root: [tag: true, post_traverse: :post_traverse]
                   ] ++
                     @keyword_mapping ++
                     @operator_mapping ++ @sub_operator_mapping ++ @collected_mapping
@@ -202,8 +193,8 @@ defmodule Zig.Parser do
     {rest, [process_escape(escape_string) | rest_args], context}
   end
 
-  defp trim_doc_comment(comment, separator) do
-    comment
+  defp trim_doc_comment(doc_comment, separator) do
+    doc_comment
     |> String.split("\n")
     |> Enum.map(&String.trim/1)
     |> Enum.map(&String.trim_leading(&1, separator))
@@ -215,25 +206,14 @@ defmodule Zig.Parser do
     {rest, [trimmed_literal | rest_args], context}
   end
 
-  def post_traverse("", args, context, _, _) do
-    props =
-      args
-      |> Enum.reverse()
-      |> Enum.group_by(&group_for/1, &value_for/1)
-
-    {"", [], struct(context, props)}
+  def post_traverse("", [Root: [{:doc_comment, [doc_comment]} | code]], context, _, _) do
+    doc_comment = trim_doc_comment(doc_comment, "//!")
+    {"", [], struct(context, code: code, doc_comment: doc_comment)}
   end
 
-  @block_tags ~w(usingnamespace toplevelcomptime)a
-
-  defp group_for(%TestDecl{}), do: :tests
-  defp group_for(%Function{}), do: :functions
-  defp group_for({:const, _, _}), do: :decls
-  defp group_for({:var, _, _}), do: :decls
-  defp group_for({tag, _}) when tag in @block_tags, do: tag
-
-  defp value_for({tag, block}) when tag in @block_tags, do: block
-  defp value_for(other), do: other
+  def post_traverse("", [Root: code], context, _, _) do
+    {"", [], struct(context, code: code)}
+  end
 
   @escaped %{?t => ?\t, ?n => ?\n, ?' => ?', ?" => ?", ?\\ => ?\\}
   defp process_escape(<<92, char>>), do: @escaped[char]

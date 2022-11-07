@@ -1,17 +1,17 @@
 defmodule Zig.Parser.StructOptions do
-  defstruct extern: false, packed: false, comment: nil
+  defstruct extern: false, packed: false, doc_comment: nil
 end
 
 defmodule Zig.Parser.OpaqueOptions do
-  defstruct extern: false, packed: false, comment: nil
+  defstruct extern: false, packed: false, doc_comment: nil
 end
 
 defmodule Zig.Parser.EnumOptions do
-  defstruct extern: false, packed: false, comment: nil, type: nil
+  defstruct extern: false, packed: false, doc_comment: nil, type: nil
 end
 
 defmodule Zig.Parser.UnionOptions do
-  defstruct extern: false, packed: false, comment: nil, tagtype: nil, tagged: false
+  defstruct extern: false, packed: false, doc_comment: nil, tagtype: nil, tagged: false
 end
 
 defmodule Zig.Parser.PrimaryTypeExpr do
@@ -75,7 +75,7 @@ defmodule Zig.Parser.PrimaryTypeExpr do
 
     {opts, rest_args} =
       case container_args do
-        [{:container_doc_comment, [comment]} | rest_args] ->
+        [{:doc_comment, [comment]} | rest_args] ->
           comment =
             comment
             |> String.split("\n")
@@ -83,22 +83,45 @@ defmodule Zig.Parser.PrimaryTypeExpr do
             |> Enum.map(&String.trim_leading(&1, "//!"))
             |> Enum.join("\n")
 
-          {Map.put(opts, :comment, comment), rest_args}
+          {Map.put(opts, :doc_comment, comment), rest_args}
 
         rest_args ->
           {opts, rest_args}
       end
 
-    {container, opts, parse_container_args(rest_args, [])}
+    {container, opts, parse_container_body(rest_args, [])}
   end
 
   defp parse(["'", parsed_char, "'"]), do: parsed_char
 
   defp parse([any]), do: any
 
-  defp parse_builtin([:RPAREN], so_far), do: Enum.reverse(so_far)
-  defp parse_builtin([:COMMA | rest], so_far), do: parse_builtin(rest, so_far)
-  defp parse_builtin([value | rest], so_far), do: parse_builtin(rest, [value | so_far])
+  defp parse_builtin([:RPAREN], parts), do: Enum.reverse(parts)
+  defp parse_builtin([:COMMA | rest], parts), do: parse_builtin(rest, parts)
+  defp parse_builtin([value | rest], parts), do: parse_builtin(rest, [value | parts])
 
-  defp parse_container_args([:RBRACE], so_far), do: Enum.reverse(so_far)
+  defp parse_container_body([const = {:const, _, _} | rest], parts) do
+    new_parts = Keyword.update(parts, :decls, [const], &[const | &1])
+    parse_container_body(rest, new_parts)
+  end
+
+  defp parse_container_body([identifier, :COLON, type | rest], parts) do
+    new_parts = Keyword.update(parts, :fields, [{identifier, type}], &[{identifier, type} | &1])
+    parse_container_body(rest, new_parts)
+  end
+
+  defp parse_container_body([:COMMA | rest], parts), do: parse_container_body(rest, parts)
+
+  defp parse_container_body([:RBRACE], parts) do
+    Enum.reduce([:fields, :decls], parts, fn
+      part_label, parts ->
+        Keyword.update(parts, part_label, [], &Enum.reverse/1)
+    end)
+  end
+
+  defp parse_container_body([identifier |rest], parts) do
+    # this is for enum fields
+    new_parts = Keyword.update(parts, :fields, [identifier], &[identifier | &1])
+    parse_container_body(rest, new_parts)
+  end
 end

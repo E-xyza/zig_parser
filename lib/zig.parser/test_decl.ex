@@ -1,27 +1,50 @@
+defmodule Zig.Parser.TestOptions do
+  defstruct [:position, :doc_comment]
+end
+
 defmodule Zig.Parser.TestDecl do
-  @enforce_keys [:line, :column]
-  defstruct @enforce_keys ++ [:name, :doc_comment, :block]
+  alias Zig.Parser
+  alias Zig.Parser.TestOptions
 
-  def post_traverse(rest, [{__MODULE__, [position | args]} | rest_args], context, _, _) do
-    {rest, [from_args(args, position) | rest_args], context}
-  end
-
-  defp from_args([:test, block = {:block, _, _}], position) do
-    %__MODULE__{line: position.line, column: position.column, block: block}
-  end
-
-  defp from_args([:test, name, block = {:block, _, _}], position) when is_binary(name) do
-    %__MODULE__{line: position.line, column: position.column, block: block, name: name}
-  end
-
-  defp from_args([{:doc_comment, comment} | rest], position) do
+  def post_traverse(
+        rest,
+        [{__MODULE__, [position, {:doc_comment, comment} | args]} | rest_args],
+        context,
+        _,
+        _
+      ) do
     comment_lines =
       comment
       |> String.split("\n")
       |> length
 
-    rest
-    |> from_args(%{position | line: position.line + comment_lines - 1, column: 1})
-    |> Map.put(:doc_comment, comment)
+    ast =
+      args
+      |> parse()
+      |> Parser.put_opt(:doc_comment, comment)
+      |> Parser.put_opt(:position, %{
+        position
+        | line: position.line + comment_lines - 1,
+          column: 1
+      })
+
+    {rest, [ast | rest_args], context}
+  end
+
+  def post_traverse(rest, [{__MODULE__, [position | args]} | rest_args], context, _, _) do
+    ast =
+      args
+      |> parse
+      |> Parser.put_opt(:position, position)
+
+    {rest, [ast | rest_args], context}
+  end
+
+  defp parse([:test, block = {:block, _, _}]) do
+    {:test, %TestOptions{}, {nil, block}}
+  end
+
+  defp parse([:test, name, block = {:block, _, _}]) when is_binary(name) do
+    {:test, %TestOptions{}, {name, block}}
   end
 end

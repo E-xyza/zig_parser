@@ -2,24 +2,19 @@ defmodule Zig.Parser.Test.TopLevelComptimeTest do
   use ExUnit.Case, async: true
 
   alias Zig.Parser
-  alias Zig.Parser.Block
 
   describe "when given a basic comptime block" do
     test "it can be found" do
-      assert %Parser{toplevelcomptime: [{:block, %{comment: nil}, []}]} =
-               Parser.parse("comptime {}")
+      assert [{:comptime, _, {:block, %{doc_comment: nil}, []}}] =
+               Parser.parse("comptime {}").code
     end
 
     test "doc comments are attached" do
-      assert %Parser{
-               toplevelcomptime: [
-                 {:block, %{comment: " this does something\n"}, []}
-               ]
-             } =
+      assert [{:comptime, _, {:block, %{doc_comment: " this does something\n"}, []}}] =
                Parser.parse("""
                /// this does something
                comptime {}
-               """)
+               """).code
     end
   end
 end

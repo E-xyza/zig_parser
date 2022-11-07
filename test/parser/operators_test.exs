@@ -2,7 +2,6 @@ defmodule Zig.Parser.Test.OperatorsTest do
   use ExUnit.Case, async: true
 
   alias Zig.Parser
-  alias Zig.Parser.Const
 
   describe "binary operators in expressions" do
     # tests:
@@ -48,128 +47,110 @@ defmodule Zig.Parser.Test.OperatorsTest do
     #      / ASTERISKPERCENT
 
     test "or operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:or, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a or b;")
+      assert [{:const, _, {_, _, {:or, _, [:a, :b]}}}] = Parser.parse("const foo = a or b;").code
     end
 
     test "and operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:and, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a and b;")
+      assert [{:const, _, {_, _, {:and, _, [:a, :b]}}}] =
+               Parser.parse("const foo = a and b;").code
     end
 
     test "equals operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:==, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a == b;")
+      assert [{:const, _, {_, _, {:==, _, [:a, :b]}}}] = Parser.parse("const foo = a == b;").code
     end
 
     test "notequals operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:!=, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a != b;")
+      assert [{:const, _, {_, _, {:!=, _, [:a, :b]}}}] = Parser.parse("const foo = a != b;").code
     end
 
     test "less than operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:<, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a < b;")
+      assert [{:const, _, {_, _, {:<, _, [:a, :b]}}}] = Parser.parse("const foo = a < b;").code
     end
 
     test "greater than operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:>, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a > b;")
+      assert [{:const, _, {_, _, {:>, _, [:a, :b]}}}] = Parser.parse("const foo = a > b;").code
     end
 
     test "less than or equals operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:<=, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a <= b;")
+      assert [{:const, _, {_, _, {:<=, _, [:a, :b]}}}] = Parser.parse("const foo = a <= b;").code
     end
 
     test "greater than or equal operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:>=, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a >= b;")
+      assert [{:const, _, {_, _, {:>=, _, [:a, :b]}}}] = Parser.parse("const foo = a >= b;").code
     end
 
     test "bitwise and operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:&, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a & b;")
+      assert [{:const, _, {_, _, {:&, _, [:a, :b]}}}] = Parser.parse("const foo = a & b;").code
     end
 
     test "bitwise xor operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:^, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a ^ b;")
+      assert [{:const, _, {_, _, {:^, _, [:a, :b]}}}] = Parser.parse("const foo = a ^ b;").code
     end
 
     test "bitwise or operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:|, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a | b;")
+      assert [{:const, _, {_, _, {:|, _, [:a, :b]}}}] = Parser.parse("const foo = a | b;").code
     end
 
     test "orelse operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:orelse, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a orelse b;")
+      assert [{:const, _, {_, _, {:orelse, _, [:a, :b]}}}] =
+               Parser.parse("const foo = a orelse b;").code
     end
 
     test "leftshift operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:"<<", _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a << b;")
+      assert [{:const, _, {_, _, {:"<<", _, [:a, :b]}}}] =
+               Parser.parse("const foo = a << b;").code
     end
 
     test "rightshift operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:">>", _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a >> b;")
+      assert [{:const, _, {_, _, {:">>", _, [:a, :b]}}}] =
+               Parser.parse("const foo = a >> b;").code
     end
 
     test "plus operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:+, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a + b;")
+      assert [{:const, _, {_, _, {:+, _, [:a, :b]}}}] = Parser.parse("const foo = a + b;").code
     end
 
     test "minus operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:-, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a - b;")
+      assert [{:const, _, {_, _, {:-, _, [:a, :b]}}}] = Parser.parse("const foo = a - b;").code
     end
 
     test "comptime array concatentaion operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:++, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a ++ b;")
+      assert [{:const, _, {_, _, {:++, _, [:a, :b]}}}] = Parser.parse("const foo = a ++ b;").code
     end
 
     test "pluspercent operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:"+%", _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a +% b;")
+      assert [{:const, _, {_, _, {:"+%", _, [:a, :b]}}}] =
+               Parser.parse("const foo = a +% b;").code
     end
 
     test "minuspercent operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:"-%", _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a -% b;")
+      assert [{:const, _, {_, _, {:"-%", _, [:a, :b]}}}] =
+               Parser.parse("const foo = a -% b;").code
     end
 
     test "boolean or operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:||, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a || b;")
+      assert [{:const, _, {_, _, {:||, _, [:a, :b]}}}] = Parser.parse("const foo = a || b;").code
     end
 
     test "multiply operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:*, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a * b;")
+      assert [{:const, _, {_, _, {:*, _, [:a, :b]}}}] = Parser.parse("const foo = a * b;").code
     end
 
     test "divide operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:/, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a / b;")
+      assert [{:const, _, {_, _, {:/, _, [:a, :b]}}}] = Parser.parse("const foo = a / b;").code
     end
 
     test "modulo operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:%, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a % b;")
+      assert [{:const, _, {_, _, {:%, _, [:a, :b]}}}] = Parser.parse("const foo = a % b;").code
     end
 
     test "array repeat operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:**, _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a ** b;")
+      assert [{:const, _, {_, _, {:**, _, [:a, :b]}}}] = Parser.parse("const foo = a ** b;").code
     end
 
     test "wraparound multiply operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:"*%", _, [:a, :b]}}}]} =
-               Parser.parse("const foo = a *% b;")
+      assert [{:const, _, {_, _, {:"*%", _, [:a, :b]}}}] =
+               Parser.parse("const foo = a *% b;").code
     end
   end
 
@@ -177,30 +158,27 @@ defmodule Zig.Parser.Test.OperatorsTest do
 
   describe "unary prefix operators in expressions" do
     test "boolean negation operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:!, _, :a}}}]} = Parser.parse("const foo = !a;")
+      assert [{:const, _, {_, _, {:!, _, :a}}}] = Parser.parse("const foo = !a;").code
     end
 
     test "arithmetic negation operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:-, _, :a}}}]} = Parser.parse("const foo = -a;")
+      assert [{:const, _, {_, _, {:-, _, :a}}}] = Parser.parse("const foo = -a;").code
     end
 
     test "bitwise negation operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:"~", _, :a}}}]} =
-               Parser.parse("const foo = ~a;")
+      assert [{:const, _, {_, _, {:"~", _, :a}}}] = Parser.parse("const foo = ~a;").code
     end
 
     test "dereference operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:&, _, :a}}}]} = Parser.parse("const foo = &a;")
+      assert [{:const, _, {_, _, {:&, _, :a}}}] = Parser.parse("const foo = &a;").code
     end
 
     test "try operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:try, _, :a}}}]} =
-               Parser.parse("const foo = try a;")
+      assert [{:const, _, {_, _, {:try, _, :a}}}] = Parser.parse("const foo = try a;").code
     end
 
     test "await operator" do
-      assert %Parser{decls: [{:const, _, {_, _, {:await, _, :a}}}]} =
-               Parser.parse("const foo = await a;")
+      assert [{:const, _, {_, _, {:await, _, :a}}}] = Parser.parse("const foo = await a;").code
     end
   end
 end

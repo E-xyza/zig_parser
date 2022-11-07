@@ -2,33 +2,37 @@ defmodule Zig.Parser.Test.BlockTest do
   use ExUnit.Case, async: true
 
   alias Zig.Parser
-  alias Zig.Parser.Block
-  alias Zig.Parser.Const
 
-  # this test (ab)uses the comptime block to track block information
+  # this test (ab)uses the comptime block to quickly jump into a block statement
+
+  defmacrop toplevelblockcontent(
+              to_bind,
+              options \\ quote do
+                _
+              end
+            ) do
+    quote do
+      [{:comptime, _, {:block, unquote(options), unquote(to_bind)}}]
+    end
+  end
 
   describe "general properties of a comptime block" do
     test "can be empty" do
-      assert %Parser{toplevelcomptime: [{:block, %{label: nil}, []}]} =
-               Parser.parse("comptime {}")
+      assert toplevelblockcontent([]) = Parser.parse("comptime {}").code
     end
 
     test "can have a label" do
-      assert %Parser{toplevelcomptime: [{:block, %{label: :foo}, []}]} =
-               Parser.parse("comptime foo: {}")
+      assert toplevelblockcontent([], %{label: :foo}) = Parser.parse("comptime foo: {}").code
     end
 
     test "can have one statement" do
-      assert %Parser{toplevelcomptime: [{:block, %{label: :foo}, [{:const, {:a, _, _}}]}]} =
-               Parser.parse("comptime foo: { const a = 1; }")
+      assert toplevelblockcontent([{:const, _, {:a, _, _}}]) =
+               Parser.parse("comptime { const a = 1; }").code
     end
 
     test "can have multiple statements" do
-      assert %Parser{
-               toplevelcomptime: [
-                 {:block, %{label: :foo}, [{:const, {:a, _, _}}, {:const, {:b, _, _}}]}
-               ]
-             } = Parser.parse("comptime foo: { const a = 1; const b = 2; }")
+      assert toplevelblockcontent([{:const, _, {:a, _, _}}, {:const, _, {:b, _, _}}]) =
+               Parser.parse("comptime foo: { const a = 1; const b = 2; }").code
     end
   end
 end

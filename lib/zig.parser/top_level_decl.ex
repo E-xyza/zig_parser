@@ -2,26 +2,26 @@ defmodule Zig.Parser.TopLevelDecl do
   alias Zig.Parser
 
   def post_traverse(rest, [{__MODULE__, args} | rest_args], context, _, _) do
-    {rest, [from_args(args) | rest_args], context}
+    {rest, [parse(args) | rest_args], context}
   end
 
-  defp from_args([{:doc_comment, comment} | rest]) do
+  defp parse([{:doc_comment, comment} | rest]) do
     rest
-    |> from_args()
-    |> Parser.put_opt(:comment, comment)
+    |> parse()
+    |> Parser.put_opt(:doc_comment, comment)
   end
 
-  defp from_args([:comptime | rest]) do
+  defp parse([:comptime | rest]) do
     rest
-    |> from_args()
+    |> parse()
     |> Parser.put_opt(:comptime, true)
   end
 
-  defp from_args([:pub | rest]) do
+  defp parse([:pub | rest]) do
     rest
-    |> from_args()
+    |> parse()
     |> Parser.put_opt(:pub, true)
   end
 
-  defp from_args([base]), do: base
+  defp parse([base]), do: base
 end

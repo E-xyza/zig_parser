@@ -23,7 +23,7 @@ defmodule Zig.Parser.TopLevelVar do
         | line: position.line + comment_lines - 1,
           column: 1
       })
-      |> Parser.put_opt(:comment, comment)
+      |> Parser.put_opt(:doc_comment, comment)
 
     {rest, [ast | rest_args], context}
   end
@@ -62,10 +62,10 @@ defmodule Zig.Parser.TopLevelVar do
   end
 
   defp parse([:var | args]) do
-    Var.from_args(args)
+    Var.parse(args)
   end
 
   defp parse([:const | args]) do
-    Const.from_args(args)
+    Const.parse(args)
   end
 end

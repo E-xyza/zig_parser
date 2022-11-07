@@ -14,7 +14,8 @@ defmodule Zig.Parser.Statement do
     {rest, [parse(args) | rest_args], context}
   end
 
-  @tagged_content ~w(comptime nosuspend suspend defer errdefer)a
+  @tagged_content ~w(comptime nosuspend suspend defer)a
+  @endings [[], [:SEMICOLON]]
 
   defp parse([position | rest]) when is_map(position) do
     rest
@@ -22,20 +23,16 @@ defmodule Zig.Parser.Statement do
     |> Parser.put_opt(:position, position)
   end
 
-  defp parse([tag, block]) when tag in @tagged_content do
+  defp parse([tag, block | ender]) when tag in @tagged_content and ender in @endings do
     {tag, %StatementOptions{}, block}
   end
 
-  defp parse([tag, expr, :SEMICOLON]) when tag in @tagged_content do
-    {tag, %StatementOptions{}, expr}
+  defp parse([:errdefer, block | ender]) when ender in @endings do
+    {:errdefer, %StatementOptions{}, do: block}
   end
 
-  defp parse([:errdefer, :|, name, :|, block]) do
-    {:errdefer, %StatementOptions{}, {:payload, name, block}}
-  end
-
-  defp parse([:errdefer, :|, name, :|, expr, :SEMICOLON]) do
-    {:errdefer, %StatementOptions{}, {:payload, name, expr}}
+  defp parse([:errdefer, :|, name, :|, block | ender]) when ender in @endings do
+    {:errdefer, %StatementOptions{}, payload: name, do: block}
   end
 
   defp parse([:if | rest]) do
@@ -49,11 +46,11 @@ defmodule Zig.Parser.Statement do
   end
 
   defp parse([:var | rest_args]) do
-    Var.from_args(rest_args)
+    Var.parse(rest_args)
   end
 
   defp parse([:const | rest_args]) do
-    Const.from_args(rest_args)
+    Const.parse(rest_args)
   end
 
   defp parse([label, :COLON | rest_args]) do
@@ -80,7 +77,7 @@ defmodule Zig.Parser.Statement do
     Control.parse_switch(rest_args)
   end
 
-  defp parse([expr, :SEMICOLON]) do
+  defp parse([expr | ender]) when ender in @endings do
     expr
   end
 end

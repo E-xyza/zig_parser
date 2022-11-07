@@ -1,90 +1,89 @@
-defmodule Zig.Parser.Function do
-  @enforce_keys [:line, :column]
-  defstruct @enforce_keys ++
-              [
-                :name,
-                :params,
-                :type,
-                :doc_comment,
-                :block,
-                :align,
-                :linksection,
-                :callconv,
-                extern: false,
-                export: false,
-                pub: false,
-                inline: :maybe
-              ]
+defmodule Zig.Parser.FnOptions do
+  defstruct [
+    :position,
+    :doc_comment,
+    :block,
+    :align,
+    :linksection,
+    :callconv,
+    extern: false,
+    export: false,
+    pub: false,
+    inline: :maybe
+  ]
+end
 
-  alias Zig.Parser.Block
-  alias Zig.Parser.TypeExpr
+defmodule Zig.Parser.Function do
+  alias Zig.Parser
+  alias Zig.Parser.FnOptions
 
   def post_traverse(rest, [{tag, [position = %{line: _} | args]} | rest_args], context, _, _, tag) do
-    {rest,
-     [from_args(args, %__MODULE__{line: position.line, column: position.column}) | rest_args],
-     context}
+    fun =
+      args
+      |> parse([])
+      |> Parser.put_opt(:position, position)
+
+    {rest, [fun | rest_args], context}
   end
 
-  defp from_args([:export | rest], function) do
+  defp parse([:export | rest], parts) do
     rest
-    |> from_args(function)
-    |> struct(export: true)
+    |> parse(parts)
+    |> Parser.put_opt(:export, true)
   end
 
-  defp from_args([:extern, extern_form | rest], function) when is_binary(extern_form) do
+  defp parse([:extern, extern_form | rest], parts) when is_binary(extern_form) do
     rest
-    |> from_args(function)
-    |> struct(extern: extern_form)
+    |> parse(parts)
+    |> Parser.put_opt(:extern, extern_form)
   end
 
-  defp from_args([:extern | rest], function) do
+  defp parse([:extern | rest], parts) do
     rest
-    |> from_args(function)
-    |> struct(extern: true)
+    |> parse(parts)
+    |> Parser.put_opt(:extern, true)
   end
 
-  defp from_args([:inline | rest], function) do
+  defp parse([:inline | rest], parts) do
     rest
-    |> from_args(function)
-    |> struct(inline: true)
+    |> parse(parts)
+    |> Parser.put_opt(:inline, true)
   end
 
-  defp from_args([:noinline | rest], function) do
+  defp parse([:noinline | rest], parts) do
     rest
-    |> from_args(function)
-    |> struct(inline: false)
+    |> parse(parts)
+    |> Parser.put_opt(:inline, false)
   end
 
   # identifiers are required in top level fn declarations.
-  defp from_args([:fn, name, :LPAREN, _paramdecl, :RPAREN | rest], function) do
-    from_args(rest, Map.merge(function, %{name: name, params: []}))
+  defp parse([:fn, name, :LPAREN, _paramdecl, :RPAREN | rest], parts) do
+    parse(rest, Keyword.merge(parts, name: name, params: []))
   end
 
-  defp from_args([:align, :LPAREN, alignexpr, :RPAREN | rest], function) do
+  defp parse([:align, :LPAREN, alignexpr, :RPAREN | rest], parts) do
     rest
-    |> from_args(function)
-    |> struct(align: alignexpr)
+    |> parse(parts)
+    |> Parser.put_opt(:align, alignexpr)
   end
 
-  defp from_args([:linksection, :LPAREN, linkexpr, :RPAREN | rest], function) do
+  defp parse([:linksection, :LPAREN, linkexpr, :RPAREN | rest], parts) do
     rest
-    |> from_args(function)
-    |> struct(linksection: linkexpr)
+    |> parse(parts)
+    |> Parser.put_opt(:linksection, linkexpr)
   end
 
-  defp from_args([:callconv, :LPAREN, callconv, :RPAREN | rest], function) do
+  defp parse([:callconv, :LPAREN, callconv, :RPAREN | rest], parts) do
     rest
-    |> from_args(function)
-    |> struct(callconv: callconv)
+    |> parse(parts)
+    |> Parser.put_opt(:callconv, callconv)
   end
 
-  defp from_args([:SEMICOLON], function), do: function
+  defp parse([:SEMICOLON], parts), do: {:fn, %FnOptions{}, parts}
 
-  defp from_args([block], function), do: struct(function, block: block)
+  defp parse([block], parts), do: {:fn, %FnOptions{}, Keyword.merge(parts, block: block)}
 
-  defp from_args([expr | rest], function) do
-    rest
-    |> from_args(function)
-    |> struct(type: expr)
+  defp parse([expr | rest], parts) do
+    parse(rest, Keyword.merge(parts, type: expr))
   end
 end

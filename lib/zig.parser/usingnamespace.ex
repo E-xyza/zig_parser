@@ -6,6 +6,6 @@ defmodule Zig.Parser.Usingnamespace do
         _,
         _
       ) do
-    {rest, [{:usingnamespace, arg} | rest_args], context}
+    {rest, [{:usingnamespace, %{}, arg} | rest_args], context}
   end
 end
