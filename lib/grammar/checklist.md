@@ -41,7 +41,7 @@
 - [ ] SuffixExpr
 - [ ] PrimaryTypeExpr
 - [ ] ContainerDecl
-- [ ] ErrorSetDecl
+- [X] ErrorSetDecl
 - [ ] GroupedExpr
 - [ ] IfTypeExpr
 - [ ] LabeledTypeExpr

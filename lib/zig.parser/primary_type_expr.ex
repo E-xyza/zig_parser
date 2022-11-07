@@ -36,6 +36,16 @@ defmodule Zig.Parser.PrimaryTypeExpr do
     union: %UnionOptions{}
   }
 
+  defp parse([:DOT, map]) when is_map(map) do
+    {:anonymous_struct, map}
+  end
+
+  defp parse([:DOT, list]) when is_list(list) do
+    {:tuple, list}
+  end
+
+  defp parse([:DOT, {:empty}]), do: {:empty}
+
   defp parse([:DOT, enum_literal]) do
     {:enum_literal, enum_literal}
   end
@@ -94,6 +104,10 @@ defmodule Zig.Parser.PrimaryTypeExpr do
 
   defp parse(["'", parsed_char, "'"]), do: parsed_char
 
+  defp parse([:error, :LBRACE | errorset]) do
+    parse_errorset(errorset, [])
+  end
+
   defp parse([any]), do: any
 
   defp parse_builtin([:RPAREN], parts), do: Enum.reverse(parts)
@@ -124,4 +138,10 @@ defmodule Zig.Parser.PrimaryTypeExpr do
     new_parts = Keyword.update(parts, :fields, [identifier], &[identifier | &1])
     parse_container_body(rest, new_parts)
   end
+
+  defp parse_errorset([:RBRACE], so_far), do: {:errorset, Enum.reverse(so_far)}
+
+  defp parse_errorset([:COMMA | rest], so_far), do: parse_errorset(rest, so_far)
+
+  defp parse_errorset([identifier | rest], so_far), do: parse_errorset(rest, [identifier | so_far])
 end

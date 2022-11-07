@@ -55,7 +55,7 @@ defmodule Zig.Parser.Expr do
 
   defp parse([arg]), do: arg
 
-  defp parse([e, :empty]) do
+  defp parse([e, {:empty}]) do
     {:empty, e}
   end
 

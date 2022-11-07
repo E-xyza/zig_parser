@@ -83,12 +83,13 @@ defmodule Zig.Parser.Test.FunctionTest do
     end
 
     test "can have a doc comment" do
-      assert [{:fn, _, opts}] = Parser.parse("""
-      fn foo(
-        /// this is a comment
-        bar: u8
-      ) void {}
-      """).code
+      assert [{:fn, _, opts}] =
+               Parser.parse("""
+               fn foo(
+                 /// this is a comment
+                 bar: u8
+               ) void {}
+               """).code
 
       assert [{:bar, %{doc_comment: " this is a comment\n"}, _}] = opts[:params]
     end
