@@ -30,4 +30,29 @@ defmodule Zig.ParserTest do
                Parser.parse(~s(test "foo" {}\ntest "bar" {})).code
     end
   end
+
+  describe "dependencies can be found" do
+    test "with a single toplevel @import" do
+      assert ["foo.zig"] =
+               Parser.parse(~S[const foo = @import("foo.zig");]).dependencies
+    end
+
+    test "when multiple toplevel @import" do
+      assert ["foo.zig", "bar.zig"] =
+               Parser.parse(~S[const foo = @import("foo.zig"); const bar = @import("bar.zig");]).dependencies
+    end
+
+    test "builtin stuff (no .zig extension) is ignored" do
+      assert [] = Parser.parse(~S[const std = @import("std");]).dependencies
+    end
+
+    test "with @embedFile" do
+      assert ["somefile.json"] =
+               Parser.parse(~S[const file = @embedFile("somefile.json");]).dependencies
+    end
+
+    test "can't identify if it's not a literal" do
+      assert [] = Parser.parse(~S[const std = @import(content);]).dependencies
+    end
+  end
 end

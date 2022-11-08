@@ -2,7 +2,7 @@ defmodule Zig.Parser do
   require Pegasus
   import NimbleParsec
 
-  defstruct [:doc_comment, code: []]
+  defstruct [:doc_comment, code: [], dependencies: []]
 
   alias Zig.Parser.Asm
   alias Zig.Parser.AssignExpr

@@ -24,7 +24,25 @@ defmodule Zig.Parser.PrimaryTypeExpr do
   alias Zig.Parser.UnionOptions
 
   def post_traverse(rest, [{:PrimaryTypeExpr, args} | args_rest], context, _, _) do
-    {rest, [parse(args) | args_rest], context}
+    expr = parse(args)
+
+    new_context =
+      case expr do
+        {:builtin, :embedFile, [string: path]} ->
+          %{context | dependencies: context.dependencies ++ [path]}
+
+        {:builtin, :import, [string: path]} ->
+          if Path.extname(path) == ".zig" do
+            %{context | dependencies: context.dependencies ++ [path]}
+          else
+            context
+          end
+
+        _ ->
+          context
+      end
+
+    {rest, [expr | args_rest], new_context}
   end
 
   def _parse(a), do: parse(a)

@@ -265,7 +265,8 @@ defmodule Zig.Parser.Test.TypeExprTest do
     end
 
     test "multi union" do
-      assert const_with({:errorunion, [:bar, :baz, :quux]}) = Parser.parse("const foo = bar!baz!quux;").code
+      assert const_with({:errorunion, [:bar, :baz, :quux]}) =
+               Parser.parse("const foo = bar!baz!quux;").code
     end
   end
 end
