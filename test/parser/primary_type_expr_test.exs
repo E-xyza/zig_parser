@@ -113,7 +113,113 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
     end
 
     test "with more than one error" do
-      assert const_with({:errorset, [:abc, :bcd]}) = Parser.parse("const foo = error {abc, bcd};").code
+      assert const_with({:errorset, [:abc, :bcd]}) =
+               Parser.parse("const foo = error {abc, bcd};").code
+    end
+  end
+
+  describe "literals" do
+    test "float" do
+      assert const_with({:float, 4.7}) = Parser.parse("const foo = 4.7;").code
+    end
+
+    test "integer" do
+      assert const_with({:integer, 47}) = Parser.parse("const foo = 47;").code
+    end
+
+    test "string" do
+      assert const_with({:string, "literal"}) = Parser.parse(~S(const foo = "literal";)).code
+    end
+
+    test "error" do
+      assert const_with({:error, :foo}) = Parser.parse(~S(const foo = error.foo;)).code
+    end
+  end
+
+  describe "fnproto" do
+    test "works with no parameters" do
+      const_with({:fn, _, parts}) = Parser.parse("const foo = fn () void;").code
+      assert [] = parts[:params]
+      assert :void = parts[:type]
+    end
+
+    test "works with one parameter" do
+      const_with({:fn, _, parts}) = Parser.parse("const foo = fn (u8) void;").code
+      assert [{:_, _, :u8}] = parts[:params]
+      assert :void = parts[:type]
+    end
+
+    test "works with one named parameter" do
+      const_with({:fn, _, parts}) = Parser.parse("const foo = fn (this: u8) void;").code
+      assert [{:this, _, :u8}] = parts[:params]
+      assert :void = parts[:type]
+    end
+
+    test "works with two parameters" do
+      const_with({:fn, _, parts}) = Parser.parse("const foo = fn (u8, u32) void;").code
+      assert [{:_, _, :u8}, {:_, _, :u32}] = parts[:params]
+      assert :void = parts[:type]
+    end
+  end
+
+  describe "GroupedExpr" do
+    test "drops parentheses" do
+      assert const_with(:void) = Parser.parse("const foo = (void);").code
+    end
+  end
+
+  describe "LabeledTypeExpr" do
+    test "can be a labeled block" do
+      const_with(expr) = Parser.parse("const foo = label: {};").code
+      assert {:block, %{label: :label}, []} = expr
+    end
+
+    test "can be a labeled loop" do
+      const_with(expr) = Parser.parse("const foo = label: while (true) {};").code
+      assert {:while, %{label: :label}, _} = expr
+    end
+  end
+
+  describe "identifier" do
+    test "can be a basic identifier" do
+      assert const_with(:identifier) = Parser.parse("const foo = identifier;").code
+    end
+
+    test "can be a an identifier with special string" do
+      assert const_with(:"foo-bar") = Parser.parse(~S(const foo = @"foo-bar";)).code
+    end
+
+    @tag :skip
+    test "can be a an identifier with really special string" do
+      assert const_with(:"🚀") = Parser.parse(~S(const foo = @"🚀";)).code
+    end
+  end
+
+  describe "iftypeexpr" do
+    test "can be parsed" do
+      assert const_with({:if, _, _}) = Parser.parse("const foo = if (true) bar;").code
+    end
+  end
+
+  describe "comptime" do
+    test "can be parsed" do
+      assert const_with({:comptime, _}) = Parser.parse("const foo = comptime {};").code
+    end
+  end
+
+  describe "special literals" do
+    test "anyframe" do
+      assert const_with(:anyframe) = Parser.parse("const foo = anyframe;").code
+    end
+
+    test "unreachable" do
+      assert const_with(:unreachable) = Parser.parse("const foo = unreachable;").code
+    end
+  end
+
+  describe "switch" do
+    test "switch" do
+      assert const_with({:switch, _, _}) = Parser.parse("const foo = switch (bar) {};").code
     end
   end
 end

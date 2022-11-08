@@ -15,7 +15,10 @@ defmodule Zig.Parser.UnionOptions do
 end
 
 defmodule Zig.Parser.PrimaryTypeExpr do
+  alias Zig.Parser
+  alias Zig.Parser.Control
   alias Zig.Parser.EnumOptions
+  alias Zig.Parser.Function
   alias Zig.Parser.OpaqueOptions
   alias Zig.Parser.StructOptions
   alias Zig.Parser.UnionOptions
@@ -23,6 +26,8 @@ defmodule Zig.Parser.PrimaryTypeExpr do
   def post_traverse(rest, [{:PrimaryTypeExpr, args} | args_rest], context, _, _) do
     {rest, [parse(args) | args_rest], context}
   end
+
+  def _parse(a), do: parse(a)
 
   defp parse([{:builtin, name}, :LPAREN | builtin_args]) do
     {:builtin, name, parse_builtin(builtin_args, [])}
@@ -104,9 +109,24 @@ defmodule Zig.Parser.PrimaryTypeExpr do
 
   defp parse(["'", parsed_char, "'"]), do: parsed_char
 
-  defp parse([:error, :LBRACE | errorset]) do
-    parse_errorset(errorset, [])
-  end
+  # error sets and error literals
+
+  defp parse([:error, :LBRACE | errorset]), do: parse_errorset(errorset, [])
+
+  defp parse([:error, :DOT, error]), do: {:error, error}
+
+  # FnProto
+  defp parse(fnproto = [:fn | _rest]), do: Function.parse(fnproto)
+
+  # GroupedExpr
+  defp parse([:LPAREN, expr, :RPAREN]), do: expr
+
+  # LabeledExpr
+  defp parse([label, :COLON, expr]), do: Parser.put_opt(expr, :label, label)
+
+  # SwitchExpr
+
+  defp parse([:switch | rest]), do: Control.parse_switch(rest)
 
   defp parse([any]), do: any
 
@@ -143,5 +163,6 @@ defmodule Zig.Parser.PrimaryTypeExpr do
 
   defp parse_errorset([:COMMA | rest], so_far), do: parse_errorset(rest, so_far)
 
-  defp parse_errorset([identifier | rest], so_far), do: parse_errorset(rest, [identifier | so_far])
+  defp parse_errorset([identifier | rest], so_far),
+    do: parse_errorset(rest, [identifier | so_far])
 end

@@ -26,6 +26,8 @@ defmodule Zig.Parser.Function do
     {rest, [fun | rest_args], context}
   end
 
+  def parse(what), do: parse(what, [])
+
   defp parse([:export | rest], parts) do
     rest
     |> parse(parts)
@@ -61,6 +63,10 @@ defmodule Zig.Parser.Function do
     parse(rest, Keyword.merge(parts, name: name, params: parse_params(params)))
   end
 
+  defp parse([:fn, :LPAREN, {:ParamDeclList, params}, :RPAREN | rest], parts) do
+    parse(rest, Keyword.merge(parts, params: parse_params(params)))
+  end
+
   defp parse([:align, :LPAREN, alignexpr, :RPAREN | rest], parts) do
     rest
     |> parse(parts)
@@ -79,9 +85,11 @@ defmodule Zig.Parser.Function do
     |> Parser.put_opt(:callconv, callconv)
   end
 
-  defp parse([:SEMICOLON], parts), do: {:fn, %FnOptions{}, parts}
+  @enders [[], [:SEMICOLON]]
+  defp parse(ender, parts) when ender in @enders, do: {:fn, %FnOptions{}, parts}
 
-  defp parse([block], parts), do: {:fn, %FnOptions{}, Keyword.merge(parts, block: block)}
+  defp parse([block = {:block, _, _}], parts),
+    do: {:fn, %FnOptions{}, Keyword.merge(parts, block: block)}
 
   defp parse([expr | rest], parts) do
     parse(rest, Keyword.merge(parts, type: expr))

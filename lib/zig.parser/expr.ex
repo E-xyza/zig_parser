@@ -53,6 +53,21 @@ defmodule Zig.Parser.Expr do
     |> Parser.put_opt(:inline, true)
   end
 
+  defp parse([label, :COLON | rest]) do
+    rest
+    |> parse()
+    |> Parser.put_opt(:label, label)
+  end
+
+  # consider emplacement of information in the catch block.
+  defp parse([value, :catch, :|, payload, :|, code]) do
+    {:catch, %{}, [value, code, payload: payload]}
+  end
+
+  defp parse([value, :catch, code]) do
+    {:catch, %{}, [value, code]}
+  end
+
   defp parse([arg]), do: arg
 
   defp parse([e, {:empty}]) do

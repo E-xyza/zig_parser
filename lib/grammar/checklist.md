@@ -39,10 +39,10 @@
 - [ ] TypeExpr
 - [ ] ErrorUnionExpr
 - [ ] SuffixExpr
-- [ ] PrimaryTypeExpr
+- [X] PrimaryTypeExpr
 - [ ] ContainerDecl
 - [X] ErrorSetDecl
-- [ ] GroupedExpr
+- [X] GroupedExpr
 - [ ] IfTypeExpr
 - [ ] LabeledTypeExpr
 - [ ] LoopTypeExpr

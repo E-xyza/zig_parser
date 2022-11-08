@@ -3,6 +3,24 @@ defmodule Zig.Parser.Collected do
 
   def literals, do: @literals
 
+  def post_traverse(rest, [string | args_rest], context, _, _, :line_string) do
+    collated =
+      string
+      |> String.split("\n")
+      |> Enum.map_join("\n", fn line -> line |> String.trim() |> String.trim_leading("\\\\") end)
+
+    {rest, [collated | args_rest], context}
+  end
+
+  def post_traverse(rest, ["@" <> special_identifier | args_rest], context, _, _, :IDENTIFIER) do
+    id_atom =
+      special_identifier
+      |> String.trim(~S("))
+      |> String.to_atom()
+
+    {rest, [id_atom | args_rest], context}
+  end
+
   def post_traverse(rest, [collected | args_rest], context, _, _, :IDENTIFIER) do
     {rest, [String.to_atom(collected) | args_rest], context}
   end

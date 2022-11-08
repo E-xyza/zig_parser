@@ -78,7 +78,7 @@ defmodule Zig.Parser do
   @operators ~w(COMMA DOT DOT2 COLON LBRACE LBRACKET LPAREN MINUSRARROW LETTERC QUESTIONMARK RBRACE RBRACKET RPAREN SEMICOLON)a
   @operator_mapping Enum.map(@operators, &{&1, [token: true]})
 
-  @collecteds ~w(IDENTIFIER INTEGER FLOAT INTEGER STRINGLITERAL BUILTINIDENTIFIER)a
+  @collecteds ~w(IDENTIFIER INTEGER FLOAT INTEGER STRINGLITERAL BUILTINIDENTIFIER line_string)a
   @collected_mapping Enum.map(
                        @collecteds,
                        &{&1, [collect: true, post_traverse: {Collected, :post_traverse, [&1]}]}
