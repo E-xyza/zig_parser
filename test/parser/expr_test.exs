@@ -216,44 +216,4 @@ defmodule Zig.Parser.Test.ExprTest do
                Parser.parse("const foo = MyArrayType{1, 2, 3};").code
     end
   end
-
-  describe "dereferenced content" do
-    test "that is a field" do
-      assert const_with({:ref, [:bar, :baz]}) = Parser.parse("const foo = bar.baz;").code
-    end
-
-    test "that is an array" do
-      assert const_with({:ref, [:bar, 10]}) = Parser.parse("const foo = bar[10];").code
-    end
-
-    test "that is a pointer" do
-      assert const_with({:ptrref, [:bar, :baz, 10, :quux]}) =
-               Parser.parse("const foo = bar.baz[10].quux.*;").code
-    end
-  end
-
-  describe "function calls" do
-    test "no parameter" do
-      assert const_with({:bar, _, []}) = Parser.parse("const foo = bar();").code
-    end
-
-    test "one parameter" do
-      assert const_with({:bar, _, [integer: 1]}) = Parser.parse("const foo = bar(1);").code
-    end
-
-    test "two parameters" do
-      assert const_with({:bar, _, [integer: 1, integer: 2]}) =
-               Parser.parse("const foo = bar(1, 2);").code
-    end
-
-    test "a ref as a base" do
-      assert const_with({{:ref, [:bar, :baz]}, _, []}) =
-               Parser.parse("const foo = bar.baz();").code
-    end
-
-    test "continuation of ref" do
-      assert const_with({:ref, [{{:ref, [:bar, :baz]}, _, []}, :quux]}) =
-               Parser.parse("const foo = bar.baz().quux;").code
-    end
-  end
 end

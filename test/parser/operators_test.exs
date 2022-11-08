@@ -47,7 +47,9 @@ defmodule Zig.Parser.Test.OperatorsTest do
     #      / ASTERISKPERCENT
 
     defmacrop const_with(expr) do
-      quote do [{:const, _, {_, _, unquote(expr)}}] end
+      quote do
+        [{:const, _, {_, _, unquote(expr)}}]
+      end
     end
 
     test "or operator" do
@@ -153,15 +155,18 @@ defmodule Zig.Parser.Test.OperatorsTest do
 
   describe "the catch operator" do
     test "value with no payload" do
-      assert const_with({:catch, _, [:x, {:integer, 10}]}) = Parser.parse("const foo = x catch 10;").code
+      assert const_with({:catch, _, [:x, {:integer, 10}]}) =
+               Parser.parse("const foo = x catch 10;").code
     end
 
     test "value that is a block" do
-      assert const_with({:catch, _, [:x, {:block, _, []}]}) = Parser.parse("const foo = x catch {};").code
+      assert const_with({:catch, _, [:x, {:block, _, []}]}) =
+               Parser.parse("const foo = x catch {};").code
     end
 
     test "with a payload" do
-      assert const_with({:catch, _, [:x, {:block, _, []}, payload: :err]}) = Parser.parse("const foo = x catch |err| {};").code
+      assert const_with({:catch, _, [:x, {:block, _, []}, payload: :err]}) =
+               Parser.parse("const foo = x catch |err| {};").code
     end
   end
 
