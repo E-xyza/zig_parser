@@ -2,7 +2,7 @@ defmodule Zig.Parser do
   require Pegasus
   import NimbleParsec
 
-  defstruct [:doc_comment, code: [], dependencies: []]
+  defstruct [:doc_comment, code: [], dependencies: [], comments: []]
 
   alias Zig.Parser.Asm
   alias Zig.Parser.AssignExpr
@@ -95,6 +95,7 @@ defmodule Zig.Parser do
                       collect: true
                     ],
                     doc_comment: [post_traverse: :doc_comment, tag: true, collect: true],
+                    line_comment: [post_traverse: :line_comment, tag: true, start_position: true],
                     AssignExpr: [
                       tag: AssignExpr,
                       post_traverse: {AssignExpr, :post_traverse, []}
@@ -175,7 +176,11 @@ defmodule Zig.Parser do
 
   def parse(string) do
     case parser(string) do
-      {:ok, _, "", parser, _, _} -> parser
+      {:ok, _, "", parser, _, _} ->
+        %{parser |
+          comments: Enum.reverse(parser.comments),
+          dependencies: Enum.uniq(parser.dependencies)
+        }
     end
   end
 
@@ -187,6 +192,11 @@ defmodule Zig.Parser do
 
   defp doc_comment(rest, [{:doc_comment, [comment]} | rest_args], context, _, _) do
     {rest, [{:doc_comment, trim_doc_comment(comment, "///")} | rest_args], context}
+  end
+
+  defp line_comment(rest, [{:line_comment, [position, "//" | comment]} | rest_args], context, _, _) do
+    comment_data = {IO.iodata_to_binary(comment), position}
+    {rest, rest_args, %{context | comments: [comment_data | context.comments]}}
   end
 
   defp char_escape(rest, [{:char_escape, [escape_string]} | rest_args], context, _, _) do

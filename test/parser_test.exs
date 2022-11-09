@@ -63,14 +63,14 @@ defmodule Zig.ParserTest do
     end
 
     test "one comment" do
-      assert [{" this is a comment\n", %{line: 1, column: 1}}] = Parser.parse("""
+      assert [{" this is a comment", %{line: 1, column: 1}}] = Parser.parse("""
       // this is a comment
       pub fn main() void{}
       """).comments
     end
 
     test "two comments" do
-      assert [{" this is a comment\n", %{line: 1, column: 1}}, {" this is another comment\n", %{line: 3, column: 2}}] = Parser.parse("""
+      assert [{" this is a comment", %{line: 1, column: 1}}, {" this is another comment", %{line: 3, column: 3}}] = Parser.parse("""
       // this is a comment
       pub fn main() void{}
         // this is another comment
