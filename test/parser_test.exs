@@ -33,8 +33,7 @@ defmodule Zig.ParserTest do
 
   describe "dependencies can be found" do
     test "with a single toplevel @import" do
-      assert ["foo.zig"] =
-               Parser.parse(~S[const foo = @import("foo.zig");]).dependencies
+      assert ["foo.zig"] = Parser.parse(~S[const foo = @import("foo.zig");]).dependencies
     end
 
     test "when multiple toplevel @import" do
@@ -53,6 +52,29 @@ defmodule Zig.ParserTest do
 
     test "can't identify if it's not a literal" do
       assert [] = Parser.parse(~S[const std = @import(content);]).dependencies
+    end
+  end
+
+  describe "line comments are logged" do
+    test "no comments" do
+      assert [] = Parser.parse("""
+      pub fn main() void {}
+      """).comments
+    end
+
+    test "one comment" do
+      assert [{" this is a comment\n", %{line: 1, column: 1}}] = Parser.parse("""
+      // this is a comment
+      pub fn main() void{}
+      """).comments
+    end
+
+    test "two comments" do
+      assert [{" this is a comment\n", %{line: 1, column: 1}}, {" this is another comment\n", %{line: 3, column: 2}}] = Parser.parse("""
+      // this is a comment
+      pub fn main() void{}
+        // this is another comment
+      """).comments
     end
   end
 end

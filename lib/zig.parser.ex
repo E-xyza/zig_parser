@@ -230,9 +230,10 @@ defmodule Zig.Parser do
 
   @doc false
   # maybe we take this out:
-  def put_opt(identifier, :position, _) when is_atom(identifier), do: identifier
 
-  def put_opt({identifier, options, params}, key, value) do
+  def put_opt({identifier, options, params}, key, value) when is_map(options) do
     {identifier, %{options | key => value}, params}
   end
+
+  def put_opt(other, _, _), do: other
 end

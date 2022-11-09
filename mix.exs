@@ -7,6 +7,8 @@ defmodule ZigParser.MixProject do
       version: "0.1.0",
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
+      description: "a zig parser in elixir",
+      package: package(),
       deps: deps()
     ]
   end
@@ -17,9 +19,20 @@ defmodule ZigParser.MixProject do
     ]
   end
 
+  defp package do
+    [
+      licenses: ["MIT"],
+      links: %{
+        github: "https://github.com/ityonemo/zig_parser"
+      }
+    ]
+  end
+
+
   defp deps do
     [
-      {:pegasus, "~> 0.2.2", runtime: false}
+      {:pegasus, "~> 0.2.2", runtime: false},
+      {:ex_doc, ">= 0.0.0", runtime: false},
     ]
   end
 end
