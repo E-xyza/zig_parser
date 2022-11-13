@@ -57,24 +57,30 @@ defmodule Zig.ParserTest do
 
   describe "line comments are logged" do
     test "no comments" do
-      assert [] = Parser.parse("""
-      pub fn main() void {}
-      """).comments
+      assert [] =
+               Parser.parse("""
+               pub fn main() void {}
+               """).comments
     end
 
     test "one comment" do
-      assert [{" this is a comment", %{line: 1, column: 1}}] = Parser.parse("""
-      // this is a comment
-      pub fn main() void{}
-      """).comments
+      assert [{" this is a comment", %{line: 1, column: 1}}] =
+               Parser.parse("""
+               // this is a comment
+               pub fn main() void{}
+               """).comments
     end
 
     test "two comments" do
-      assert [{" this is a comment", %{line: 1, column: 1}}, {" this is another comment", %{line: 3, column: 3}}] = Parser.parse("""
-      // this is a comment
-      pub fn main() void{}
-        // this is another comment
-      """).comments
+      assert [
+               {" this is a comment", %{line: 1, column: 1}},
+               {" this is another comment", %{line: 3, column: 3}}
+             ] =
+               Parser.parse("""
+               // this is a comment
+               pub fn main() void{}
+                 // this is another comment
+               """).comments
     end
   end
 end

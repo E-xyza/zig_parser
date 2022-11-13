@@ -185,7 +185,8 @@ defmodule Zig.Parser.Test.TypeExprTest do
 
   describe "async function call" do
     test "works" do
-      assert const_with({:async, {:bar, _, []}}) = Parser.parse("const foo = async bar();").code
+      assert const_with({:bar, %{async: true}, []}) =
+               Parser.parse("const foo = async bar();").code
     end
   end
 

@@ -177,9 +177,10 @@ defmodule Zig.Parser do
   def parse(string) do
     case parser(string) do
       {:ok, _, "", parser, _, _} ->
-        %{parser |
-          comments: Enum.reverse(parser.comments),
-          dependencies: Enum.uniq(parser.dependencies)
+        %{
+          parser
+          | comments: Enum.reverse(parser.comments),
+            dependencies: Enum.uniq(parser.dependencies)
         }
     end
   end
@@ -194,7 +195,13 @@ defmodule Zig.Parser do
     {rest, [{:doc_comment, trim_doc_comment(comment, "///")} | rest_args], context}
   end
 
-  defp line_comment(rest, [{:line_comment, [position, "//" | comment]} | rest_args], context, _, _) do
+  defp line_comment(
+         rest,
+         [{:line_comment, [position, "//" | comment]} | rest_args],
+         context,
+         _,
+         _
+       ) do
     comment_data = {IO.iodata_to_binary(comment), position}
     {rest, rest_args, %{context | comments: [comment_data | context.comments]}}
   end

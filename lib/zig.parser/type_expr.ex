@@ -2,10 +2,15 @@ defmodule Zig.Parser.PointerOptions do
   defstruct [:align, const: false, volatile: false, allowzero: false]
 end
 
+defmodule Zig.Parser.CallOptions do
+  defstruct [:position, async: false]
+end
+
 defmodule Zig.Parser.TypeExpr do
   @literals Zig.Parser.Collected.literals()
 
   alias Zig.Parser
+  alias Zig.Parser.CallOptions
   alias Zig.Parser.PointerOptions
 
   def post_traverse(rest, [{__MODULE__, args} | rest_args], context, _, _) do
@@ -18,7 +23,13 @@ defmodule Zig.Parser.TypeExpr do
   defp parse([identifier, :".*"]), do: decorate([identifier], :ptrref)
   defp parse([:QUESTIONMARK | ref_or_call]), do: decorate(ref_or_call, :optional_type)
   defp parse([:anyframe, :MINUSRARROW | ref_or_call]), do: decorate(ref_or_call, :anyframe)
-  defp parse([:async | ref_or_call]), do: decorate(ref_or_call, :async)
+
+  defp parse([:async | call]) do
+    call
+    |> parse_ref_or_call([])
+    |> Parser.put_opt(:async, true)
+  end
+
   defp parse([:LBRACKET, :*, :LETTERC | rest]), do: parse_ptr_type(rest, :cptr)
   defp parse([:LBRACKET, :* | rest]), do: parse_ptr_type(rest, :multiptr)
   defp parse([:LBRACKET, :RBRACKET | rest]), do: parse_ptr_type([:RBRACKET | rest], :slice)
@@ -68,8 +79,7 @@ defmodule Zig.Parser.TypeExpr do
         list -> {:ref, Enum.reverse([name | list])}
       end
 
-    # note in the future, the call should probably have position information:
-    parse_ref_or_call(ref_rest, [{ref_name, %{}, call}])
+    parse_ref_or_call(ref_rest, [{ref_name, %CallOptions{}, call}])
   end
 
   defp parse_ref_or_call([name | rest], so_far), do: parse_ref_or_call(rest, [name | so_far])
