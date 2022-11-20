@@ -1,5 +1,5 @@
 defmodule Zig.Parser.BlockOptions do
-  defstruct [:doc_comment, :label]
+  defstruct [:doc_comment, :label, :position]
 end
 
 defmodule Zig.Parser.Block do
