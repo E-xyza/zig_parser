@@ -4,7 +4,7 @@ defmodule ZigParser.MixProject do
   def project do
     [
       app: :zig_parser,
-      version: "0.1.3",
+      version: "0.1.4",
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       description: "a zig parser in elixir",
