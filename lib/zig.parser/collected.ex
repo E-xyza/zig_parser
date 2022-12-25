@@ -45,8 +45,17 @@ defmodule Zig.Parser.Collected do
     {rest, [{:char, char} | args_rest], context}
   end
 
-  def post_traverse(rest, [float | args_rest], context, _, _, :FLOAT) do
-    {rest, [{:float, String.to_float(remove_underscore(float))} | args_rest], context}
+  def post_traverse(rest, [float_str | args_rest], context, _, _, :FLOAT) do
+    # the zig parser itself should know that this is inherently a float.
+    token = float_str
+    |> remove_underscore()
+    |> Float.parse
+    |> case do
+      {float, ""} -> {:float, float}
+      _ -> {:extended_float, float_str}
+    end
+
+    {rest, [token | args_rest], context}
   end
 
   def post_traverse(rest, [string | args_rest], context, _, _, :STRINGLITERAL) do
