@@ -56,6 +56,10 @@ defmodule Zig.Parser.Collected do
     end
 
     {rest, [token | args_rest], context}
+
+  rescue
+    ArgumentError ->
+      {rest, [{:extended_float, float_str} | args_rest], context}
   end
 
   def post_traverse(rest, [string | args_rest], context, _, _, :STRINGLITERAL) do
