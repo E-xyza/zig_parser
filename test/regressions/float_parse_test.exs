@@ -15,7 +15,9 @@ defmodule ZigParserTest.Regressions.FloatParseTest do
 
   describe "regression 25 Dec 2022" do
     test "zig parser can handle super long exponents" do
-      assert %{code: [{:const, _, const}]} = Parser.parse("const foo = 1.18973149535723176502e+4932;")
+      assert %{code: [{:const, _, const}]} =
+               Parser.parse("const foo = 1.18973149535723176502e+4932;")
+
       assert {:foo, _, {:extended_float, "1.18973149535723176502e+4932"}} = const
     end
   end
