@@ -10,7 +10,7 @@ by adding `zig_parser` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:zig_parser, "~> 0.1.0"}
+    {:zig_parser, "~> 0.1.7"}
   ]
 end
 ```
