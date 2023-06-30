@@ -125,6 +125,10 @@ defmodule Zig.Parser.Control do
      Keyword.merge([condition: condition], parse_switch_prongs(rest, []))}
   end
 
+  defp parse_switch_prongs([expr, :"=>", :|, capture, :|, expr2 | rest], so_far) do
+    parse_switch_prongs(rest, [{expr, capture, expr2} | so_far])
+  end
+
   defp parse_switch_prongs([expr, :"=>", expr2 | rest], so_far) do
     parse_switch_prongs(rest, [{expr, expr2} | so_far])
   end

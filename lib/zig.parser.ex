@@ -206,6 +206,17 @@ defmodule Zig.Parser do
     {rest, rest_args, %{context | comments: [comment_data | context.comments]}}
   end
 
+  defp line_comment(
+         rest,
+         [{:line_comment, [position, "////" | comment]} | rest_args],
+         context,
+         _,
+         _
+       ) do
+    comment_data = {IO.iodata_to_binary(["//", comment]), position}
+    {rest, rest_args, %{context | comments: [comment_data | context.comments]}}
+  end
+
   defp char_escape(rest, [{:char_escape, [escape_string]} | rest_args], context, _, _) do
     {rest, [process_escape(escape_string) | rest_args], context}
   end
