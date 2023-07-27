@@ -23,7 +23,7 @@ defmodule ZigParser.MixProject do
     [
       licenses: ["MIT"],
       links: %{
-        github: "https://github.com/ityonemo/zig_parser"
+        github: "https://github.com/E-xyza/zig_parser"
       }
     ]
   end
