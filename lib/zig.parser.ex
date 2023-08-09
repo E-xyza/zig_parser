@@ -87,11 +87,14 @@ defmodule Zig.Parser do
   @operators ~w(COMMA DOT DOT2 COLON LBRACE LBRACKET LPAREN MINUSRARROW LETTERC QUESTIONMARK RBRACE RBRACKET RPAREN SEMICOLON)a
   @operator_mapping Enum.map(@operators, &{&1, [token: true]})
 
-  @collecteds ~w(IDENTIFIER INTEGER FLOAT INTEGER STRINGLITERAL BUILTINIDENTIFIER line_string)a
+  @collecteds ~w(IDENTIFIER INTEGER FLOAT STRINGLITERAL BUILTINIDENTIFIER CHAR_LITERAL line_string)a
   @collected_mapping Enum.map(
                        @collecteds,
                        &{&1, [collect: true, post_traverse: {Collected, :post_traverse, [&1]}]}
                      )
+
+  @lists ~w(IdentifierList SwitchProngList AsmOutputList AsmInputList StringList ParamDeclList ExprList)a
+  @lists_mapping Enum.map(@lists, &{&1, tag: true})
 
   @parser_options [
                     container_doc_comment: [
@@ -106,11 +109,11 @@ defmodule Zig.Parser do
                     doc_comment: [post_traverse: :doc_comment, tag: true, collect: true],
                     line_comment: [post_traverse: :line_comment, tag: true, start_position: true],
                     AssignExpr: [
-                      tag: AssignExpr,
+                      tag: true,
                       post_traverse: {AssignExpr, :post_traverse, []}
                     ],
                     TestDecl: [
-                      tag: TestDecl,
+                      tag: true,
                       start_position: true,
                       post_traverse: {TestDecl, :post_traverse, []}
                     ],
@@ -121,7 +124,7 @@ defmodule Zig.Parser do
                       collect: true
                     ],
                     Statement: [
-                      tag: Statement,
+                      tag: true,
                       start_position: true,
                       post_traverse: {Statement, :post_traverse, []}
                     ],
@@ -130,49 +133,52 @@ defmodule Zig.Parser do
                       post_traverse: {TopLevelComptime, :post_traverse, []}
                     ],
                     TopLevelDecl: [
-                      tag: TopLevelDecl,
+                      tag: true,
                       post_traverse: {TopLevelDecl, :post_traverse, []}
                     ],
                     TopLevelVar: [
-                      tag: TopLevelVar,
+                      tag: true,
                       start_position: true,
                       post_traverse: {TopLevelVar, :post_traverse, []}
                     ],
                     TopLevelFn: [
-                      tag: TopLevelFn,
+                      tag: true,
                       start_position: true,
                       post_traverse: {Function, :post_traverse, [TopLevelFn]}
                     ],
                     TypeExpr: [
-                      tag: TypeExpr,
+                      tag: true,
                       post_traverse: {TypeExpr, :post_traverse, []}
                     ],
                     Expr: [
-                      tag: Expr,
+                      tag: true,
                       post_traverse: {Expr, :post_traverse, []}
                     ],
                     InitList: [
-                      tag: InitList,
+                      tag: true,
                       post_traverse: {InitList, :post_traverse, []}
                     ],
                     Usingnamespace: [
                       tag: :usingnamespace,
                       post_traverse: {Usingnamespace, :post_traverse, []}
                     ],
-                    ParamDeclList: [tag: true],
-                    ParamDecl: [tag: ParamDecl, post_traverse: {ParamDecl, :post_traverse, []}],
+                    ParamDecl: [tag: true, post_traverse: {ParamDecl, :post_traverse, []}],
                     PrimaryTypeExpr: [
                       tag: true,
                       post_traverse: {PrimaryTypeExpr, :post_traverse, []}
                     ],
                     IfStatement: [start_position: true],
-                    AsmExpr: [tag: Asm, post_traverse: {Asm, :post_traverse, []}],
-                    BlockExpr: [tag: BlockExpr, post_traverse: {BlockExpr, :post_traverse, []}],
-                    Block: [tag: Block, post_traverse: {Block, :post_traverse, []}],
+                    AsmExpr: [tag: true, post_traverse: {Asm, :post_traverse, []}],
+                    BlockExpr: [tag: true, post_traverse: {Block, :post_traverse, []}],
+                    Block: [tag: true, post_traverse: {Block, :post_traverse, []}],
+                    ByteAlign: [tag: true, post_traverse: {ByteAlign, :post_traverse, []}],
                     Root: [tag: true, post_traverse: :post_traverse]
                   ] ++
                     @keyword_mapping ++
-                    @operator_mapping ++ @sub_operator_mapping ++ @collected_mapping
+                    @operator_mapping ++
+                    @sub_operator_mapping ++
+                    @collected_mapping ++
+                    @lists_mapping
 
   Pegasus.parser_from_file(Path.join(__DIR__, "grammar/grammar.y"), @parser_options)
 
@@ -273,8 +279,7 @@ defmodule Zig.Parser do
     String.to_integer(number)
   end
 
-  def put_context(%_{} = _struct, context) do
-    context |> dbg(limit: 25)
-    raise "unimplemented"
+  def put_location(%_{} = struct, {row, _}, column) do
+    Map.replace!(struct, :location, {row, column})
   end
 end
