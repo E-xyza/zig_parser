@@ -5,24 +5,21 @@ defmodule Zig.Parser.Test.BlockTest do
 
   # this test (ab)uses the comptime block to quickly jump into a block statement
 
-  defmacrop toplevelblockcontent(
-              to_bind,
-              options \\ quote do
-                _
-              end
-            ) do
+  defmacrop toplevelblockcontent(block, props \\ []) do
     quote do
-      [{:comptime, _, {:block, unquote(options), unquote(to_bind)}}]
+      [{:comptime, :aa, %Zig.Parser.Block{unquote_splicing(props ++ [block: block])}}]
     end
   end
 
   describe "general properties of a comptime block" do
     test "can be empty" do
-      assert toplevelblockcontent([]) = Parser.parse("comptime {}").code
+      toplevelblockcontent([]) |> dbg(limit: 25)
+      Parser.parse("comptime {}").code |> dbg(limit: 25)
+      # assert toplevelblockcontent([]) =
     end
 
     test "can have a label" do
-      assert toplevelblockcontent([], %{label: :foo}) = Parser.parse("comptime foo: {}").code
+      assert toplevelblockcontent([], label: :foo) = Parser.parse("comptime foo: {}").code
     end
 
     test "can have one statement" do

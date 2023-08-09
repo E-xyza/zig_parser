@@ -1,9 +1,5 @@
-defmodule Zig.Parser.BlockOptions do
-  defstruct [:doc_comment, :label, :position]
-end
-
 defmodule Zig.Parser.Block do
-  alias Zig.Parser.BlockOptions
+  defstruct [:doc_comment, :label, :position, :block]
 
   def post_traverse(rest, [{__MODULE__, block_parts} | rest_args], context, _, _) do
     {rest, [parse(block_parts) | rest_args], context}
@@ -11,7 +7,7 @@ defmodule Zig.Parser.Block do
 
   defp parse([:LBRACE | rest]), do: parse(rest, [])
 
-  defp parse([:RBRACE], so_far), do: {:block, %BlockOptions{}, Enum.reverse(so_far)}
+  defp parse([:RBRACE], so_far), do: %__MODULE__{block: Enum.reverse(so_far)}
 
   defp parse([statement | rest], so_far), do: parse(rest, [statement | so_far])
 end
