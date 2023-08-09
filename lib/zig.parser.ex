@@ -12,7 +12,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.Expr
   alias Zig.Parser.InitList
   alias Zig.Parser.TestDecl
-  alias Zig.Parser.TopLevelComptime
+  alias Zig.Parser.Comptime
   alias Zig.Parser.TopLevelDecl
   alias Zig.Parser.Function
   alias Zig.Parser.PrimaryTypeExpr
@@ -128,9 +128,9 @@ defmodule Zig.Parser do
                       start_position: true,
                       post_traverse: {Statement, :post_traverse, []}
                     ],
-                    TopLevelComptime: [
-                      tag: :toplevelcomptime,
-                      post_traverse: {TopLevelComptime, :post_traverse, []}
+                    ComptimeDecl: [
+                      tag: true,
+                      post_traverse: {Comptime, :post_traverse, []}
                     ],
                     TopLevelDecl: [
                       tag: true,
@@ -279,6 +279,7 @@ defmodule Zig.Parser do
     String.to_integer(number)
   end
 
+  @doc false
   def put_location(%_{} = struct, {row, _}, column) do
     Map.replace!(struct, :location, {row, column})
   end
