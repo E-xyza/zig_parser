@@ -11,27 +11,27 @@ defmodule Zig.Parser.Test.ContainerDeclTest do
 
   describe "FnProto decorator with no block" do
     test "export works" do
-      Parser.parse("export fn myfun() void;") |> dbg(limit: 25)
+      assert [%{export: true}] = Parser.parse("export fn myfun() void;").code
     end
 
     test "extern works" do
-      Parser.parse("extern fn myfun() void;") |> dbg(limit: 25)
+      assert [%{extern: true}] = Parser.parse("extern fn myfun() void;").code
     end
 
     test "extern with a decorator works" do
-      Parser.parse("extern \"c\" fn myfun() void;") |> dbg(limit: 25)
+      assert [%{extern: "c"}] =Parser.parse("extern \"c\" fn myfun() void;").code
     end
 
     test "inline works" do
-      Parser.parse("inline fn myfun() void;") |> dbg(limit: 25)
+      assert [%{inline: true}] = Parser.parse("inline fn myfun() void;").code
     end
 
     test "noinline works" do
-      Parser.parse("noinline fn myfun() void;") |> dbg(limit: 25)
+      assert [%{inline: false}] =Parser.parse("noinline fn myfun() void;").code
     end
 
     test "with a block works" do
-      Parser.parse("fn myfun() void {}") |> dbg(limit: 25)
+      assert [%{block: %{code: []}}] = Parser.parse("fn myfun() void {}").code
     end
   end
 

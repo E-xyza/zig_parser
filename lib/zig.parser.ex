@@ -182,6 +182,7 @@ defmodule Zig.Parser do
                     BlockExpr: [tag: true, post_traverse: {Block, :post_traverse, []}],
                     Block: [tag: true, post_traverse: {Block, :post_traverse, []}],
                     ByteAlign: [tag: true, post_traverse: {ByteAlign, :post_traverse, []}],
+                    FnProto: [tag: true, post_traverse: {Function, :post_traverse, []}],
                     Root: [tag: true, post_traverse: :post_traverse]
                   ] ++
                     @keyword_mapping ++
