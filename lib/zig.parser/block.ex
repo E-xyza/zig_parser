@@ -1,9 +1,8 @@
 defmodule Zig.Parser.Block do
   @enforce_keys [:code]
-  defstruct @enforce_keys ++ [:doc_comment, :label, :location, comptime: false]
+  defstruct @enforce_keys ++ [:label, :location, comptime: false]
 
   @type t :: %__MODULE__{
-          doc_comment: String.t() | nil,
           label: atom,
           location: {pos_integer, pos_integer},
           code: [term],
