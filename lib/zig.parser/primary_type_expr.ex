@@ -15,7 +15,7 @@ defmodule Zig.Parser.UnionOptions do
 end
 
 defmodule Zig.Parser.PrimaryTypeExpr do
-  alias Zig.Parser
+  alias Zig.Parser.Block
   alias Zig.Parser.Control
   alias Zig.Parser.EnumOptions
   alias Zig.Parser.Function
@@ -140,7 +140,9 @@ defmodule Zig.Parser.PrimaryTypeExpr do
   defp parse([:LPAREN, expr, :RPAREN]), do: expr
 
   # LabeledExpr
-  defp parse([label, :COLON, expr]), do: Parser.put_opt(expr, :label, label)
+  defp parse([label, :COLON, %Block{} = expr]) do
+    %{expr | label: label}
+  end
 
   # SwitchExpr
 

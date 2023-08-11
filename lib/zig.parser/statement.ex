@@ -1,38 +1,29 @@
-defmodule Zig.Parser.StatementOptions do
-  defstruct [:position]
-end
-
 defmodule Zig.Parser.Statement do
   alias Zig.Parser
   alias Zig.Parser.Const
   alias Zig.Parser.Control
   alias Zig.Parser.Var
 
-  alias Zig.Parser.StatementOptions
-
-  def post_traverse(rest, [{__MODULE__, args} | rest_args], context, _, _) do
+  def post_traverse(rest, [{:Statement, args} | rest_args], context, _, _) do
     {rest, [parse(args) | rest_args], context}
   end
 
   @tagged_content ~w(comptime nosuspend suspend defer)a
   @endings [[], [:SEMICOLON]]
 
-  defp parse([position | rest]) when is_map(position) do
-    rest
-    |> parse
-    |> Parser.put_opt(:position, position)
-  end
-
   defp parse([tag, block | ender]) when tag in @tagged_content and ender in @endings do
-    {tag, %StatementOptions{}, block}
+    raise "eee"
+    #   {tag, %StatementOptions{}, block}
   end
 
   defp parse([:errdefer, block | ender]) when ender in @endings do
-    {:errdefer, %StatementOptions{}, do: block}
+    raise "unimplemented"
+    #  {:errdefer, %StatementOptions{}, do: block}
   end
 
   defp parse([:errdefer, :|, name, :|, block | ender]) when ender in @endings do
-    {:errdefer, %StatementOptions{}, payload: name, do: block}
+    raise "unimplemented"
+    #  {:errdefer, %StatementOptions{}, payload: name, do: block}
   end
 
   defp parse([:if | rest]) do

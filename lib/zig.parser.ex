@@ -7,16 +7,18 @@ defmodule Zig.Parser do
   alias Zig.Parser.Asm
   alias Zig.Parser.AssignExpr
   alias Zig.Parser.Block
-  alias Zig.Parser.BlockExpr
   alias Zig.Parser.Collected
+  alias Zig.Parser.ContainerDeclarations
+  alias Zig.Parser.Decl
+  alias Zig.Parser.VarDecl
   alias Zig.Parser.Expr
   alias Zig.Parser.InitList
   alias Zig.Parser.TestDecl
-  alias Zig.Parser.Comptime
+  alias Zig.Parser.ComptimeDecl
   alias Zig.Parser.TopLevelDecl
   alias Zig.Parser.Function
+  alias Zig.Parser.PrimaryExpr
   alias Zig.Parser.PrimaryTypeExpr
-  alias Zig.Parser.Statement
   alias Zig.Parser.TopLevelFn
   alias Zig.Parser.TopLevelVar
   alias Zig.Parser.TypeExpr
@@ -117,20 +119,27 @@ defmodule Zig.Parser do
                       start_position: true,
                       post_traverse: {TestDecl, :post_traverse, []}
                     ],
+                    Decl: [
+                      tag: true,
+                      post_traverse: {Decl, :post_traverse, []}
+                    ],
+                    ContainerDeclarations: [
+                      tag: true,
+                      post_traverse: {ContainerDeclarations, :post_traverse, []}
+                    ],
+                    PrimaryExpr: [
+                      tag: true,
+                      post_traverse: {PrimaryExpr, :post_traverse, []}
+                    ],
                     skip: [ignore: true],
                     STRINGLITERALSINGLE: [
                       tag: true,
                       post_traverse: :string_literal_single,
                       collect: true
                     ],
-                    Statement: [
-                      tag: true,
-                      start_position: true,
-                      post_traverse: {Statement, :post_traverse, []}
-                    ],
                     ComptimeDecl: [
                       tag: true,
-                      post_traverse: {Comptime, :post_traverse, []}
+                      post_traverse: {ComptimeDecl, :post_traverse, []}
                     ],
                     TopLevelDecl: [
                       tag: true,
@@ -163,6 +172,7 @@ defmodule Zig.Parser do
                       post_traverse: {Usingnamespace, :post_traverse, []}
                     ],
                     ParamDecl: [tag: true, post_traverse: {ParamDecl, :post_traverse, []}],
+                    VarDecl: [tag: true, post_traverse: {VarDecl, :post_traverse, []}],
                     PrimaryTypeExpr: [
                       tag: true,
                       post_traverse: {PrimaryTypeExpr, :post_traverse, []}

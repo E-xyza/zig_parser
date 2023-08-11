@@ -13,7 +13,7 @@ defmodule Zig.Parser.TypeExpr do
   alias Zig.Parser.CallOptions
   alias Zig.Parser.PointerOptions
 
-  def post_traverse(rest, [{__MODULE__, args} | rest_args], context, _, _) do
+  def post_traverse(rest, [{:TypeExpr, args} | rest_args], context, _, _) do
     {rest, [parse(args) | rest_args], context}
   end
 

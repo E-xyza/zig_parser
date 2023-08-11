@@ -7,7 +7,7 @@ defmodule Zig.Parser.Expr do
   alias Zig.Parser.Control
   alias Zig.Parser.OperatorOptions
 
-  def post_traverse(rest, [{__MODULE__, args} | rest_args], context, _, _) do
+  def post_traverse(rest, [{:Expr, args} | rest_args], context, _, _) do
     {rest, [parse(args) | rest_args], context}
   end
 

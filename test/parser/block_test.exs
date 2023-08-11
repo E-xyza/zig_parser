@@ -3,13 +3,14 @@ defmodule Zig.Parser.Test.BlockTest do
 
   alias Zig.Parser
   alias Zig.Parser.Block
+  alias Zig.Parser.Const
 
   # note that for these tests we're testing blocks in two cases:
   # - comptime block and function block, for simplicity.
 
   describe "general properties of a comptime block" do
     test "can be empty" do
-      assert [:comptime, %Block{code: []}] = Parser.parse("comptime {}").code
+      assert [%Block{code: []}] = Parser.parse("comptime {}").code
     end
 
     test "location is set" do
@@ -17,17 +18,18 @@ defmodule Zig.Parser.Test.BlockTest do
     end
 
     test "can have a label" do
-      assert [%Block{label: :foo}] = Parser.parse("comptime foo: {}").code
+      assert [%Const{value: %Block{label: :foo}}] =
+               Parser.parse("const a = comptime foo: {};").code
     end
 
     test "can have one statement" do
-      assert [%Block{code: [{:const, _, {:a, _, _}}]}] =
+      assert [%Block{code: [%Const{}]}] =
                Parser.parse("comptime { const a = 1; }").code
     end
 
     test "can have multiple statements" do
-      assert [%Block{code: [{:const, _, {:a, _, _}}, {:const, _, {:b, _, _}}]}] =
-               Parser.parse("comptime foo: { const a = 1; const b = 2; }").code
+      assert [%Block{code: [%Const{}, %Const{}]}] =
+               Parser.parse("comptime { const a = 1; const b = 2; }").code
     end
   end
 
