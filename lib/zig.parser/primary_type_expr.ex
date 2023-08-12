@@ -1,30 +1,15 @@
-defmodule Zig.Parser.StructOptions do
-  defstruct extern: false, packed: false, doc_comment: nil
-end
-
-defmodule Zig.Parser.OpaqueOptions do
-  defstruct extern: false, packed: false, doc_comment: nil
-end
-
-defmodule Zig.Parser.EnumOptions do
-  defstruct extern: false, packed: false, doc_comment: nil, type: nil
-end
-
-defmodule Zig.Parser.UnionOptions do
-  defstruct extern: false, packed: false, doc_comment: nil, tagtype: nil, tagged: false
-end
-
 defmodule Zig.Parser.PrimaryTypeExpr do
-  alias Zig.Parser.Block
-  alias Zig.Parser.Control
-  alias Zig.Parser.EnumOptions
   alias Zig.Parser.Function
-  alias Zig.Parser.OpaqueOptions
-  alias Zig.Parser.StructOptions
-  alias Zig.Parser.UnionOptions
+
+  def post_traverse(rest, [{:PrimaryTypeExpr, [{:builtin, _} | _]} | _] = args, context, loc, col) do
+    Function.post_traverse(rest, args, context, loc, col)
+  end
 
   def post_traverse(rest, [{:PrimaryTypeExpr, args} | args_rest], context, _, _) do
     expr = parse(args)
+
+    # modify the context to add dependencies if we have either embedFile or import
+    # builtins.
 
     new_context =
       case expr do
@@ -52,12 +37,7 @@ defmodule Zig.Parser.PrimaryTypeExpr do
   end
 
   @containers ~w(struct opaque enum union)a
-  @container_opts %{
-    struct: %StructOptions{},
-    opaque: %OpaqueOptions{},
-    enum: %EnumOptions{},
-    union: %UnionOptions{}
-  }
+  @container_opts %{}
 
   defp parse([:DOT, map]) when is_map(map) do
     {:anonymous_struct, map}
@@ -140,7 +120,7 @@ defmodule Zig.Parser.PrimaryTypeExpr do
   defp parse([:LPAREN, expr, :RPAREN]), do: expr
 
   # LabeledExpr
-  defp parse([label, :COLON, %Block{} = expr]) do
+  defp parse([label, :COLON, %{} = expr]) do
     %{expr | label: label}
   end
 

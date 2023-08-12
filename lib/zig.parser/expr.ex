@@ -1,7 +1,3 @@
-defmodule Zig.Parser.OperatorOptions do
-  defstruct [:position]
-end
-
 defmodule Zig.Parser.Expr do
   alias Zig.Parser
   alias Zig.Parser.Control
@@ -11,21 +7,15 @@ defmodule Zig.Parser.Expr do
     {rest, [parse(args) | rest_args], context}
   end
 
-  @binaryoperators ~w(or and == != < > <= >= & ^ | orelse << >> + - ++ +% -% || * / % ** *%)a
-
-  defp parse([position | rest]) when is_map(position) and not is_struct(position) do
-    rest
-    |> parse
-    |> Parser.put_opt(:position, position)
-  end
-
-  defp parse([left, op | right]) when op in @binaryoperators do
-    {op, %OperatorOptions{}, [left, parse(right)]}
-  end
+  #@binaryoperators ~w(or and == != < > <= >= & ^ | orelse << >> + - ++ +% -% || * / % ** *%)a
+#
+  #defp parse([left, op | right]) when op in @binaryoperators do
+  #  {op, %OperatorOptions{}, [left, parse(right)]}
+  #end
 
   @prefixoperators ~w(! - ~ -% & try await)a
 
-  defp parse([op | rest]) when op in @prefixoperators, do: {op, %OperatorOptions{}, parse(rest)}
+#  defp parse([op | rest]) when op in @prefixoperators, do: {op, %OperatorOptions{}, parse(rest)}
 
   defp parse([:if | rest]), do: Control.parse_if(rest)
   defp parse([:break | rest]), do: parse_break(rest)

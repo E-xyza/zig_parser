@@ -8,6 +8,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.AssignExpr
   alias Zig.Parser.Block
   alias Zig.Parser.Collected
+  alias Zig.Parser.ContainerDecl
   alias Zig.Parser.ContainerDeclarations
   alias Zig.Parser.Decl
   alias Zig.Parser.VarDecl
@@ -122,6 +123,10 @@ defmodule Zig.Parser do
                     Decl: [
                       tag: true,
                       post_traverse: {Decl, :post_traverse, []}
+                    ],
+                    ContainerDecl: [
+                      tag: true,
+                      post_traverse: {ContainerDecl, :post_traverse, []}
                     ],
                     ContainerDeclarations: [
                       tag: true,
