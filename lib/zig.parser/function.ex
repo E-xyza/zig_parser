@@ -19,18 +19,26 @@ defmodule Zig.Parser.Function do
   ]
 
   def post_traverse(rest, [{:FnProto, [:fn | args]} | rest_args], context, loc, col) do
-    fun_struct = args
-    |> parse
-    |> Parser.put_location(loc, col)
+    fun_struct =
+      args
+      |> parse
+      |> Parser.put_location(loc, col)
 
     {rest, [fun_struct | rest_args], context}
   end
 
-  def post_traverse(rest, [{:PrimaryTypeExpr, [{:builtin, name} | args]} | rest_args], context, loc, col) do
-    fun_struct = [name | args]
-    |> parse
-    |> Map.replace!(:builtin, true)
-    |> Parser.put_location(loc, col)
+  def post_traverse(
+        rest,
+        [{:PrimaryTypeExpr, [{:builtin, name} | args]} | rest_args],
+        context,
+        loc,
+        col
+      ) do
+    fun_struct =
+      [name | args]
+      |> parse
+      |> Map.replace!(:builtin, true)
+      |> Parser.put_location(loc, col)
 
     {rest, [fun_struct | rest_args], context}
   end

@@ -1,120 +1,72 @@
-defmodule Zig.Parser.AsmOptions do
-  defstruct [:position, volatile: false]
-end
-
 defmodule Zig.Parser.Asm do
   alias Zig.Parser
-  alias Zig.Parser.AsmOptions
+
+  defstruct [:location, :code, outputs: [], inputs: [], clobbers: [], volatile: false]
 
   def post_traverse(
         rest,
-        [{__MODULE__, [:asm, :LPAREN, expr, :COLON | args]} | args_rest],
+        [{:AsmExpr, [:asm | args]} | args_rest],
         context,
-        _,
-        _
+        loc,
+        col
       ) do
-    {rest, [parse_output(args, expr: expr) | args_rest], context}
-  end
-
-  def post_traverse(
-        rest,
-        [{__MODULE__, [:asm, :volatile, :LPAREN, expr, :COLON | args]} | args_rest],
-        context,
-        _,
-        _
-      ) do
-    asm_ast =
+    asm =
       args
-      |> parse_output(expr: expr)
-      |> Parser.put_opt(:volatile, true)
+      |> parse(%__MODULE__{})
+      |> Parser.put_location(loc, col)
 
-    {rest, [asm_ast | args_rest], context}
+    {rest, [asm | args_rest], context}
   end
 
-  def parse_output([:COLON | rest], parts) do
-    parse_input(rest, reverse(parts, :outputs))
+  defp parse([:volatile | rest], asm) do
+    parse(rest, %{asm | volatile: true})
   end
 
-  def parse_output([:COMMA | rest], parts) do
-    parse_output(rest, parts)
+  defp parse([:LPAREN, {:string, code}, :COLON | rest], asm) do
+    parse(rest, %{asm | code: code})
   end
 
-  def parse_output(
-        [
-          :LBRACKET,
-          id,
-          :RBRACKET,
-          {:string, code},
-          :LPAREN,
-          :MINUSRARROW,
-          type,
-          :RPAREN | rest
-        ],
-        parts
-      ) do
-    new_parts =
-      Keyword.update(parts, :outputs, [{id, code, {:->, type}}], &[{id, code, {:->, type}} | &1])
-
-    parse_output(rest, new_parts)
+  defp parse([{:AsmOutputList, outputs}, :COLON | rest], asm) do
+    parse(rest, %{asm | outputs: parse_io(outputs, [])})
   end
 
-  def parse_output(
-        [
-          :LBRACKET,
-          id,
-          :RBRACKET,
-          {:string, code},
-          :LPAREN,
-          identifier,
-          :RPAREN | rest
-        ],
-        parts
-      ) do
-    new_parts =
-      Keyword.update(parts, :outputs, [{id, code, identifier}], &[{id, code, identifier} | &1])
-
-    parse_output(rest, new_parts)
+  defp parse([{:AsmInputList, inputs}, :COLON | rest], asm) do
+    parse(rest, %{asm | inputs: parse_io(inputs, [])})
   end
 
-  def parse_input([:COLON | rest], parts) do
-    parse_clobbers(rest, reverse(parts, :inputs))
+  defp parse([{:StringList, clobbers}, :RPAREN], asm) do
+    clobber_names = Enum.map(clobbers, fn {:string, string} -> string end)
+    %{asm | clobbers: clobber_names}
   end
 
-  def parse_input(
-        [
-          :LBRACKET,
-          id,
-          :RBRACKET,
-          {:string, code},
-          :LPAREN,
-          type,
-          :RPAREN | rest
-        ],
-        parts
-      ) do
-    new_parts = Keyword.update(parts, :inputs, [{id, code, type}], &[{id, code, type} | &1])
-    parse_input(rest, new_parts)
+  defp parse([:RPAREN], asm), do: asm
+
+  defp parse_io(
+         [
+           :LBRACKET,
+           id,
+           :RBRACKET,
+           {:string, assign},
+           :LPAREN,
+           :MINUSRARROW,
+           type,
+           :RPAREN | rest
+         ],
+         so_far
+       ) do
+    parse_io(rest, [{id, assign, type: type} | so_far])
   end
 
-  def parse_input([:COMMA | rest], parts) do
-    parse_input(rest, parts)
+  defp parse_io(
+         [:LBRACKET, id, :RBRACKET, {:string, assign}, :LPAREN, identifier, :RPAREN | rest],
+         so_far
+       ) do
+    parse_io(rest, [{id, assign, var: identifier} | so_far])
   end
 
-  def parse_clobbers([:RPAREN], parts) do
-    {:asm, %AsmOptions{}, reverse(parts, :clobbers)}
+  defp parse_io([:COMMA | rest], so_far) do
+    parse_io(rest, so_far)
   end
 
-  def parse_clobbers([{:string, string} | rest], parts) do
-    new_parts = Keyword.update(parts, :clobbers, [string], &[string | &1])
-
-    parse_clobbers(rest, new_parts)
-  end
-
-  def parse_clobbers([:COMMA | rest], parts) do
-    parse_clobbers(rest, parts)
-  end
-
-  defp reverse(parts, field) do
-    Keyword.update(parts, field, [], &Enum.reverse/1)
-  end
+  defp parse_io([], so_far), do: Enum.reverse(so_far)
 end

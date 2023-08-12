@@ -1,21 +1,20 @@
 defmodule Zig.Parser.Expr do
   alias Zig.Parser
   alias Zig.Parser.Control
-  alias Zig.Parser.OperatorOptions
 
   def post_traverse(rest, [{:Expr, args} | rest_args], context, _, _) do
     {rest, [parse(args) | rest_args], context}
   end
 
-  #@binaryoperators ~w(or and == != < > <= >= & ^ | orelse << >> + - ++ +% -% || * / % ** *%)a
-#
-  #defp parse([left, op | right]) when op in @binaryoperators do
+  # @binaryoperators ~w(or and == != < > <= >= & ^ | orelse << >> + - ++ +% -% || * / % ** *%)a
+  #
+  # defp parse([left, op | right]) when op in @binaryoperators do
   #  {op, %OperatorOptions{}, [left, parse(right)]}
-  #end
+  # end
 
   @prefixoperators ~w(! - ~ -% & try await)a
 
-#  defp parse([op | rest]) when op in @prefixoperators, do: {op, %OperatorOptions{}, parse(rest)}
+  #  defp parse([op | rest]) when op in @prefixoperators, do: {op, %OperatorOptions{}, parse(rest)}
 
   defp parse([:if | rest]), do: Control.parse_if(rest)
   defp parse([:break | rest]), do: parse_break(rest)

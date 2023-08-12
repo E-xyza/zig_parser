@@ -28,7 +28,7 @@ defmodule Zig.Parser.Test.ContainerDeclTest do
     end
 
     test "noinline works" do
-      assert [%{inline: false}] =Parser.parse("noinline fn myfun() void;").code
+      assert [%{inline: false}] = Parser.parse("noinline fn myfun() void;").code
     end
 
     test "with a block works" do
@@ -66,7 +66,8 @@ defmodule Zig.Parser.Test.ContainerDeclTest do
     end
 
     test "with an import" do
-      assert [%{namespace: %Function{builtin: true}}] = Parser.parse("usingnamespace @import(\"std\");").code
+      assert [%{namespace: %Function{builtin: true}}] =
+               Parser.parse("usingnamespace @import(\"std\");").code
     end
   end
 end

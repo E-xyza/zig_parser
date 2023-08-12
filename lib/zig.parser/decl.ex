@@ -1,5 +1,6 @@
 defmodule Zig.Parser.Decl do
   alias Zig.Parser.Block
+  alias Zig.Parser.Const
   alias Zig.Parser.Function
   alias Zig.Parser.Var
   alias Zig.Parser.Usingnamespace
@@ -31,4 +32,6 @@ defmodule Zig.Parser.Decl do
   defp parse([%Function{} = function, %Block{} = block]), do: %{function | block: block}
 
   defp parse([%Var{} = var]), do: var
+
+  defp parse([%Const{} = const]), do: const
 end

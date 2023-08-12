@@ -1,11 +1,11 @@
-defmodule Zig.Parser.Test.ExprTest do
+defmodule Zig.Parser.Test.PrimaryExprTest do
   use ExUnit.Case, async: true
 
   alias Zig.Parser
 
   # tests:
   # PrimaryExpr
-  #    <- AsmExpr
+  #    <- AsmExpr  # tested in asm_test.exs
   #     / IfExpr
   #     / KEYWORD_break BreakLabel? Expr?
   #     / KEYWORD_comptime Expr
@@ -17,99 +17,6 @@ defmodule Zig.Parser.Test.ExprTest do
   #     / Block
   #     / CurlySuffixExpr
 
-  describe "asm expressions" do
-    # AsmExpr <- KEYWORD_asm KEYWORD_volatile? LPAREN Expr AsmOutput? RPAREN
-    # AsmOutput <- COLON AsmOutputList AsmInput?
-    # AsmOutputItem <- LBRACKET IDENTIFIER RBRACKET STRINGLITERAL LPAREN (MINUSRARROW TypeExpr / IDENTIFIER) RPAREN
-    # AsmOutputList <- (AsmOutputItem COMMA)* AsmOutputItem?
-    # AsmInput <- COLON AsmInputList AsmClobbers?
-    # AsmInputList <- (AsmInputItem COMMA)* AsmInputItem?
-    # AsmInputItem <- LBRACKET IDENTIFIER RBRACKET STRINGLITERAL LPAREN Expr RPAREN
-    # AsmClobbers <- COLON StringList
-
-    defmacrop asm_with(
-                parts,
-                opts \\ quote do
-                  %{}
-                end
-              ) do
-      quote do
-        [{:const, _, {:foo, _, {:asm, unquote(opts), unquote(parts)}}}]
-      end
-    end
-
-    test "basic asm expression" do
-      assert asm_with(expr: {:string, "syscall"}, outputs: [], inputs: [], clobbers: []) =
-               Parser.parse(~S|const foo = asm("syscall" : : : );|).code
-    end
-
-    test "asm with volatile" do
-      assert asm_with(_, %{volatile: true}) =
-               Parser.parse(~S|const foo = asm volatile("syscall" : : : );|).code
-    end
-
-    test "one output expression" do
-      asm_with(parts) =
-        Parser.parse(~S|const foo = asm("syscall" : [ret] "={rax}" (-> usize) : : );|).code
-
-      assert [{:ret, "={rax}", {:->, :usize}}] = parts[:outputs]
-    end
-
-    test "one output expression with an identifier" do
-      asm_with(parts) =
-        Parser.parse(~S|const foo = asm("syscall" : [ret] "={rax}" (identifier) : : );|).code
-
-      assert [{:ret, "={rax}", :identifier}] = parts[:outputs]
-    end
-
-    test "two output expressions" do
-      asm_with(parts) =
-        Parser.parse(
-          ~S|const foo = asm("syscall" : [ret] "={rax}" (-> usize), [ret] "={rax}" (-> usize) : : );|
-        ).code
-
-      assert [{:ret, "={rax}", {:->, :usize}}, {:ret, "={rax}", {:->, :usize}}] = parts[:outputs]
-    end
-
-    test "one input expression" do
-      asm_with(parts) =
-        Parser.parse(~S|const foo = asm("syscall" : : [number] "{rax}" (number) : );|).code
-
-      assert [{:number, "{rax}", :number}] = parts[:inputs]
-    end
-
-    test "two input expressions" do
-      asm_with(parts) =
-        Parser.parse(
-          ~S|const foo = asm("syscall" : : [number] "{rax}" (number), [arg1] "{rdi}" (arg1) : );|
-        ).code
-
-      assert [{:number, "{rax}", :number}, {:arg1, "{rdi}", :arg1}] = parts[:inputs]
-    end
-
-    test "one clobber register" do
-      asm_with(parts) = Parser.parse(~S|const foo = asm("syscall" : : : "rcx");|).code
-      assert ["rcx"] = parts[:clobbers]
-    end
-
-    test "two clobber registers" do
-      asm_with(parts) = Parser.parse(~S|const foo = asm("syscall" : : : "rcx", "r11");|).code
-      assert ["rcx", "r11"] = parts[:clobbers]
-    end
-
-    test "with multiline string" do
-      asm_with(parts) =
-        Parser.parse(~S"""
-        const foo = asm(
-          \\ this is
-          \\ some
-          \\ assembler code
-          : : : );
-        """).code
-
-      assert {:string, " this is\n some\n assembler code\n"} = parts[:expr]
-    end
-  end
 
   defmacro const_with(expr) do
     quote do
