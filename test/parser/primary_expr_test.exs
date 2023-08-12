@@ -3,7 +3,11 @@ defmodule Zig.Parser.Test.PrimaryExprTest do
 
   alias Zig.Parser
   alias Zig.Parser.Break
+  alias Zig.Parser.Comptime
   alias Zig.Parser.Continue
+  alias Zig.Parser.Nosuspend
+  alias Zig.Parser.Resume
+  alias Zig.Parser.Return
 
   # tests:
   # PrimaryExpr
@@ -46,24 +50,24 @@ defmodule Zig.Parser.Test.PrimaryExprTest do
   end
 
   describe "tagged exprs" do
-    #    test "comptime" do
-    #      assert const_with({:comptime, :bar}) = Parser.parse("const foo = comptime bar;").code
-    #    end
-    #
-    #    test "nosuspend" do
-    #      assert const_with({:nosuspend, :bar}) = Parser.parse("const foo = nosuspend bar;").code
-    #    end
-    #
-    #    test "resume" do
-    #      assert const_with({:resume, :bar}) = Parser.parse("const foo = resume bar;").code
-    #    end
-    #
-    #    test "return" do
-    #      assert const_with({:return, :bar}) = Parser.parse("const foo = return bar;").code
-    #    end
-    #  end
-    #
-    #  describe "blocks" do
+    test "comptime" do
+      assert [%{value: %Comptime{expr: :bar}}] = Parser.parse("const foo = comptime bar;").code
+    end
+
+    test "nosuspend" do
+      assert [%{value: %Nosuspend{expr: :bar}}] = Parser.parse("const foo = nosuspend bar;").code
+    end
+
+    test "resume" do
+      assert [%{value: %Resume{expr: :bar}}] = Parser.parse("const foo = resume bar;").code
+    end
+
+    test "return" do
+      assert [%{value: %Return{expr: :bar}}] = Parser.parse("const foo = return bar;").code
+    end
+  end
+
+  describe "blocks" do
     #    # note this is probably a semantic error
     #    test "work" do
     #      assert const_with({:block, _, []}) = Parser.parse("const foo = {};").code
