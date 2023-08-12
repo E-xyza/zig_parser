@@ -2,12 +2,14 @@ defmodule Zig.Parser.Test.PrimaryExprTest do
   use ExUnit.Case, async: true
 
   alias Zig.Parser
+  alias Zig.Parser.Block
   alias Zig.Parser.Break
   alias Zig.Parser.Comptime
   alias Zig.Parser.Continue
   alias Zig.Parser.Nosuspend
   alias Zig.Parser.Resume
   alias Zig.Parser.Return
+  alias Zig.Parser.StructLiteral
 
   # tests:
   # PrimaryExpr
@@ -19,7 +21,7 @@ defmodule Zig.Parser.Test.PrimaryExprTest do
   #     / KEYWORD_continue BreakLabel?
   #     / KEYWORD_resume Expr
   #     / KEYWORD_return Expr?
-  #     / BlockLabel? LoopExpr # <-- punted to LoopTest
+  #     / BlockLabel? LoopExpr # tested in loop_test.exs
   #     / Block
   #     / CurlySuffixExpr
 
@@ -68,30 +70,64 @@ defmodule Zig.Parser.Test.PrimaryExprTest do
   end
 
   describe "blocks" do
-    #    # note this is probably a semantic error
-    #    test "work" do
-    #      assert const_with({:block, _, []}) = Parser.parse("const foo = {};").code
-    #    end
-    #  end
-    #
-    #  describe "curly suffix init" do
-    #    test "with an empty curly struct" do
-    #      assert const_with({:empty, :MyStruct}) = Parser.parse("const foo = MyStruct{};").code
-    #    end
-    #
-    #    test "with a struct definer" do
-    #      assert const_with({:struct, :MyStruct, %{foo: {:integer, 1}}}) =
-    #               Parser.parse("const foo = MyStruct{.foo = 1};").code
-    #    end
-    #
-    #    test "with a struct definer with two terms" do
-    #      assert const_with({:struct, :MyStruct, %{foo: {:integer, 1}, bar: {:integer, 2}}}) =
-    #               Parser.parse("const foo = MyStruct{.foo = 1, .bar = 2};").code
-    #    end
-    #
-    #    test "with an array definer" do
-    #      assert const_with({:array, :MyArrayType, [integer: 1, integer: 2, integer: 3]}) =
-    #               Parser.parse("const foo = MyArrayType{1, 2, 3};").code
-    #    end
+    # note this is probably a semantic error
+    test "work" do
+      assert [%{value: %Block{}}] = Parser.parse("const foo = {};").code
+    end
+  end
+
+  describe "curly suffix init" do
+    test "with an empty curly struct" do
+      empty = %{}
+
+      assert [%{value: %StructLiteral{type: :MyStruct, values: ^empty}}] =
+               Parser.parse("const foo = MyStruct{};").code
+    end
+
+    test "with a struct definer" do
+      assert [%{value: %StructLiteral{type: :MyStruct, values: %{foo: {:integer, 1}}}}] =
+               Parser.parse("const foo = MyStruct{.foo = 1};").code
+    end
+
+    test "with a struct definer with two terms" do
+      assert [
+               %{
+                 value: %StructLiteral{
+                   type: :MyStruct,
+                   values: %{foo: {:integer, 1}, bar: {:integer, 2}}
+                 }
+               }
+             ] =
+               Parser.parse("const foo = MyStruct{.foo = 1, .bar = 2};").code
+    end
+
+    test "with an anonymous definer with two terms" do
+      assert [%{value: %StructLiteral{type: nil, values: %{foo: {:integer, 1}}}}] =
+               Parser.parse("const foo = .{.foo = 1};").code
+    end
+
+    test "with an array definer" do
+      assert [
+               %{
+                 value: %StructLiteral{
+                   type: :MyArrayType,
+                   values: %{0 => {:integer, 1}, 1 => {:integer, 2}, 2 => {:integer, 3}}
+                 }
+               }
+             ] =
+               Parser.parse("const foo = MyArrayType{1, 2, 3};").code
+    end
+
+    test "as a tuple" do
+      assert [
+               %{
+                 value: %StructLiteral{
+                   type: nil,
+                   values: %{0 => {:integer, 1}, 1 => {:integer, 2}, 2 => {:integer, 3}}
+                 }
+               }
+             ] =
+               Parser.parse("const foo = .{1, 2, 3};").code
+    end
   end
 end

@@ -1,9 +1,9 @@
 defmodule Zig.Parser.InitList do
-  def post_traverse(rest, [{__MODULE__, args} | rest_args], context, _, _) do
+  def post_traverse(rest, [{:InitList, args} | rest_args], context, _, _) do
     {rest, [get_init_list(args) | rest_args], context}
   end
 
-  defp get_init_list([:LBRACE, :RBRACE]), do: {:empty}
+  defp get_init_list([:LBRACE, :RBRACE]), do: %{}
 
   defp get_init_list([:LBRACE, :DOT | rest]), do: get_struct([:DOT | rest], %{})
 

@@ -1,5 +1,6 @@
 defmodule Zig.Parser.PrimaryTypeExpr do
   alias Zig.Parser.Function
+  alias Zig.Parser.StructLiteral
 
   def post_traverse(rest, [{:PrimaryTypeExpr, [{:builtin, _} | _]} | _] = args, context, loc, col) do
     Function.post_traverse(rest, args, context, loc, col)
@@ -40,11 +41,16 @@ defmodule Zig.Parser.PrimaryTypeExpr do
   @container_opts %{}
 
   defp parse([:DOT, map]) when is_map(map) do
-    {:anonymous_struct, map}
+    %StructLiteral{values: map}
   end
 
   defp parse([:DOT, list]) when is_list(list) do
-    {:tuple, list}
+    map =
+      list
+      |> Enum.with_index()
+      |> Map.new(fn {value, index} -> {index, value} end)
+
+    %StructLiteral{values: map}
   end
 
   defp parse([:DOT, {:empty}]), do: {:empty}
