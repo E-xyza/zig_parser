@@ -28,44 +28,47 @@ defmodule Zig.Parser.Test.PrimaryExprTest do
   describe "break/continue expr" do
     # note these are a misuse of the const and are probably a semantic error.
     test "break" do
-      assert [%{value: %Break{label: nil}}] = Parser.parse("const foo = break;").code
+      assert [%{value: :break}] = Parser.parse("const foo = break;").code
     end
 
     test "break with tag" do
-      assert [%{value: %Break{label: :foo}}] = Parser.parse("const foo = break :foo;").code
+      assert [%{value: {:break, :foo}}] = Parser.parse("const foo = break :foo;").code
     end
 
     test "break with tag and value" do
-      assert [%{value: %Break{label: :foo, value: :bar}}] =
-               Parser.parse("const foo = break :foo bar;").code
+      assert [%{value: {:break, :foo, :bar}}] = Parser.parse("const foo = break :foo bar;").code
     end
 
     test "continue" do
-      assert [%{value: %Continue{label: nil}}] =
+      assert [%{value: :continue}] =
                Parser.parse("const foo = continue;").code
     end
 
     test "continue with tag" do
-      assert [%{value: %Continue{label: :foo}}] =
+      assert [%{value: {:continue, :foo}}] =
                Parser.parse("const foo = continue :foo;").code
     end
   end
 
   describe "tagged exprs" do
     test "comptime" do
-      assert [%{value: %Comptime{expr: :bar}}] = Parser.parse("const foo = comptime bar;").code
+      assert [%{value: {:comptime, :bar}}] = Parser.parse("const foo = comptime bar;").code
     end
 
     test "nosuspend" do
-      assert [%{value: %Nosuspend{expr: :bar}}] = Parser.parse("const foo = nosuspend bar;").code
+      assert [%{value: {:nosuspend, :bar}}] = Parser.parse("const foo = nosuspend bar;").code
     end
 
     test "resume" do
-      assert [%{value: %Resume{expr: :bar}}] = Parser.parse("const foo = resume bar;").code
+      assert [%{value: {:resume, :bar}}] = Parser.parse("const foo = resume bar;").code
     end
 
-    test "return" do
-      assert [%{value: %Return{expr: :bar}}] = Parser.parse("const foo = return bar;").code
+    test "return with no payload" do
+      assert [%{value: :return}] = Parser.parse("const foo = return;").code
+    end
+
+    test "return with payload" do
+      assert [%{value: {:return, :bar}}] = Parser.parse("const foo = return bar;").code
     end
   end
 

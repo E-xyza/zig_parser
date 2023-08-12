@@ -7,6 +7,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.Asm
   alias Zig.Parser.AssignExpr
   alias Zig.Parser.Block
+  alias Zig.Parser.ByteAlign
   alias Zig.Parser.Collected
   alias Zig.Parser.ContainerDecl
   alias Zig.Parser.ContainerDeclarations
@@ -186,8 +187,13 @@ defmodule Zig.Parser do
                     AsmExpr: [tag: true, post_traverse: {Asm, :post_traverse, []}],
                     BlockExpr: [tag: true, post_traverse: {Block, :post_traverse, []}],
                     Block: [tag: true, post_traverse: {Block, :post_traverse, []}],
-                    ByteAlign: [tag: true, post_traverse: {ByteAlign, :post_traverse, []}],
                     FnProto: [tag: true, post_traverse: {Function, :post_traverse, []}],
+                    # basic pseudofunction keywords
+                    CallConv: [tag: true, post_traverse: :pseudofunction],
+                    ByteAlign: [tag: true, post_traverse: :pseudofunction],
+                    LinkSection: [tag: true, post_traverse: :pseudofunction],
+                    AddrSpace: [tag: true, post_traverse: :pseudofunction],
+                    # Top level
                     Root: [tag: true, post_traverse: :post_traverse]
                   ] ++
                     @keyword_mapping ++
@@ -293,6 +299,10 @@ defmodule Zig.Parser do
 
   defp process_escape(<<"\\x"::binary, number::binary-2>>) do
     String.to_integer(number)
+  end
+
+  defp pseudofunction(rest, [{_tag, [name, :LPAREN, payload, :RPAREN]} | rest_args], context, _loc, _col) do
+    {rest, [{name, payload} | rest_args], context}
   end
 
   @doc false
