@@ -6,7 +6,7 @@ defmodule Zig.Parser.Test.PrimaryExprTest do
   # tests:
   # PrimaryExpr
   #    <- AsmExpr  # tested in asm_test.exs
-  #     / IfExpr
+  #     / IfExpr  # tested in if_expr_test.exs
   #     / KEYWORD_break BreakLabel? Expr?
   #     / KEYWORD_comptime Expr
   #     / KEYWORD_nosuspend Expr
@@ -16,44 +16,6 @@ defmodule Zig.Parser.Test.PrimaryExprTest do
   #     / BlockLabel? LoopExpr # <-- punted to LoopTest
   #     / Block
   #     / CurlySuffixExpr
-
-
-  defmacro const_with(expr) do
-    quote do
-      [{:const, _, {:foo, _, unquote(expr)}}]
-    end
-  end
-
-  describe "if expr" do
-    # IfExpr <- IfPrefix Expr (KEYWORD_else Payload? Expr)?
-    # IfPrefix <- KEYWORD_if LPAREN Expr RPAREN PtrPayload?
-
-    test "basic if statement only" do
-      assert const_with({:if, _, condition: :foo, consequence: :bar}) =
-               Parser.parse("const foo = if (foo) bar;").code
-    end
-
-    test "basic if statement with payload paramater" do
-      assert const_with({:if, _, condition: :foo, payload: :bar, consequence: :bar}) =
-               Parser.parse("const foo = if (foo) |bar| bar;").code
-    end
-
-    test "basic if statement with pointer payload parameter" do
-      assert const_with({:if, _, condition: :foo, ptr_payload: :bar, consequence: :bar}) =
-               Parser.parse("const foo = if (foo) |*bar| bar;").code
-    end
-
-    test "basic else statement" do
-      assert const_with({:if, _, condition: :foo, consequence: :bar, else: :baz}) =
-               Parser.parse("const foo = if (foo) bar else baz;").code
-    end
-
-    test "else statement with payload" do
-      assert const_with(
-               {:if, _, condition: :foo, consequence: :bar, else_payload: :baz, else: :baz}
-             ) = Parser.parse("const foo = if (foo) bar else |baz| baz;").code
-    end
-  end
 
   describe "break/continue expr" do
     # note these are a misuse of the const and are probably a semantic error.
