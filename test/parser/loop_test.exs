@@ -4,6 +4,7 @@ defmodule Zig.Parser.Test.LoopTest do
   alias Zig.Parser
   alias Zig.Parser.Block
   alias Zig.Parser.For
+  alias Zig.Parser.While
 
   # tests:
   # PrimaryExpr
@@ -19,7 +20,7 @@ defmodule Zig.Parser.Test.LoopTest do
     # PtrListPayload <- PIPE ASTERISK? IDENTIFIER (COMMA ASTERISK? IDENTIFIER)* COMMA? PIPE
 
     test "basic for loop" do
-      assert [%{value: %For{iterators: [:array], captures: [:item], code: %Block{}}}] =
+      assert [%{value: %For{iterators: [:array], captures: [:item], block: %Block{}}}] =
                Parser.parse("const foo = for (array) |item| {};").code
     end
 
@@ -81,50 +82,33 @@ defmodule Zig.Parser.Test.LoopTest do
     # WhileContinueExpr <- COLON LPAREN AssignExpr RPAREN
 
     test "basic while loop" do
-      #      assert [{:const, _, {_, _, whileloop}}] =
-      #               Parser.parse("const foo = while (condition) {};").code
+      assert [%{value: %While{condition: :condition}}] =
+               Parser.parse("const foo = while (condition) {};").code
     end
 
-    #
-    #    test "while loop with payload" do
-    #      assert [{:const, _, {_, _, whileloop}}] =
-    #               Parser.parse("const foo = while (condition) |value| {};").code
-    #
-    #      assert {:while, _, condition: :condition, payload: :value, do: {:block, _, []}} = whileloop
-    #    end
-    #
-    #    test "while loop with pointer payload" do
-    #      assert [{:const, _, {_, _, whileloop}}] =
-    #               Parser.parse("const foo = while (condition) |*value| {};").code
-    #
-    #      assert {:while, _, condition: :condition, ptr_payload: :value, do: {:block, _, []}} =
-    #               whileloop
-    #    end
-    #
-    #    test "while loop with continuation" do
-    #      assert [{:const, _, {_, _, whileloop}}] =
-    #               Parser.parse("const foo = while (condition) : (next) {};").code
-    #
-    #      assert {:while, _, condition: :condition, next: :next, do: {:block, _, []}} = whileloop
-    #    end
-    #
-    #    test "while loop with else" do
-    #      assert [{:const, _, {_, _, whileloop}}] =
-    #               Parser.parse("const foo = while (condition) {} else {};").code
-    #
-    #      assert {:while, _, condition: :condition, do: {:block, _, []}, else: {:block, _, []}} =
-    #               whileloop
-    #    end
-    #
-    #    test "while loop with else and payload" do
-    #      assert [{:const, _, {_, _, whileloop}}] =
-    #               Parser.parse("const foo = while (condition) {} else |err| {};").code
-    #
-    #      assert {:while, _,
-    #              condition: :condition,
-    #              do: {:block, _, []},
-    #              else_payload: :err,
-    #              else: {:block, _, []}} = whileloop
-    #    end
+    test "while loop with payload" do
+      assert [%{value: %While{payload: :value}}] =
+               Parser.parse("const foo = while (condition) |value| {};").code
+    end
+
+    test "while loop with pointer payload" do
+      assert [%{value: %While{payload: {:*, :value}}}] =
+               Parser.parse("const foo = while (condition) |*value| {};").code
+    end
+
+    test "while loop with continuation" do
+      assert [%{value: %While{condition: :condition, continue: :next}}] =
+               Parser.parse("const foo = while (condition) : (next) {};").code
+    end
+
+    test "while loop with else" do
+      assert [%{value: %While{else: %Block{}}}] =
+               Parser.parse("const foo = while (condition) {} else {};").code
+    end
+
+    test "while loop with else and payload" do
+      assert [%{value: %While{else_payload: :err}}] =
+               Parser.parse("const foo = while (condition) {} else |err| {};").code
+    end
   end
 end

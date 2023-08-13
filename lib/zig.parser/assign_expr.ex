@@ -3,7 +3,7 @@ defmodule Zig.Parser.AssignExpr do
 
   def post_traverse(
         rest,
-        [{__MODULE__, args} | args_rest],
+        [{:AssignExpr, args} | args_rest],
         context,
         _,
         _

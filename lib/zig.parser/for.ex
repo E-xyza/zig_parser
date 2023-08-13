@@ -1,5 +1,5 @@
 defmodule Zig.Parser.For do
-  defstruct [:code, :label, :else, inline: false, iterators: [], captures: []]
+  defstruct [:block, :label, :else, inline: false, iterators: [], captures: []]
 
   alias Zig.Parser.Block
 
@@ -45,7 +45,7 @@ defmodule Zig.Parser.For do
   defp parse_capture(for_struct, [:|, block = %Block{} | rest]) do
     for_struct
     |> Map.update!(:captures, &Enum.reverse/1)
-    |> Map.replace!(:code, block)
+    |> Map.replace!(:block, block)
     |> parse_else(rest)
   end
 
