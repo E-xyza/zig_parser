@@ -9,6 +9,10 @@ defmodule Zig.Parser.ErrorUnionExpr do
     parse_grouped(args)
   end
 
+  defp parse_grouped([ref, :DOT, next | rest]) do
+    parse_grouped([group(ref, next) | rest])
+  end
+
   defp parse_grouped([ref, :LBRACKET | rest]) do
     parse_indexed(ref, rest)
   end
@@ -23,6 +27,10 @@ defmodule Zig.Parser.ErrorUnionExpr do
 
   defp parse_grouped([ref, :LPAREN, {:ExprList, args}, :RPAREN | rest]) do
     parse_grouped([{:call, ref, args} | rest])
+  end
+
+  defp parse_grouped([expr1, :!, expr2 | rest]) do
+    parse_grouped([{:errorunion, expr1, expr2} | rest])
   end
 
   defp parse_grouped([ref]), do: ref

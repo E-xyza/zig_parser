@@ -283,7 +283,8 @@ defmodule Zig.Parser.Test.TypeExprTest do
     end
 
     test "works for an identifier + left bracket" do
-      assert [%{value: {:ref, [:bar, {:index, :baz}]}}] = Parser.parse("const foo = bar[baz];").code
+      assert [%{value: {:ref, [:bar, {:index, :baz}]}}] =
+               Parser.parse("const foo = bar[baz];").code
     end
 
     test "works for an identifier + open ended range" do
@@ -318,10 +319,49 @@ defmodule Zig.Parser.Test.TypeExprTest do
     end
   end
 
+  describe "primary type expression, multiple deep" do
+    test "works for a double deep identifier" do
+      assert [%{value: {:ref, [:bar, :baz]}}] = Parser.parse("const foo = bar.baz;").code
+    end
+
+    test "works for a triple deep identifier" do
+      assert [%{value: {:ref, [:bar, :baz, :quux]}}] =
+               Parser.parse("const foo = bar.baz.quux;").code
+    end
+
+    test "works for something really complex" do
+      assert [
+               %{
+                 value: {
+                   :call,
+                   {:ref, [{:call, {:ref, [:bar, {:index, :baz}, :quux]}, []}, :mlem]},
+                   [:blep]
+                 }
+               }
+             ] = Parser.parse("const foo = bar[baz].quux().mlem(blep);").code
+    end
+  end
+
   describe "async function call" do
     test "works" do
       #  assert const_with({:bar, %{async: true}, []}) =
       #           Parser.parse("const foo = async bar();").code
+    end
+  end
+
+  describe "as error unions" do
+    test "basic error union" do
+      assert [%{value: {:errorunion, :bar, :baz}}] = Parser.parse("const foo = bar!baz;").code
+    end
+
+    test "complex error union" do
+      assert [
+               %{
+                 value:
+                   {:errorunion, {:call, {:ref, [:bar, {:index, {:integer, 2}}]}, [:baz]},
+                    {:call, :quux, [:mlem]}}
+               }
+             ] = Parser.parse("const foo = bar[2](baz)!quux(mlem);").code
     end
   end
 end
