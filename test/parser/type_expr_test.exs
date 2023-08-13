@@ -252,113 +252,76 @@ defmodule Zig.Parser.Test.TypeExprTest do
 
   describe "the array prefix" do
     test "works with specified length" do
-      assert [%{value: %Array{array: {:integer, 3}, type: :u8}}] =
+      assert [%{value: %Array{count: {:integer, 3}, type: :u8}}] =
                Parser.parse("const foo = [3]u8;").code
     end
 
-    #
-    #    test "works with inferred length" do
-    #      assert const_with({:array, _, length: :_, type: :u8}) =
-    #               Parser.parse("const foo = [_]u8;").code
-    #    end
-    #
-    #    test "works with specified length and sentinel" do
-    #      assert const_with({:array, _, length: {:integer, 3}, type: :u8, sentinel: {:integer, 0}}) =
-    #               Parser.parse("const foo = [3:0]u8;").code
-    #    end
-    #
-    #    test "works with inferred length and sentinel" do
-    #      assert const_with({:array, _, length: :_, type: :u8, sentinel: {:integer, 0}}) =
-    #               Parser.parse("const foo = [_:0]u8;").code
-    #    end
+    test "works with auto length" do
+      assert [%{value: %Array{count: :_, type: :u8}}] =
+               Parser.parse("const foo = [_]u8;").code
+    end
+
+    test "works with sentinel" do
+      assert [%{value: %Array{count: {:integer, 3}, sentinel: {:integer, 0}, type: :u8}}] =
+               Parser.parse("const foo = [3:0]u8;").code
+    end
   end
 
-  #
-  #  describe "async function call" do
-  #    test "works" do
-  #      assert const_with({:bar, %{async: true}, []}) =
-  #               Parser.parse("const foo = async bar();").code
-  #    end
-  #  end
-  #
-  #  describe "dereferenced content" do
-  #    test "that is basic with a pointer pointer" do
-  #      assert const_with({:ptrref, :bar}) = Parser.parse("const foo = bar.*;").code
-  #    end
-  #
-  #    test "that is basic with a required" do
-  #      assert const_with({:required, :bar}) = Parser.parse("const foo = bar.?;").code
-  #    end
-  #
-  #    test "that is a field" do
-  #      assert const_with({:ref, [:bar, :baz]}) = Parser.parse("const foo = bar.baz;").code
-  #    end
-  #
-  #    test "that is an array" do
-  #      assert const_with({:ref, [:bar, {:index, {:integer, 10}}]}) =
-  #               Parser.parse("const foo = bar[10];").code
-  #    end
-  #
-  #    test "that makes a slice" do
-  #      assert const_with({:ref, [:bar, {:slice, {:integer, 1}, {:integer, 5}}]}) =
-  #               Parser.parse("const foo = bar[1..5];").code
-  #    end
-  #
-  #    test "that makes a slice with a sentinel" do
-  #      assert const_with(
-  #               {:ref, [:bar, {:slice, {:integer, 1}, {:integer, 5}, sentinel: {:integer, 0}}]}
-  #             ) = Parser.parse("const foo = bar[1..5:0];").code
-  #    end
-  #
-  #    test "that makes a slice with inferred end" do
-  #      assert const_with({:ref, [:bar, {:slice, {:integer, 1}, :end}]}) =
-  #               Parser.parse("const foo = bar[1..];").code
-  #    end
-  #
-  #    test "that is a pointer" do
-  #      assert const_with({:ptrref, [:bar, :baz, {:index, {:integer, 10}}, :quux]}) =
-  #               Parser.parse("const foo = bar.baz[10].quux.*;").code
-  #    end
-  #
-  #    test "that is a required" do
-  #      assert const_with({:required, [:bar, :baz, {:index, {:integer, 10}}, :quux]}) =
-  #               Parser.parse("const foo = bar.baz[10].quux.?;").code
-  #    end
-  #  end
-  #
-  #  describe "function calls" do
-  #    test "no parameter" do
-  #      assert const_with({:bar, _, []}) = Parser.parse("const foo = bar();").code
-  #    end
-  #
-  #    test "one parameter" do
-  #      assert const_with({:bar, _, [integer: 1]}) = Parser.parse("const foo = bar(1);").code
-  #    end
-  #
-  #    test "two parameters" do
-  #      assert const_with({:bar, _, [integer: 1, integer: 2]}) =
-  #               Parser.parse("const foo = bar(1, 2);").code
-  #    end
-  #
-  #    test "a ref as a base" do
-  #      assert const_with({{:ref, [:bar, :baz]}, _, []}) =
-  #               Parser.parse("const foo = bar.baz();").code
-  #    end
-  #
-  #    test "continuation of ref" do
-  #      assert const_with({:ref, [{{:ref, [:bar, :baz]}, _, []}, :quux]}) =
-  #               Parser.parse("const foo = bar.baz().quux;").code
-  #    end
-  #  end
-  #
-  #  describe "error unions" do
-  #    test "one union" do
-  #      assert const_with({:errorunion, [:bar, :baz]}) = Parser.parse("const foo = bar!baz;").code
-  #    end
-  #
-  #    test "multi union" do
-  #      assert const_with({:errorunion, [:bar, :baz, :quux]}) =
-  #               Parser.parse("const foo = bar!baz!quux;").code
-  #    end
-  #  end
+  # SuffixExpr
+
+  describe "primary type expression, one deep" do
+    # PrimaryTypeExpr (SuffixOp / FnCallArguments)*
+
+    # SuffixOp
+    #   <- LBRACKET Expr (DOT2 (Expr? (COLON Expr)?)?)? RBRACKET
+    #    / DOT IDENTIFIER
+    #    / DOTASTERISK
+    #    / DOTQUESTIONMARK
+
+    test "works for just an identifier" do
+      assert [%{value: :bar}] = Parser.parse("const foo = bar;").code
+    end
+
+    test "works for an identifier + left bracket" do
+      assert [%{value: {:ref, [:bar, {:index, :baz}]}}] = Parser.parse("const foo = bar[baz];").code
+    end
+
+    test "works for an identifier + open ended range" do
+      assert [%{value: {:ref, [:bar, {:range, {:integer, 0}}]}}] =
+               Parser.parse("const foo = bar[0..];").code
+    end
+
+    test "works for an identifier + range" do
+      assert [%{value: {:ref, [:bar, {:range, {:integer, 0}, :baz}]}}] =
+               Parser.parse("const foo = bar[0..baz];").code
+    end
+
+    test "works for an identifier + range + sentinel" do
+      assert [%{value: {:ref, [:bar, {:range, {:integer, 0}, :baz, {:integer, 0}}]}}] =
+               Parser.parse("const foo = bar[0..baz:0];").code
+    end
+
+    test "works for a pointer deref" do
+      assert [%{value: {:ref, [:bar, :*]}}] = Parser.parse("const foo = bar.*;").code
+    end
+
+    test "works for a optional deref" do
+      assert [%{value: {:ref, [:bar, :"?"]}}] = Parser.parse("const foo = bar.?;").code
+    end
+
+    test "works for a function call with no arguments" do
+      assert [%{value: {:call, :bar, []}}] = Parser.parse("const foo = bar();").code
+    end
+
+    test "works for a function call with one argument" do
+      assert [%{value: {:call, :bar, [:baz]}}] = Parser.parse("const foo = bar(baz);").code
+    end
+  end
+
+  describe "async function call" do
+    test "works" do
+      #  assert const_with({:bar, %{async: true}, []}) =
+      #           Parser.parse("const foo = async bar();").code
+    end
+  end
 end
