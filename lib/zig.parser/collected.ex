@@ -1,5 +1,5 @@
 defmodule Zig.Parser.Collected do
-  @literals ~w(integer char float string)a
+  @literals ~w[integer char float string]a
 
   def literals, do: @literals
 

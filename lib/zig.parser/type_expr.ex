@@ -90,8 +90,8 @@ defmodule Zig.Parser.TypeExpr do
 
   defp parse_call([argument | rest], so_far), do: parse_call(rest, [argument | so_far])
 
-  @boolean_slice_opts ~w(allowzero const volatile)a
-  @bracketed ~w(slice multiptr cptr array)a
+  @boolean_slice_opts ~w[allowzero const volatile]a
+  @bracketed ~w[slice multiptr cptr array]a
 
   defp parse_ptr_type([:RBRACKET | rest], class) when class in @bracketed do
     parse_ptr_opts(rest, class)

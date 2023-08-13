@@ -28,7 +28,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.ParamDecl
   alias Zig.Parser.ParseError
 
-  @keywords ~w(addrspace align allowzero and anyframe anytype asm async await break callconv catch comptime const continue defer else enum errdefer error export extern fn for if inline noalias nosuspend noinline opaque or orelse packed pub resume return linksection struct suspend switch test threadlocal try union unreachable usingnamespace var volatile while)a
+  @keywords ~w[addrspace align allowzero and anyframe anytype asm async await break callconv catch comptime const continue defer else enum errdefer error export extern fn for if inline noalias nosuspend noinline opaque or orelse packed pub resume return linksection struct suspend switch test threadlocal try union unreachable usingnamespace var volatile while]a
   @keyword_mapping Enum.map(@keywords, &{:"KEYWORD_#{&1}", [token: &1]})
 
   @sub_operators %{
@@ -88,16 +88,16 @@ defmodule Zig.Parser do
                           {name, [token: op, start_position: true]}
                         end)
 
-  @operators ~w(COMMA DOT DOT2 COLON LBRACE LBRACKET LPAREN MINUSRARROW LETTERC QUESTIONMARK RBRACE RBRACKET RPAREN SEMICOLON)a
+  @operators ~w[COMMA DOT DOT2 COLON LBRACE LBRACKET LPAREN MINUSRARROW LETTERC QUESTIONMARK RBRACE RBRACKET RPAREN SEMICOLON]a
   @operator_mapping Enum.map(@operators, &{&1, [token: true]})
 
-  @collecteds ~w(IDENTIFIER INTEGER FLOAT STRINGLITERAL BUILTINIDENTIFIER CHAR_LITERAL line_string)a
+  @collecteds ~w[IDENTIFIER INTEGER FLOAT STRINGLITERAL BUILTINIDENTIFIER CHAR_LITERAL line_string]a
   @collected_mapping Enum.map(
                        @collecteds,
                        &{&1, [collect: true, post_traverse: {Collected, :post_traverse, [&1]}]}
                      )
 
-  @lists ~w(IdentifierList SwitchProngList AsmOutputList AsmInputList StringList ParamDeclList ExprList)a
+  @lists ~w[IdentifierList SwitchProngList AsmOutputList AsmInputList StringList ParamDeclList ExprList]a
   @lists_mapping Enum.map(@lists, &{&1, tag: true})
 
   @parser_options [

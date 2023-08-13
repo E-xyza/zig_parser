@@ -8,7 +8,7 @@ defmodule Zig.Parser.Statement do
     {rest, [parse(args) | rest_args], context}
   end
 
-  @tagged_content ~w(comptime nosuspend suspend defer)a
+  @tagged_content ~w[comptime nosuspend suspend defer]a
   @endings [[], [:SEMICOLON]]
 
   defp parse([tag, block | ender]) when tag in @tagged_content and ender in @endings do

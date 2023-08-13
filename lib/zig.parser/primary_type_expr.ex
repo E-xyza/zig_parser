@@ -37,7 +37,7 @@ defmodule Zig.Parser.PrimaryTypeExpr do
     {:builtin, name, parse_builtin(builtin_args, [])}
   end
 
-  @containers ~w(struct opaque enum union)a
+  @containers ~w[struct opaque enum union]a
   @container_opts %{}
 
   defp parse([:DOT, map]) when is_map(map) do
