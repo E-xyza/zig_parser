@@ -1,4 +1,5 @@
 defmodule Zig.Parser.PrimaryExpr do
+  alias Zig.Parser.For
   alias Zig.Parser.If
   alias Zig.Parser.StructLiteral
 
@@ -13,9 +14,12 @@ defmodule Zig.Parser.PrimaryExpr do
     end
   end
 
-  defp parse([:if | rest]) do
-    If.parse(rest)
+  defp parse([label, :COLON | rest]) do
+    %{parse(rest) | label: label}
   end
+
+  defp parse([:if | rest]), do: If.parse(rest)
+  defp parse([:for | rest]), do: For.parse(rest)
 
   defp parse([:break]), do: :break
   defp parse([:break, :COLON, tag]), do: {:break, tag}

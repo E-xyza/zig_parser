@@ -10,6 +10,7 @@ defmodule Zig.Parser.Block do
         }
 
   alias Zig.Parser
+  alias Zig.Parser.Block
 
   def post_traverse(rest, [{:Block, code} | rest_args], context, loc, col) do
     block =
@@ -17,6 +18,11 @@ defmodule Zig.Parser.Block do
       |> parse
       |> Parser.put_location(loc, col)
 
+    {rest, [block | rest_args], context}
+  end
+
+  def post_traverse(rest, [{:BlockExpr, [%Block{} = code]} | rest_args], context, loc, col) do
+    block = Parser.put_location(code, loc, col)
     {rest, [block | rest_args], context}
   end
 

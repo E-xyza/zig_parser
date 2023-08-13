@@ -7,13 +7,13 @@ defmodule Zig.Parser do
   alias Zig.Parser.Asm
   alias Zig.Parser.AssignExpr
   alias Zig.Parser.Block
-  alias Zig.Parser.ByteAlign
   alias Zig.Parser.Collected
   alias Zig.Parser.ContainerDecl
   alias Zig.Parser.ContainerDeclarations
   alias Zig.Parser.Decl
   alias Zig.Parser.VarDecl
   alias Zig.Parser.Expr
+  alias Zig.Parser.For
   alias Zig.Parser.InitList
   alias Zig.Parser.TestDecl
   alias Zig.Parser.ComptimeDecl
@@ -188,6 +188,9 @@ defmodule Zig.Parser do
                     BlockExpr: [tag: true, post_traverse: {Block, :post_traverse, []}],
                     Block: [tag: true, post_traverse: {Block, :post_traverse, []}],
                     FnProto: [tag: true, post_traverse: {Function, :post_traverse, []}],
+                    ForStatement: [tag: true, post_traverse: {For, :post_traverse, []}],
+                    # keywords that add inline
+                    LoopStatement: [tag: true, post_traverse: :add_inline],
                     # basic pseudofunction keywords
                     CallConv: [tag: true, post_traverse: :pseudofunction],
                     ByteAlign: [tag: true, post_traverse: :pseudofunction],
@@ -301,7 +304,17 @@ defmodule Zig.Parser do
     String.to_integer(number)
   end
 
-  defp pseudofunction(rest, [{_tag, [name, :LPAREN, payload, :RPAREN]} | rest_args], context, _loc, _col) do
+  defp add_inline(rest, [{_tag, [:inline, payload]} | rest_args], context, _loc, _col) do
+    {rest, [%{payload | inline: true} | rest_args], context}
+  end
+
+  defp pseudofunction(
+         rest,
+         [{_tag, [name, :LPAREN, payload, :RPAREN]} | rest_args],
+         context,
+         _loc,
+         _col
+       ) do
     {rest, [{name, payload} | rest_args], context}
   end
 
