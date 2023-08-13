@@ -8,7 +8,7 @@ defmodule Zig.Parser.Function do
     :name,
     :params,
     :type,
-    :align,
+    :alignment,
     :linksection,
     :callconv,
     impliciterror: false,
@@ -53,7 +53,7 @@ defmodule Zig.Parser.Function do
   end
 
   defp parse_decl([{:align, align} | rest], fun_struct) do
-    parse_decl(rest, %{fun_struct | align: align})
+    parse_decl(rest, %{fun_struct | alignment: align})
   end
 
   defp parse_decl([{:callconv, {:enum_literal, callconv}} | rest], fun_struct) do

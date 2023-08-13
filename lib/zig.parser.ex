@@ -11,6 +11,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.ContainerDecl
   alias Zig.Parser.ContainerDeclarations
   alias Zig.Parser.Decl
+  alias Zig.Parser.ErrorUnionExpr
   alias Zig.Parser.VarDecl
   alias Zig.Parser.Expr
   alias Zig.Parser.For
@@ -21,6 +22,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.Function
   alias Zig.Parser.PrimaryExpr
   alias Zig.Parser.PrimaryTypeExpr
+  alias Zig.Parser.Statement
   alias Zig.Parser.TopLevelFn
   alias Zig.Parser.TopLevelVar
   alias Zig.Parser.TypeExpr
@@ -169,6 +171,10 @@ defmodule Zig.Parser do
                       tag: true,
                       post_traverse: {Expr, :post_traverse, []}
                     ],
+                    ErrorUnionExpr: [
+                      tag: true,
+                      post_traverse: {ErrorUnionExpr, :post_traverse, []}
+                    ],
                     InitList: [
                       tag: true,
                       post_traverse: {InitList, :post_traverse, []}
@@ -189,6 +195,7 @@ defmodule Zig.Parser do
                     Block: [tag: true, post_traverse: {Block, :post_traverse, []}],
                     FnProto: [tag: true, post_traverse: {Function, :post_traverse, []}],
                     ForStatement: [tag: true, post_traverse: {For, :post_traverse, []}],
+                    Statement: [tag: true, post_traverse: {Statement, :post_traverse, []}],
                     # keywords that add inline
                     LoopStatement: [tag: true, post_traverse: :add_inline],
                     # basic pseudofunction keywords

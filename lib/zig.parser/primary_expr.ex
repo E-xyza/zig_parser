@@ -15,10 +15,6 @@ defmodule Zig.Parser.PrimaryExpr do
     end
   end
 
-  defp parse([label, :COLON | rest]) do
-    %{parse(rest) | label: label}
-  end
-
   defp parse([:if | rest]), do: If.parse(rest)
   defp parse([:for | rest]), do: For.parse(rest)
   defp parse([:while | rest]), do: While.parse(rest)
@@ -35,6 +31,10 @@ defmodule Zig.Parser.PrimaryExpr do
 
   defp parse([:return]), do: :return
   defp parse([:return, expr]), do: {:return, expr}
+
+  defp parse([label, :COLON | rest]) do
+    %{parse(rest) | label: label}
+  end
 
   defp parse([identifier, map]) when is_map(map) do
     %StructLiteral{type: identifier, values: map}

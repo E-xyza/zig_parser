@@ -5,7 +5,7 @@ defmodule Zig.Parser.Var do
     :value,
     :location,
     :doc_comment,
-    :align,
+    :alignment,
     extern: false,
     export: false,
     pub: false,

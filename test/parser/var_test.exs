@@ -88,7 +88,7 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
     # var and const
 
     test "adds byte alignment" do
-      assert [{:var, %{align: {:integer, 8}}, {_, _, _}}] =
+      assert [{:var, %{alignment: {:integer, 8}}, {_, _, _}}] =
                Parser.parse("var foo: u32 align(8) = undefined;").code
     end
 

@@ -13,7 +13,7 @@ defmodule Zig.Parser.Test.FunctionTest do
     test "has correct defaults" do
       assert [
                %Function{
-                 align: nil,
+                 alignment: nil,
                  linksection: nil,
                  callconv: nil,
                  impliciterror: false
@@ -22,7 +22,7 @@ defmodule Zig.Parser.Test.FunctionTest do
     end
 
     test "can obtain byte alignment" do
-      assert [%Function{align: {:integer, 32}}] =
+      assert [%Function{alignment: {:integer, 32}}] =
                Parser.parse("fn foo() align(32) void {}").code
     end
 
