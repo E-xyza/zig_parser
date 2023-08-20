@@ -1,10 +1,8 @@
 defmodule Zig.Parser.PrimaryTypeExpr do
+  alias Zig.Parser.ErrorSet
   alias Zig.Parser.Function
   alias Zig.Parser.StructLiteral
-
-  def post_traverse(rest, [{:PrimaryTypeExpr, [{:builtin, _} | _]} | _] = args, context, loc, col) do
-    Function.post_traverse(rest, args, context, loc, col)
-  end
+  alias Zig.Parser.Switch
 
   def post_traverse(rest, [{:PrimaryTypeExpr, args} | args_rest], context, _, _) do
     expr = parse(args)
@@ -33,8 +31,8 @@ defmodule Zig.Parser.PrimaryTypeExpr do
 
   def _parse(a), do: parse(a)
 
-  defp parse([{:builtin, name}, :LPAREN | builtin_args]) do
-    {:builtin, name, parse_builtin(builtin_args, [])}
+  defp parse([{:builtin, name}, :LPAREN, {:ExprList, args}, :RPAREN]) do
+    {:call, name, parse_args(args, [])}
   end
 
   @containers ~w[struct opaque enum union]a
@@ -115,7 +113,7 @@ defmodule Zig.Parser.PrimaryTypeExpr do
 
   # error sets and error literals
 
-  defp parse([:error, :LBRACE | errorset]), do: parse_errorset(errorset, [])
+  defp parse([:error, :LBRACE | errorset]), do: ErrorSet.parse([:LBRACE | errorset])
 
   defp parse([:error, :DOT, error]), do: {:error, error}
 
@@ -131,14 +129,13 @@ defmodule Zig.Parser.PrimaryTypeExpr do
   end
 
   # SwitchExpr
-
-  defp parse([:switch | rest]), do: Control.parse_switch(rest)
+  defp parse(switch = [:switch | rest]), do: Switch.parse(switch)
 
   defp parse([any]), do: any
 
-  defp parse_builtin([:RPAREN], parts), do: Enum.reverse(parts)
-  defp parse_builtin([:COMMA | rest], parts), do: parse_builtin(rest, parts)
-  defp parse_builtin([value | rest], parts), do: parse_builtin(rest, [value | parts])
+  defp parse_args([], _), do: []
+  defp parse_args([arg], so_far), do: Enum.reverse([arg | so_far])
+  defp parse_args([arg, :COMMA | rest], so_far), do: parse_args(rest, [arg | so_far])
 
   defp parse_container_body([const = {:const, _, _} | rest], parts) do
     new_parts = Keyword.update(parts, :decls, [const], &[const | &1])
@@ -164,11 +161,4 @@ defmodule Zig.Parser.PrimaryTypeExpr do
     new_parts = Keyword.update(parts, :fields, [identifier], &[identifier | &1])
     parse_container_body(rest, new_parts)
   end
-
-  defp parse_errorset([:RBRACE], so_far), do: {:errorset, Enum.reverse(so_far)}
-
-  defp parse_errorset([:COMMA | rest], so_far), do: parse_errorset(rest, so_far)
-
-  defp parse_errorset([identifier | rest], so_far),
-    do: parse_errorset(rest, [identifier | so_far])
 end

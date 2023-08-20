@@ -41,7 +41,7 @@ defmodule Zig.Parser.Collected do
     {rest, [{:integer, String.to_integer(remove_underscore(integer))} | args_rest], context}
   end
 
-  def post_traverse(rest, [<<?', char, ?'>> | args_rest], context, _, _, :CHAR_LITERAL) do
+  def post_traverse(rest, ["'", char, "'" | args_rest], context, _, _, :CHAR_LITERAL) do
     {rest, [{:char, char} | args_rest], context}
   end
 

@@ -47,36 +47,26 @@ defmodule Zig.Parser.Test.StatementTest do
       [%{code: [%Block{comptime: true}]}] = Parser.parse("comptime {comptime {}}").code
     end
 
-    test "can apply to a generic call" do
-      [%{code: [%Block{comptime: true}]}] = Parser.parse("comptime {comptime foo(bar);}").code
+    test "can be nosuspend" do
+      [%{code: [%Block{nosuspend: true}]}] = Parser.parse("comptime {nosuspend {}}").code
     end
 
-    #
-    #   test "can be nosuspend" do
-    #     toplevelblockcontent(nosuspend) = Parser.parse("comptime {nosuspend {}}").code
-    #     assert {:nosuspend, _, {:block, _, []}} = nosuspend
-    #   end
-    #
-    #   test "can be suspend" do
-    #     toplevelblockcontent(suspend) = Parser.parse("comptime {suspend {}}").code
-    #     assert {:suspend, _, {:block, _, []}} = suspend
-    #   end
-    #
-    #   test "can be defer" do
-    #     toplevelblockcontent(defer) = Parser.parse("comptime {defer {}}").code
-    #     assert {:defer, _, {:block, _, []}} = defer
-    #   end
-    #
-    #   test "can be errdefer" do
-    #     toplevelblockcontent(errdefer) = Parser.parse("comptime {errdefer {}}").code
-    #     assert {:errdefer, _, do: {:block, _, []}} = errdefer
-    #   end
-    #
-    #   test "can be errdefer with a payload" do
-    #     toplevelblockcontent(errdefer) = Parser.parse("comptime {errdefer |err| {}}").code
-    #     assert {:errdefer, _, payload: :err, do: {:block, _, []}} = errdefer
-    #   end
-    # end
+    test "can be suspend" do
+      [%{code: [%Block{suspend: true}]}] = Parser.parse("comptime {suspend {}}").code
+    end
+
+    test "can be defer" do
+      [%{code: [{:defer, %Block{}}]}] = Parser.parse("comptime {defer {}}").code
+    end
+
+    test "can be errdefer" do
+      [%{code: [{:errdefer, %Block{}}]}] = Parser.parse("comptime {errdefer {}}").code
+    end
+
+    test "can be errdefer with a payload" do
+      [%{code: [{:errdefer, :err, %Block{}}]}] = Parser.parse("comptime {errdefer |err| {}}").code
+    end
+
     #
     # describe "prefixed expressions" do
     #   test "can be comptime" do

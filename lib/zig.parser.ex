@@ -93,7 +93,7 @@ defmodule Zig.Parser do
   @operators ~w[COMMA DOT DOT2 COLON LBRACE LBRACKET LPAREN MINUSRARROW LETTERC QUESTIONMARK RBRACE RBRACKET RPAREN SEMICOLON]a
   @operator_mapping Enum.map(@operators, &{&1, [token: true]})
 
-  @collecteds ~w[IDENTIFIER INTEGER FLOAT STRINGLITERAL BUILTINIDENTIFIER CHAR_LITERAL line_string]a
+  @collecteds ~w[IDENTIFIER INTEGER FLOAT STRINGLITERAL BUILTINIDENTIFIER line_string]a
   @collected_mapping Enum.map(
                        @collecteds,
                        &{&1, [collect: true, post_traverse: {Collected, :post_traverse, [&1]}]}
@@ -142,8 +142,10 @@ defmodule Zig.Parser do
                     skip: [ignore: true],
                     STRINGLITERALSINGLE: [
                       tag: true,
-                      post_traverse: :string_literal_single,
-                      collect: true
+                      post_traverse: :string_literal_single
+                    ],
+                    CHAR_LITERAL: [
+                      post_traverse: {Collected, :post_traverse, [:CHAR_LITERAL]}
                     ],
                     ComptimeDecl: [
                       tag: true,
@@ -203,6 +205,8 @@ defmodule Zig.Parser do
                     ByteAlign: [tag: true, post_traverse: :pseudofunction],
                     LinkSection: [tag: true, post_traverse: :pseudofunction],
                     AddrSpace: [tag: true, post_traverse: :pseudofunction],
+                    # substituted functions:
+                    mb_utf8_literal: [alias: :utf8],
                     # Top level
                     Root: [tag: true, post_traverse: :post_traverse]
                   ] ++
@@ -220,6 +224,8 @@ defmodule Zig.Parser do
     |> parsec(:Root)
 
   defparsecp(:parser, zig_parser)
+
+  defparsecp(:utf8, utf8_char(not: 0))
 
   def parse(string) do
     case parser(string) do
@@ -284,9 +290,9 @@ defmodule Zig.Parser do
     |> Enum.join("\n")
   end
 
-  defp string_literal_single(rest, [{:STRINGLITERALSINGLE, [literal]} | rest_args], context, _, _) do
-    trimmed_literal = String.trim(literal, ~S("))
-    {rest, [trimmed_literal | rest_args], context}
+  defp string_literal_single(rest, [{:STRINGLITERALSINGLE, literal} | rest_args], context, _, _) do
+    remove_ends = Enum.slice(literal, 1..-2//1)
+    {rest, [List.to_string(remove_ends) | rest_args], context}
   end
 
   def post_traverse("", [Root: [{:doc_comment, [doc_comment]} | code]], context, _, _) do

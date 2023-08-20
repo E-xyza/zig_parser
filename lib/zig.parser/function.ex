@@ -28,27 +28,16 @@ defmodule Zig.Parser.Function do
     {rest, [fun_struct | rest_args], context}
   end
 
-  def post_traverse(
-        rest,
-        [{:PrimaryTypeExpr, [{:builtin, name} | args]} | rest_args],
-        context,
-        loc,
-        col
-      ) do
-    fun_struct =
-      [name | args]
-      |> parse
-      |> Map.replace!(:builtin, true)
-      |> Parser.put_location(loc, col)
-
-    {rest, [fun_struct | rest_args], context}
+  # type declaration
+  def parse([:LPAREN, {:ParamDeclList, params}, :RPAREN, type]) do
+    %__MODULE__{params: parse_params(params, []), type: type}
   end
 
-  defp parse([name, :LPAREN, {:ParamDeclList, params}, :RPAREN | rest]) do
-    parse_decl(rest, %__MODULE__{name: name, params: params})
+  def parse([name, :LPAREN, {:ParamDeclList, params}, :RPAREN | rest]) do
+    parse_decl(rest, %__MODULE__{name: name, params: parse_params(params, [])})
   end
 
-  defp parse([name, :LPAREN, {:ExprList, params}, :RPAREN]) do
+  def parse([name, :LPAREN, {:ExprList, params}, :RPAREN]) do
     %__MODULE__{name: name, params: params}
   end
 
@@ -69,4 +58,11 @@ defmodule Zig.Parser.Function do
   end
 
   defp parse_decl([type], fun_struct), do: %{fun_struct | type: type}
+
+  defp parse_params([identifier, :COMMA | rest], so_far),
+    do: parse_params(rest, [identifier | so_far])
+
+  defp parse_params([identifier], so_far), do: Enum.reverse(so_far, [identifier])
+
+  defp parse_params([], []), do: []
 end

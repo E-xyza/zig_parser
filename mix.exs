@@ -30,7 +30,7 @@ defmodule ZigParser.MixProject do
 
   defp deps do
     [
-      {:pegasus, "~> 0.2.2", runtime: false},
+      {:pegasus, "~> 0.2.3", runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
