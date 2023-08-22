@@ -1,6 +1,7 @@
 defmodule Zig.Parser.Block do
   @enforce_keys [:code]
-  defstruct @enforce_keys ++ [:label, :location, comptime: false, nosuspend: false, suspend: false]
+  defstruct @enforce_keys ++
+              [:label, :location, comptime: false, nosuspend: false, suspend: false]
 
   @type t :: %__MODULE__{
           label: atom,

@@ -42,47 +42,43 @@ defmodule Zig.Parser.Test.FunctionTest do
     end
   end
 
-  # describe "function parameters" do
-  #  test "can have one argument" do
-  #    assert [{:fn, _, opts}] = Parser.parse("fn foo(bar: u8) void {}").code
-  #    assert [{:bar, _, :u8}] = opts[:params]
-  #  end
-  #
-  #  test "can have two arguments" do
-  #    assert [{:fn, _, opts}] = Parser.parse("fn foo(bar: u8, baz: u32) void {}").code
-  #    assert [{:bar, _, :u8}, {:baz, _, :u32}] = opts[:params]
-  #  end
-  #
-  #  test "can have a doc comment" do
-  #    assert [{:fn, _, opts}] =
-  #             Parser.parse("""
-  #             fn foo(
-  #               /// this is a comment
-  #               bar: u8
-  #             ) void {}
-  #             """).code
-  #
-  #    assert [{:bar, %{doc_comment: " this is a comment\n"}, _}] = opts[:params]
-  #  end
-  #
-  #  test "can be noalias" do
-  #    assert [{:fn, _, opts}] = Parser.parse("fn foo(noalias bar: u8) void {}").code
-  #    assert [{:bar, %{noalias: true}, _}] = opts[:params]
-  #  end
-  #
-  #  test "can be comptime" do
-  #    assert [{:fn, _, opts}] = Parser.parse("fn foo(comptime bar: u8) void {}").code
-  #    assert [{:bar, %{comptime: true}, _}] = opts[:params]
-  #  end
-  #
-  #  test "can have no name" do
-  #    assert [{:fn, _, opts}] = Parser.parse("fn foo(u8) void {}").code
-  #    assert [{:_, _, :u8}] = opts[:params]
-  #  end
-  #
-  #  test "can be a vararg" do
-  #    assert [{:fn, _, opts}] = Parser.parse("fn foo(...) void {}").code
-  #    assert [:...] = opts[:params]
-  #  end
-  # end
+  describe "function parameters" do
+    test "can have one argument" do
+      assert [%Function{params: [%{name: :bar, type: :u8}]}] =
+               Parser.parse("fn foo(bar: u8) void {}").code
+    end
+
+    test "can have two arguments" do
+      assert [%Function{params: [%{name: :bar, type: :u8}, %{name: :baz, type: :u32}]}] =
+               Parser.parse("fn foo(bar: u8, baz: u32) void {}").code
+    end
+
+    test "can have a doc comment" do
+      assert [%Function{params: [%{doc_comment: doc_comment}]}] =
+               Parser.parse("""
+               fn foo(
+                 /// this is a comment
+                 bar: u8
+               ) void {}
+               """).code
+
+      assert doc_comment =~ "this is a comment"
+    end
+
+    test "can be noalias" do
+      assert [%{params: [%{noalias: true}]}] = Parser.parse("fn foo(noalias bar: u8) void {}").code
+    end
+
+      test "can be comptime" do
+        assert [%{params: [%{comptime: true}]}] = Parser.parse("fn foo(comptime bar: u8) void {}").code
+      end
+
+      test "can have no name" do
+        assert [%{params: [%{name: nil, type: :u8}]}] = Parser.parse("fn foo(u8) void {}").code
+      end
+
+      test "can be a vararg" do
+        assert [%{params: [%{type: :...}]}] = Parser.parse("fn foo(...) void {}").code
+      end
+  end
 end

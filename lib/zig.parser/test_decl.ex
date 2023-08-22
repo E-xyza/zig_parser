@@ -1,14 +1,12 @@
-defmodule Zig.Parser.TestOptions do
-  defstruct [:position, :doc_comment]
-end
-
 defmodule Zig.Parser.TestDecl do
   alias Zig.Parser
-  alias Zig.Parser.TestOptions
+  alias Zig.Parser.Block
+
+  defstruct [:position, :doc_comment, :block, :name]
 
   def post_traverse(
         rest,
-        [{__MODULE__, [position, {:doc_comment, comment} | args]} | rest_args],
+        [{:TestDecl, [position, {:doc_comment, comment} | args]} | rest_args],
         context,
         _,
         _
@@ -18,33 +16,20 @@ defmodule Zig.Parser.TestDecl do
       |> String.split("\n")
       |> length
 
-    ast =
-      args
-      |> parse()
-      |> Parser.put_opt(:doc_comment, comment)
-      |> Parser.put_opt(:position, %{
-        position
-        | line: position.line + comment_lines - 1,
-          column: 1
-      })
-
+    ast = %{parse(args) | doc_comment: comment, position: position}
     {rest, [ast | rest_args], context}
   end
 
-  def post_traverse(rest, [{__MODULE__, [position | args]} | rest_args], context, _, _) do
-    ast =
-      args
-      |> parse
-      |> Parser.put_opt(:position, position)
-
+  def post_traverse(rest, [{:TestDecl, [position | args]} | rest_args], context, _, _) do
+    ast = %{parse(args) | position: position}
     {rest, [ast | rest_args], context}
   end
 
-  defp parse([:test, block = {:block, _, _}]) do
-    {:test, %TestOptions{}, {nil, block}}
+  defp parse([:test, %Block{} = block]) do
+    %__MODULE__{block: block}
   end
 
-  defp parse([:test, name, block = {:block, _, _}]) when is_binary(name) do
-    {:test, %TestOptions{}, {name, block}}
+  defp parse([:test, name, %Block{} = block]) when is_binary(name) do
+    %__MODULE__{name: name, block: block}
   end
 end

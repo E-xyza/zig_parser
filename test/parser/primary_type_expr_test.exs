@@ -141,32 +141,32 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
     end
 
     test "works with one parameter" do
-      assert [%{value: %Function{params: [:u8], type: :void}}] =
+      assert [%{value: %Function{params: [%{type: :u8}], type: :void}}] =
                Parser.parse("const foo = fn (u8) void;").code
     end
 
     test "works with one named parameter" do
-      assert [%{value: %Function{params: [{:this, :u8}], type: :void}}] =
+      assert [%{value: %Function{params: [%{name: :this}], type: :void}}] =
                Parser.parse("const foo = fn (this: u8) void;").code
     end
 
     test "works with two parameters" do
-      assert [%{value: %Function{params: [:u8, :u32], type: :void}}] =
+      assert [%{value: %Function{params: [%{type: :u8}, %{type: :u32}], type: :void}}] =
                Parser.parse("const foo = fn (u8, u32) void;").code
     end
 
     test "works with noalias" do
-      assert [%{value: %Function{params: [{:noalias, :u8}], type: :void}}] =
+      assert [%{value: %Function{params: [%{noalias: true}], type: :void}}] =
                Parser.parse("const foo = fn (noalias u8) void;").code
     end
 
     test "works with comptime" do
-      assert [%{value: %Function{params: [{:comptime, :u8}], type: :void}}] =
+      assert [%{value: %Function{params: [%{comptime: true}], type: :void}}] =
                Parser.parse("const foo = fn (comptime u8) void;").code
     end
 
     test "works with tripledot" do
-      assert [%{value: %Function{params: [:...], type: :void}}] =
+      assert [%{value: %Function{params: [%{type: :...}], type: :void}}] =
                Parser.parse("const foo = fn (...) void;").code
     end
   end

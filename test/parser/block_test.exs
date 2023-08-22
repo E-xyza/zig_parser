@@ -35,7 +35,7 @@ defmodule Zig.Parser.Test.BlockTest do
 
   describe "general properties of a function block" do
     test "can be empty" do
-      assert [%_{code: []}] = Parser.parse("fn foo() void {}").code
+      assert [%{block: %{code: []}}] = Parser.parse("fn foo() void {}").code
     end
   end
 end

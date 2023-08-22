@@ -35,8 +35,7 @@ defmodule Zig.Parser.Asm do
   end
 
   defp parse([{:StringList, clobbers}, :RPAREN], asm) do
-    clobber_names = Enum.map(clobbers, fn {:string, string} -> string end)
-    %{asm | clobbers: clobber_names}
+    %{asm | clobbers: parse_clobbers(clobbers, [])}
   end
 
   defp parse([:RPAREN], asm), do: asm
@@ -69,4 +68,12 @@ defmodule Zig.Parser.Asm do
   end
 
   defp parse_io([], so_far), do: Enum.reverse(so_far)
+
+  defp parse_clobbers([], []), do: []
+
+  defp parse_clobbers([{:string, string}], so_far), do: Enum.reverse([string | so_far])
+
+  defp parse_clobbers([{:string, string}, :COMMA | rest], so_far) do
+    parse_clobbers(rest, [string | so_far])
+  end
 end
