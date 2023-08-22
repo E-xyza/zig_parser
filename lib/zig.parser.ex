@@ -16,7 +16,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.Expr
   alias Zig.Parser.For
   alias Zig.Parser.InitList
-  alias Zig.Parser.TestDecl
+  alias Zig.Parser.Test
   alias Zig.Parser.ComptimeDecl
   alias Zig.Parser.TopLevelDecl
   alias Zig.Parser.Function
@@ -121,7 +121,7 @@ defmodule Zig.Parser do
                     TestDecl: [
                       tag: true,
                       start_position: true,
-                      post_traverse: {TestDecl, :post_traverse, []}
+                      post_traverse: {Test, :post_traverse, []}
                     ],
                     Decl: [
                       tag: true,

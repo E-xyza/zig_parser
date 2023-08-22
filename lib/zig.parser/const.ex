@@ -1,5 +1,15 @@
 defmodule Zig.Parser.Const do
-  defstruct [:name, :type, :value, :location, :doc_comment, pub: false, comptime: false]
+  defstruct [
+    :name,
+    :type,
+    :value,
+    :location,
+    :linksection,
+    :addrspace,
+    :doc_comment,
+    pub: false,
+    comptime: false
+  ]
 
   def parse([:COLON, type | rest]) do
     %{parse(rest) | type: type}

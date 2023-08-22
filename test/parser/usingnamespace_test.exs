@@ -9,10 +9,7 @@ defmodule Zig.Parser.Test.UsingNamespaceTest do
 
   describe "when given a basic usingnamespace block" do
     test "it can be found" do
-      assert [{:usingnamespace, _, :foo}] =
-               Parser.parse("""
-               usingnamespace foo;
-               """).code
+      assert [%{namespace: :foo}] = Parser.parse("usingnamespace foo;").code
     end
   end
 end

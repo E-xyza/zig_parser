@@ -12,10 +12,10 @@ defmodule Zig.Parser.PrimaryTypeExpr do
 
     new_context =
       case expr do
-        {:builtin, :embedFile, [string: path]} ->
+        {:call, :embedFile, [string: path]} ->
           %{context | dependencies: context.dependencies ++ [path]}
 
-        {:builtin, :import, [string: path]} ->
+        {:call, :import, [string: path]} ->
           if Path.extname(path) == ".zig" do
             %{context | dependencies: context.dependencies ++ [path]}
           else

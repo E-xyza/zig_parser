@@ -66,19 +66,21 @@ defmodule Zig.Parser.Test.FunctionTest do
     end
 
     test "can be noalias" do
-      assert [%{params: [%{noalias: true}]}] = Parser.parse("fn foo(noalias bar: u8) void {}").code
+      assert [%{params: [%{noalias: true}]}] =
+               Parser.parse("fn foo(noalias bar: u8) void {}").code
     end
 
-      test "can be comptime" do
-        assert [%{params: [%{comptime: true}]}] = Parser.parse("fn foo(comptime bar: u8) void {}").code
-      end
+    test "can be comptime" do
+      assert [%{params: [%{comptime: true}]}] =
+               Parser.parse("fn foo(comptime bar: u8) void {}").code
+    end
 
-      test "can have no name" do
-        assert [%{params: [%{name: nil, type: :u8}]}] = Parser.parse("fn foo(u8) void {}").code
-      end
+    test "can have no name" do
+      assert [%{params: [%{name: nil, type: :u8}]}] = Parser.parse("fn foo(u8) void {}").code
+    end
 
-      test "can be a vararg" do
-        assert [%{params: [%{type: :...}]}] = Parser.parse("fn foo(...) void {}").code
-      end
+    test "can be a vararg" do
+      assert [%{params: [%{type: :...}]}] = Parser.parse("fn foo(...) void {}").code
+    end
   end
 end

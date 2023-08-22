@@ -66,7 +66,7 @@ defmodule Zig.Parser.Test.ContainerDeclTest do
     end
 
     test "with an import" do
-      assert [%{namespace: %Function{builtin: true}}] =
+      assert [%{namespace: {:call, :import, [string: "std"]}}] =
                Parser.parse("usingnamespace @import(\"std\");").code
     end
   end

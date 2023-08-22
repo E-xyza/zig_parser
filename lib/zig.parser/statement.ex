@@ -27,5 +27,7 @@ defmodule Zig.Parser.Statement do
     {:errdefer, parse(rest_args)}
   end
 
+  defp parse([statement, :SEMICOLON]), do: statement
+
   defp parse([content]), do: content
 end

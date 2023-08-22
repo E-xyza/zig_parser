@@ -1,8 +1,8 @@
-defmodule Zig.Parser.TestDecl do
+defmodule Zig.Parser.Test do
   alias Zig.Parser
   alias Zig.Parser.Block
 
-  defstruct [:position, :doc_comment, :block, :name]
+  defstruct [:position, :block, :name]
 
   def post_traverse(
         rest,

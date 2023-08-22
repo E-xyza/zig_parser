@@ -2,6 +2,7 @@ defmodule ZigParserTest.Regressions.FloatParseTest do
   use ExUnit.Case, async: true
 
   alias Zig.Parser
+  alias Zig.Parser.Const
 
   # problem: zig can handle very large (128-bit) floats
   # and elixir/BEAM can't, so it fails to parse correctly.
@@ -15,10 +16,10 @@ defmodule ZigParserTest.Regressions.FloatParseTest do
 
   describe "regression 25 Dec 2022" do
     test "zig parser can handle super long exponents" do
-      assert %{code: [{:const, _, const}]} =
+      assert %{code: [%Const{value: value}]} =
                Parser.parse("const foo = 1.18973149535723176502e+4932;")
 
-      assert {:foo, _, {:extended_float, "1.18973149535723176502e+4932"}} = const
+      assert {:extended_float, "1.18973149535723176502e+4932"} = value
     end
   end
 end

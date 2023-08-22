@@ -2,6 +2,7 @@ defmodule Zig.ParserTest do
   use ExUnit.Case, async: true
 
   alias Zig.Parser
+  alias Zig.Parser.Test
 
   describe "when given a file with a top-level doc comment" do
     test "a one-liner works" do
@@ -22,11 +23,11 @@ defmodule Zig.ParserTest do
 
   describe "when given a file with a test" do
     test "one test can be found" do
-      assert [{:test, _, {"foo", {:block, _, []}}}] = Parser.parse(~s(test "foo" {})).code
+      assert [%Test{name: "foo"}] = Parser.parse(~s(test "foo" {})).code
     end
 
     test "multiple tests can be found" do
-      assert [{:test, _, {"foo", _}}, {:test, _, {"bar", _}}] =
+      assert [%Test{name: "foo"}, %Test{name: "bar"}] =
                Parser.parse(~s(test "foo" {}\ntest "bar" {})).code
     end
   end

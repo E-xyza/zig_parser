@@ -2,12 +2,14 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
   use ExUnit.Case, async: true
 
   alias Zig.Parser
+  alias Zig.Parser.Const
+  alias Zig.Parser.Var
 
   describe "top level declarations on top level var blocks" do
     # tests:
     # TopLevelDecl <- doc_comment? KEYWORD_pub? (TopLevelFn / TopLevelVar / Usingnamespace)
     test "get doc comment for vars" do
-      assert [{:var, %{doc_comment: " this is a doc comment\n"}, {_, _, _}}] =
+      assert [%Var{doc_comment: " this is a doc comment\n"}] =
                Parser.parse("""
                /// this is a doc comment
                var foo: u32 = undefined;
@@ -15,14 +17,14 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
     end
 
     test "can identify pub for var" do
-      assert [{:var, %{pub: true}, {_, _, _}}] =
+      assert [%Var{pub: true}] =
                Parser.parse("""
                pub var foo: u32 = undefined;
                """).code
     end
 
     test "get doc comments for const" do
-      assert [{:const, %{doc_comment: " this is a doc comment\n"}, _}] =
+      assert [%Const{doc_comment: " this is a doc comment\n"}] =
                Parser.parse("""
                /// this is a doc comment
                const foo = 100;
@@ -30,7 +32,7 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
     end
 
     test "can identify pub for const" do
-      assert [{:const, %{pub: true}, _}] =
+      assert [%Const{pub: true}] =
                Parser.parse("""
                pub const foo = 100;
                """).code
@@ -45,39 +47,43 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
 
     test "it can be found" do
       assert [
-               {:var,
-                %{
-                  export: false,
-                  extern: false,
-                  threadlocal: false
-                }, {_, _, _}}
+               %Var{
+                 export: false,
+                 extern: false,
+                 threadlocal: false
+               }
              ] = Parser.parse("var foo: u32 = undefined;").code
     end
 
     test "export is flagged" do
-      assert [{:var, %{export: true}, {_, _, _}}] =
+      assert [%Var{export: true}] =
                Parser.parse("export var foo: u32 = undefined;").code
     end
 
     test "extern is flagged" do
-      assert [{:var, %{extern: true}, {_, _, _}}] =
+      assert [%Var{extern: true}] =
                Parser.parse("extern var foo: u32 = undefined;").code
     end
 
     test "extern can be typed" do
-      assert [{:var, %{extern: "C"}, {_, _, _}}] =
+      assert [%Var{extern: "C"}] =
                Parser.parse(~S|extern "C" var foo: u32 = undefined;|).code
     end
 
     test "threadlocal is flagged" do
-      assert [{:var, %{threadlocal: true}, {_, _, _}}] =
+      assert [%Var{threadlocal: true}] =
                Parser.parse("threadlocal var foo: u32 = undefined;").code
+    end
+
+    test "addrspace is marked" do
+      assert [%Var{addrspace: :gpu}] =
+               Parser.parse("var foo: u32 addrspace(.gpu) = undefined;").code
     end
   end
 
   describe "when given a basic top level const block" do
     test "it can be found" do
-      assert [{:const, _, {:foo, _, _}}] = Parser.parse("const foo = 100;").code
+      assert [%Const{name: :foo}] = Parser.parse("const foo = 100;").code
     end
   end
 
@@ -88,12 +94,12 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
     # var and const
 
     test "adds byte alignment" do
-      assert [{:var, %{alignment: {:integer, 8}}, {_, _, _}}] =
+      assert [%Var{alignment: {:integer, 8}}] =
                Parser.parse("var foo: u32 align(8) = undefined;").code
     end
 
     test "extern is flagged" do
-      assert [{:var, %{linksection: {:enum_literal, :foo}}, {_, _, _}}] =
+      assert [%Var{linksection: :foo}] =
                Parser.parse("var foo: u32 linksection(.foo) = undefined;").code
     end
   end

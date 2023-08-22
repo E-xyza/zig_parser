@@ -6,6 +6,8 @@ defmodule Zig.Parser.Var do
     :location,
     :doc_comment,
     :alignment,
+    :linksection,
+    :addrspace,
     extern: false,
     export: false,
     pub: false,
@@ -15,6 +17,18 @@ defmodule Zig.Parser.Var do
 
   def parse([:COLON, type | rest]) do
     %{parse(rest) | type: type}
+  end
+
+  def parse([{:linksection, {:enum_literal, section}} | rest]) do
+    %{parse(rest) | linksection: section}
+  end
+
+  def parse([{:addrspace, {:enum_literal, section}} | rest]) do
+    %{parse(rest) | addrspace: section}
+  end
+
+  def parse([{:align, alignment} | rest]) do
+    %{parse(rest) | alignment: alignment}
   end
 
   def parse([:=, value, :SEMICOLON]) do

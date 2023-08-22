@@ -4,20 +4,48 @@ defmodule Zig.Parser.ContainerDeclarations do
   end
 
   def post_traverse(rest, [{:ContainerDeclarations, args} | rest_args], context, _loc, _row) do
-    {rest, [parse(args) | rest_args], context}
+    new_args =
+      args
+      |> parse(nil, [])
+      |> Enum.reverse(rest_args)
+
+    {rest, new_args, context}
   end
 
-  defp parse([:comptime | rest]) do
-    %{parse(rest) | comptime: true}
+  defp parse([:comptime | rest], attrs, so_far) do
+    new_attrs =
+      attrs
+      |> List.wrap()
+      |> Keyword.put(:comptime, true)
+
+    parse(rest, new_attrs, so_far)
   end
 
-  defp parse([{:doc_comment, comment} | rest]) do
-    %{parse(rest) | doc_comment: comment}
+  defp parse([{:doc_comment, comment} | rest], attrs, so_far) do
+    new_attrs =
+      attrs
+      |> List.wrap()
+      |> Keyword.put(:doc_comment, comment)
+
+    parse(rest, new_attrs, so_far)
   end
 
-  defp parse([:pub | rest]) do
-    %{parse(rest) | pub: true}
+  defp parse([:pub | rest], attrs, so_far) do
+    new_attrs =
+      attrs
+      |> List.wrap()
+      |> Keyword.put(:pub, true)
+
+    parse(rest, new_attrs, so_far)
   end
 
-  defp parse([rest]), do: rest
+  defp parse([term | rest], nil, so_far) do
+    parse(rest, nil, [term | so_far])
+  end
+
+  defp parse([term | rest], attrs, so_far) do
+    parse(rest, nil, [struct!(term, attrs) | so_far])
+  end
+
+  defp parse([], _, so_far), do: Enum.reverse(so_far)
 end
