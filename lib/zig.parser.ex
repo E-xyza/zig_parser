@@ -23,7 +23,6 @@ defmodule Zig.Parser do
   alias Zig.Parser.PrimaryTypeExpr
   alias Zig.Parser.Statement
   alias Zig.Parser.TypeExpr
-  alias Zig.Parser.Usingnamespace
   alias Zig.Parser.ParamDecl
   alias Zig.Parser.ParseError
 
@@ -125,6 +124,7 @@ defmodule Zig.Parser do
                       post_traverse: {Decl, :post_traverse, []}
                     ],
                     ContainerDecl: [
+                      start_position: true,
                       tag: true,
                       post_traverse: {ContainerDecl, :post_traverse, []}
                     ],
@@ -133,6 +133,7 @@ defmodule Zig.Parser do
                       post_traverse: {ContainerDeclarations, :post_traverse, []}
                     ],
                     PrimaryExpr: [
+                      start_position: true,
                       tag: true,
                       post_traverse: {PrimaryExpr, :post_traverse, []}
                     ],
@@ -164,22 +165,37 @@ defmodule Zig.Parser do
                       tag: true,
                       post_traverse: {InitList, :post_traverse, []}
                     ],
-                    Usingnamespace: [
-                      tag: :usingnamespace,
-                      post_traverse: {Usingnamespace, :post_traverse, []}
-                    ],
                     ParamDecl: [tag: true, post_traverse: {ParamDecl, :post_traverse, []}],
-                    VarDecl: [tag: true, post_traverse: {VarDecl, :post_traverse, []}],
+                    VarDecl: [
+                      start_position: true,
+                      tag: true,
+                      post_traverse: {VarDecl, :post_traverse, []}
+                    ],
                     PrimaryTypeExpr: [
                       tag: true,
                       post_traverse: {PrimaryTypeExpr, :post_traverse, []}
                     ],
                     SwitchItem: [tag: true],
-                    IfStatement: [start_position: true],
-                    AsmExpr: [tag: true, post_traverse: {Asm, :post_traverse, []}],
-                    BlockExpr: [tag: true, post_traverse: {Block, :post_traverse, []}],
-                    Block: [tag: true, post_traverse: {Block, :post_traverse, []}],
-                    FnProto: [tag: true, post_traverse: {Function, :post_traverse, []}],
+                    AsmExpr: [
+                      start_position: true,
+                      tag: true,
+                      post_traverse: {Asm, :post_traverse, []}
+                    ],
+                    BlockExpr: [
+                      start_position: true,
+                      tag: true,
+                      post_traverse: {Block, :post_traverse, []}
+                    ],
+                    Block: [
+                      start_position: true,
+                      tag: true,
+                      post_traverse: {Block, :post_traverse, []}
+                    ],
+                    FnProto: [
+                      start_position: true,
+                      tag: true,
+                      post_traverse: {Function, :post_traverse, []}
+                    ],
                     ForStatement: [tag: true, post_traverse: {For, :post_traverse, []}],
                     Statement: [tag: true, post_traverse: {Statement, :post_traverse, []}],
                     # keywords that add inline
@@ -316,7 +332,7 @@ defmodule Zig.Parser do
   end
 
   @doc false
-  def put_location(%_{} = struct, {row, _}, column) do
-    Map.replace!(struct, :location, {row, column})
+  def put_location(%_{} = struct, location) do
+    Map.replace!(struct, :location, {location.line, location.column})
   end
 end

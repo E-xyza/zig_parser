@@ -1,5 +1,5 @@
 defmodule Zig.Parser.ErrorSet do
-  defstruct [:values]
+  defstruct [:values, :location]
 
   def parse([:LBRACE, {:IdentifierList, list}, :RBRACE]) do
     parse(list, [])

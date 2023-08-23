@@ -19,6 +19,16 @@ defmodule Zig.Parser.AsmTest do
                Parser.parse(~S|const foo = asm("syscall" : : : );|).code
     end
 
+    test "asm expression location" do
+      assert [_, %{value: %Asm{location: location}}] =
+               Parser.parse(~S"""
+               const bar = 1;
+               const foo = asm("syscall" : : : );
+               """).code
+
+      assert {2, 13} == location
+    end
+
     test "asm with volatile" do
       assert [%{value: %Asm{volatile: true}}] =
                Parser.parse(~S|const foo = asm volatile("syscall" : : : );|).code

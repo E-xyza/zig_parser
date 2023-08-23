@@ -40,6 +40,14 @@ defmodule Zig.Parser.Test.FunctionTest do
       assert [%Function{impliciterror: true}] =
                Parser.parse("fn foo() !void {}").code
     end
+
+    test "reports location" do
+      assert [_, %Function{location: {2, 1}}] =
+               Parser.parse(~S"""
+               const a = 1;
+               fn foo() !void {}
+               """).code
+    end
   end
 
   describe "function parameters" do

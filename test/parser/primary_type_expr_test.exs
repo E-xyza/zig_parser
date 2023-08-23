@@ -114,6 +114,14 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
       assert [%{value: %ErrorSet{values: [:abc, :bcd]}}] =
                Parser.parse("const foo = error {abc, bcd};").code
     end
+
+    test "gets the location correct" do
+      assert [_, %{value: %ErrorSet{location: {2, 13}}}] =
+               Parser.parse(~S"""
+               const bar = 1;
+               const foo = error {abc};
+               """).code
+    end
   end
 
   describe "literals" do

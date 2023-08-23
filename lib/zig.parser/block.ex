@@ -13,25 +13,25 @@ defmodule Zig.Parser.Block do
   alias Zig.Parser
   alias Zig.Parser.Block
 
-  def post_traverse(rest, [{:Block, code} | rest_args], context, loc, col) do
+  def post_traverse(rest, [{:Block, [start | code]} | rest_args], context, _, _) do
     block =
       code
       |> parse
-      |> Parser.put_location(loc, col)
+      |> Parser.put_location(start)
 
     {rest, [block | rest_args], context}
   end
 
-  def post_traverse(rest, [{:BlockExpr, [%Block{} = code]} | rest_args], context, loc, col) do
-    block = Parser.put_location(code, loc, col)
+  def post_traverse(rest, [{:BlockExpr, [start, %Block{} = code]} | rest_args], context, _, _) do
+    block = Parser.put_location(code, start)
     {rest, [block | rest_args], context}
   end
 
-  def post_traverse(rest, [{:BlockExpr, [label, :COLON, code]} | rest_args], context, loc, col) do
+  def post_traverse(rest, [{:BlockExpr, [start, label, :COLON, code]} | rest_args], context, _, _) do
     block =
       code
       |> parse
-      |> Parser.put_location(loc, col)
+      |> Parser.put_location(start)
       |> Map.replace!(:label, label)
 
     {rest, [block | rest_args], context}

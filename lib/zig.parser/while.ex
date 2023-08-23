@@ -1,5 +1,5 @@
 defmodule Zig.Parser.While do
-  defstruct [:block, :label, :condition, :payload, :continue, :else_payload, :else, inline: false]
+  defstruct [:block, :label, :condition, :payload, :continue, :location, :else_payload, :else, inline: false]
 
   alias Zig.Parser.Block
 

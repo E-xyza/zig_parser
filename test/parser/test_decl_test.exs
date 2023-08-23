@@ -12,5 +12,12 @@ defmodule Zig.Parser.Test.TestDeclTest do
     test "parse a named test" do
       assert [%Test{name: "foobar"}] = Parser.parse(~S(test "foobar" {})).code
     end
+
+    test "gets the location" do
+      assert [_, %Test{location: {2, 1}}] = Parser.parse(~S"""
+      const foo = 1;
+      test "foobar" {}
+      """).code
+    end
   end
 end

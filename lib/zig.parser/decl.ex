@@ -3,7 +3,6 @@ defmodule Zig.Parser.Decl do
   alias Zig.Parser.Const
   alias Zig.Parser.Function
   alias Zig.Parser.Var
-  alias Zig.Parser.Usingnamespace
 
   def post_traverse(rest, [{:Decl, args} | rest_args], context, _loc, _row) do
     {rest, [parse(args) | rest_args], context}
@@ -23,9 +22,7 @@ defmodule Zig.Parser.Decl do
 
   defp parse([:threadlocal | rest]), do: %{parse(rest) | threadlocal: true}
 
-  defp parse([:usingnamespace, payload, :SEMICOLON]) do
-    %Usingnamespace{namespace: payload}
-  end
+  defp parse([:usingnamespace, payload, :SEMICOLON]), do: {:usingnamespace, payload}
 
   defp parse([%Function{} = function, :SEMICOLON]), do: function
 

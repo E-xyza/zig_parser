@@ -24,6 +24,14 @@ defmodule Zig.Parser.Test.LoopTest do
                Parser.parse("const foo = for (array) |item| {};").code
     end
 
+    test "gets location" do
+      assert [_, %{value: %For{location: {2, 13}}}] =
+               Parser.parse(~S"""
+               const bar = 1;
+               const foo = for (array) |item| {};
+               """).code
+    end
+
     test "modifying for loop" do
       assert [%{value: %For{iterators: [:array], captures: [{:*, :item}]}}] =
                Parser.parse("const foo = for (array) |*item| {};").code
@@ -84,6 +92,14 @@ defmodule Zig.Parser.Test.LoopTest do
     test "basic while loop" do
       assert [%{value: %While{condition: :condition}}] =
                Parser.parse("const foo = while (condition) {};").code
+    end
+
+    test "get location" do
+      assert [_, %{value: %While{location: {2, 13}}}] =
+               Parser.parse(~S"""
+               const bar = 1;
+               const foo = while (condition) {};
+               """).code
     end
 
     test "while loop with payload" do

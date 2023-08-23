@@ -1,5 +1,5 @@
 defmodule Zig.Parser.For do
-  defstruct [:block, :label, :else, inline: false, iterators: [], captures: []]
+  defstruct [:block, :label, :else, :location, inline: false, iterators: [], captures: []]
 
   alias Zig.Parser.Block
 

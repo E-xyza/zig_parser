@@ -5,6 +5,7 @@ defmodule Zig.Parser.If do
     :else,
     :ptr_payload,
     :else_payload,
+    :location,
     comptime: false
   ]
 

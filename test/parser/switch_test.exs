@@ -61,7 +61,8 @@ defmodule Zig.Parser.Test.SwitchTest do
       assert [%{value: %Switch{prongs: prongs}}] =
                Parser.parse("const foo = switch (foo) {1 => |bar| .foo, 2 => .baz};").code
 
-      assert [{[integer: 1], :bar, {:enum_literal, :foo}}, {[integer: 2], {:enum_literal, :baz}}] = prongs
+      assert [{[integer: 1], :bar, {:enum_literal, :foo}}, {[integer: 2], {:enum_literal, :baz}}] =
+               prongs
     end
   end
 end

@@ -1,21 +1,30 @@
 defmodule Zig.Parser.Test do
+  alias Zig.Parser
   alias Zig.Parser.Block
 
-  defstruct [:position, :block, :name]
+  defstruct [:block, :name, :location]
 
   def post_traverse(
         rest,
-        [{:TestDecl, [position, {:doc_comment, comment} | args]} | rest_args],
+        [{:TestDecl, [start, {:doc_comment, comment} | args]} | rest_args],
         context,
         _,
         _
       ) do
-    ast = %{parse(args) | doc_comment: comment, position: position}
+
+    ast = args
+    |> parse
+    |> Map.replace!(:doc_comment, comment)
+    |> Parser.put_location(start)
+    
     {rest, [ast | rest_args], context}
   end
 
-  def post_traverse(rest, [{:TestDecl, [position | args]} | rest_args], context, _, _) do
-    ast = %{parse(args) | position: position}
+  def post_traverse(rest, [{:TestDecl, [start | args]} | rest_args], context, _, _) do
+    ast = args
+    |> parse
+    |> Parser.put_location(start)
+
     {rest, [ast | rest_args], context}
   end
 

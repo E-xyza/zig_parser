@@ -2,11 +2,11 @@ defmodule Zig.Parser.ContainerDecl do
   alias Zig.Parser
   alias Zig.Parser.Struct
 
-  def post_traverse(rest, [{:ContainerDecl, args} | rest_args], context, loc, row) do
+  def post_traverse(rest, [{:ContainerDecl, [start | args]} | rest_args], context, _, _) do
     container =
       args
       |> parse
-      |> Parser.put_location(loc, row)
+      |> Parser.put_location(start)
 
     {rest, [container | rest_args], context}
   end

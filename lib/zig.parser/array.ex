@@ -1,5 +1,5 @@
 defmodule Zig.Parser.Array do
-  defstruct [:count, :sentinel, :type]
+  defstruct [:count, :sentinel, :type, :location]
 
   def parse([:LBRACKET, count, :RBRACKET, type]) do
     %__MODULE__{count: count, type: type}

@@ -3,17 +3,11 @@ defmodule Zig.Parser.Asm do
 
   defstruct [:location, :code, outputs: [], inputs: [], clobbers: [], volatile: false]
 
-  def post_traverse(
-        rest,
-        [{:AsmExpr, [:asm | args]} | args_rest],
-        context,
-        loc,
-        col
-      ) do
+  def post_traverse(rest, [{:AsmExpr, [start, :asm | args]} | args_rest], context, _, _) do
     asm =
       args
       |> parse(%__MODULE__{})
-      |> Parser.put_location(loc, col)
+      |> Parser.put_location(start)
 
     {rest, [asm | args_rest], context}
   end

@@ -32,5 +32,13 @@ defmodule Zig.Parser.Test.IfExprtest do
       assert [%{value: %If{test: :foo, then: :bar, else_payload: :baz, else: :baz}}] =
                Parser.parse("const foo = if (foo) bar else |baz| baz;").code
     end
+
+    test "reports location" do
+      assert [_, %{value: %If{location: {2, 13}}}] =
+               Parser.parse(~S"""
+               const a = 1;
+               const foo = if (foo) bar else |baz| baz;
+               """).code
+    end
   end
 end

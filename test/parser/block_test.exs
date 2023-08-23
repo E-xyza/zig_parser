@@ -14,7 +14,7 @@ defmodule Zig.Parser.Test.BlockTest do
     end
 
     test "location is set" do
-      assert [%Block{location: {1, 11}}] = Parser.parse("comptime {}").code
+      assert [%Block{location: {1, 10}}] = Parser.parse("comptime {}").code
     end
 
     test "can have a label" do
@@ -30,6 +30,14 @@ defmodule Zig.Parser.Test.BlockTest do
     test "can have multiple statements" do
       assert [%Block{code: [%Const{}, %Const{}]}] =
                Parser.parse("comptime { const a = 1; const b = 2; }").code
+    end
+
+    test "sets location correctly" do
+      assert [_, %Block{location: {2, 10}}] =
+               Parser.parse(~S"""
+               const foo = 1;
+               comptime {}
+               """).code
     end
   end
 

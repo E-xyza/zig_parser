@@ -81,6 +81,14 @@ defmodule Zig.Parser.Test.PrimaryExprTest do
                Parser.parse("const foo = MyStruct{};").code
     end
 
+    test "gets location" do
+      assert [_, %{value: %StructLiteral{location: {2, 13}}}] =
+               Parser.parse(~S"""
+               const bar = 1;
+               const foo = MyStruct{};
+               """).code
+    end
+
     test "with a struct definer" do
       assert [%{value: %StructLiteral{type: :MyStruct, values: %{foo: {:integer, 1}}}}] =
                Parser.parse("const foo = MyStruct{.foo = 1};").code

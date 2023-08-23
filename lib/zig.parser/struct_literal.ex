@@ -1,5 +1,5 @@
 defmodule Zig.Parser.StructLiteral do
-  defstruct [:type, :values]
+  defstruct [:type, :values, :location]
 
   @type t :: %__MODULE__{
           type: atom | nil,

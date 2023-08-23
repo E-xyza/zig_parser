@@ -19,11 +19,11 @@ defmodule Zig.Parser.Function do
     inline: :maybe
   ]
 
-  def post_traverse(rest, [{:FnProto, [:fn | args]} | rest_args], context, loc, col) do
+  def post_traverse(rest, [{:FnProto, [start, :fn | args]} | rest_args], context, _, _) do
     fun_struct =
       args
       |> parse
-      |> Parser.put_location(loc, col)
+      |> Parser.put_location(start)
 
     {rest, [fun_struct | rest_args], context}
   end

@@ -4,6 +4,7 @@ defmodule Zig.Parser.Pointer do
     :sentinel,
     :type,
     :count,
+    :location,
     const: false,
     volatile: false,
     allowzero: false

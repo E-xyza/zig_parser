@@ -1,11 +1,18 @@
 defmodule Zig.Parser.PrimaryExpr do
+  alias Zig.Parser
   alias Zig.Parser.For
   alias Zig.Parser.If
   alias Zig.Parser.StructLiteral
   alias Zig.Parser.While
 
-  def post_traverse(rest, [{:PrimaryExpr, args} | args_rest], context, _, _) do
-    {rest, [parse(args) | args_rest], context}
+  def post_traverse(rest, [{:PrimaryExpr, [start | args]} | args_rest], context, _, _) do
+    expr = case parse(args) do
+      struct_value when is_struct(struct_value) -> Parser.put_location(struct_value, start)
+      tuple_value when is_tuple(tuple_value) -> tuple_value
+      atom_value when is_atom(atom_value) -> atom_value
+    end
+
+    {rest, [expr | args_rest], context}
   end
 
   defp parse([:comptime | rest]) do
