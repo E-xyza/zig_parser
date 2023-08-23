@@ -174,6 +174,7 @@ defmodule Zig.Parser do
                       tag: true,
                       post_traverse: {PrimaryTypeExpr, :post_traverse, []}
                     ],
+                    SwitchItem: [tag: true],
                     IfStatement: [start_position: true],
                     AsmExpr: [tag: true, post_traverse: {Asm, :post_traverse, []}],
                     BlockExpr: [tag: true, post_traverse: {Block, :post_traverse, []}],
