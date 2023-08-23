@@ -129,7 +129,7 @@ defmodule Zig.Parser.PrimaryTypeExpr do
   end
 
   # SwitchExpr
-  defp parse(switch = [:switch | rest]), do: Switch.parse(switch)
+  defp parse(switch = [:switch | _rest]), do: Switch.parse(switch)
 
   defp parse([any]), do: any
 

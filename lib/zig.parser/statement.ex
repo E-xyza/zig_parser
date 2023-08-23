@@ -1,4 +1,6 @@
 defmodule Zig.Parser.Statement do
+  alias Zig.Parser.Block
+
   def post_traverse(rest, [{:Statement, args} | rest_args], context, _, _) do
     {rest, [parse(args) | rest_args], context}
   end
@@ -8,11 +10,23 @@ defmodule Zig.Parser.Statement do
   end
 
   defp parse([:nosuspend | rest_args]) do
-    %{parse(rest_args) | nosuspend: true}
+    case parse(rest_args) do
+      %Block{} = block ->
+        %{block | nosuspend: true}
+
+      other ->
+        {:nosuspend, other}
+    end
   end
 
   defp parse([:suspend | rest_args]) do
-    %{parse(rest_args) | suspend: true}
+    case parse(rest_args) do
+      %Block{} = block ->
+        %{block | suspend: true}
+
+      other ->
+        {:suspend, other}
+    end
   end
 
   defp parse([:defer | rest_args]) do

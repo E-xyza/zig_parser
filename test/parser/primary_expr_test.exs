@@ -3,12 +3,6 @@ defmodule Zig.Parser.Test.PrimaryExprTest do
 
   alias Zig.Parser
   alias Zig.Parser.Block
-  alias Zig.Parser.Break
-  alias Zig.Parser.Comptime
-  alias Zig.Parser.Continue
-  alias Zig.Parser.Nosuspend
-  alias Zig.Parser.Resume
-  alias Zig.Parser.Return
   alias Zig.Parser.StructLiteral
 
   # tests:

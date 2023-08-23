@@ -6,8 +6,6 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
   alias Zig.Parser.Var
 
   describe "top level declarations on top level var blocks" do
-    # tests:
-    # TopLevelDecl <- doc_comment? KEYWORD_pub? (TopLevelFn / TopLevelVar / Usingnamespace)
     test "get doc comment for vars" do
       assert [%Var{doc_comment: " this is a doc comment\n"}] =
                Parser.parse("""

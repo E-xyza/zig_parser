@@ -41,19 +41,4 @@ defmodule Zig.Parser.Expr do
   defp parse([e, map]) when is_map(map) do
     {:struct, e, map}
   end
-
-  defp parse_break([]), do: :break
-
-  defp parse_break([:COLON, tag | rest]) do
-    case rest do
-      [] -> {:break, tag}
-      [expr] -> {:break, tag, expr}
-    end
-  end
-
-  defp parse_continue([]), do: :continue
-
-  defp parse_continue([:COLON, tag]) do
-    {:continue, tag}
-  end
 end

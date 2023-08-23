@@ -1,5 +1,4 @@
 defmodule Zig.Parser.Test do
-  alias Zig.Parser
   alias Zig.Parser.Block
 
   defstruct [:position, :block, :name]
@@ -11,11 +10,6 @@ defmodule Zig.Parser.Test do
         _,
         _
       ) do
-    comment_lines =
-      comment
-      |> String.split("\n")
-      |> length
-
     ast = %{parse(args) | doc_comment: comment, position: position}
     {rest, [ast | rest_args], context}
   end

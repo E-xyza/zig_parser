@@ -2,7 +2,6 @@ defmodule Zig.Parser.Test.ContainerDeclTest do
   use ExUnit.Case, async: true
 
   alias Zig.Parser
-  alias Zig.Parser.Function
 
   # TESTS:
   # Decl

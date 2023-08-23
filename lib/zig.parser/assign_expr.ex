@@ -11,11 +11,14 @@ defmodule Zig.Parser.AssignExpr do
     {rest, [parse_assign(args) | args_rest], context}
   end
 
-  @assign_operators ~w[*= /= %= += -= <<= >>= &= ^= |= *%= +%= -%= *|= +|= -|= =]a
+  @assign_operators ~w[*= /= %= += -= <<= >>= &= ^= |= *%= +%= -%= *|= +|= -|= <<|= =]a
 
   defp parse_assign([left, operator, right]) when operator in @assign_operators do
     {operator, left, right}
   end
+
+  # not entirely sure why this is necessary?
+  defp parse_assign([left, :"-|", right]), do: {:"-|=", left, right}
 
   defp parse_assign([singleton]), do: singleton
 end

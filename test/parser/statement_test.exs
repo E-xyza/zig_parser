@@ -23,7 +23,7 @@ defmodule Zig.Parser.Test.StatementTest do
 
   describe "var declarations" do
     test "can be runtime" do
-      assert [%{code: [%Var{name: x, value: {:integer, 1}}]}] =
+      assert [%{code: [%Var{name: :x, value: {:integer, 1}}]}] =
                Parser.parse("comptime {var x = 1;}").code
     end
 
@@ -34,7 +34,7 @@ defmodule Zig.Parser.Test.StatementTest do
 
   describe "const declarations" do
     test "can be runtime" do
-      assert [%{code: [%Const{name: x, value: {:integer, 1}}]}] =
+      assert [%{code: [%Const{name: :x, value: {:integer, 1}}]}] =
                Parser.parse("comptime {const x = 1;}").code
     end
 
@@ -71,29 +71,30 @@ defmodule Zig.Parser.Test.StatementTest do
 
   describe "prefixed expressions" do
     test "can be comptime" do
-      assert [%If{comptime: true}] =
-               Parser.parse("comptime {comptime if (x) y;}").code |> dbg(limit: 25)
+      assert [%{code: [%If{comptime: true}]}] =
+               Parser.parse("comptime {comptime if (x) y;}").code
     end
 
     test "can be nosuspend" do
-      assert [{:nosuspend, %If{}}] =
-               Parser.parse("comptime {nosuspend if (x) y;}").code |> dbg(limit: 25)
+      assert [%{code: [{:nosuspend, %If{}}]}] =
+               Parser.parse("comptime {nosuspend if (x) y;}").code
     end
 
     test "can be suspend" do
-      assert [{:suspend, %If{}}] = Parser.parse("comptime {suspend if (x) y;}").code
+      assert [%{code: [{:suspend, %If{}}]}] = Parser.parse("comptime {suspend if (x) y;}").code
     end
 
     test "can be defer" do
-      assert [{:defer, %If{}}] = Parser.parse("comptime {defer if (x) y;}").code
+      assert [%{code: [{:defer, %If{}}]}] = Parser.parse("comptime {defer if (x) y;}").code
     end
 
     test "can be errdefer" do
-      assert [{:errdefer, %If{}}] = Parser.parse("comptime {errdefer if (x) y;}").code
+      assert [%{code: [{:errdefer, %If{}}]}] = Parser.parse("comptime {errdefer if (x) y;}").code
     end
 
     test "can be errdefer with payload" do
-      assert [{:errdefer, :err, %If{}}] = Parser.parse("comptime {errdefer |err| if (x) y;}").code
+      assert [%{code: [{:errdefer, :err, %If{}}]}] =
+               Parser.parse("comptime {errdefer |err| if (x) y;}").code
     end
   end
 

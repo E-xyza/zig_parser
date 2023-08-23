@@ -18,13 +18,10 @@ defmodule Zig.Parser do
   alias Zig.Parser.InitList
   alias Zig.Parser.Test
   alias Zig.Parser.ComptimeDecl
-  alias Zig.Parser.TopLevelDecl
   alias Zig.Parser.Function
   alias Zig.Parser.PrimaryExpr
   alias Zig.Parser.PrimaryTypeExpr
   alias Zig.Parser.Statement
-  alias Zig.Parser.TopLevelFn
-  alias Zig.Parser.TopLevelVar
   alias Zig.Parser.TypeExpr
   alias Zig.Parser.Usingnamespace
   alias Zig.Parser.ParamDecl
@@ -150,20 +147,6 @@ defmodule Zig.Parser do
                     ComptimeDecl: [
                       tag: true,
                       post_traverse: {ComptimeDecl, :post_traverse, []}
-                    ],
-                    TopLevelDecl: [
-                      tag: true,
-                      post_traverse: {TopLevelDecl, :post_traverse, []}
-                    ],
-                    TopLevelVar: [
-                      tag: true,
-                      start_position: true,
-                      post_traverse: {TopLevelVar, :post_traverse, []}
-                    ],
-                    TopLevelFn: [
-                      tag: true,
-                      start_position: true,
-                      post_traverse: {Function, :post_traverse, [TopLevelFn]}
                     ],
                     TypeExpr: [
                       tag: true,
