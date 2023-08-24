@@ -14,10 +14,11 @@ defmodule Zig.Parser.Test.TestDeclTest do
     end
 
     test "gets the location" do
-      assert [_, %Test{location: {2, 1}}] = Parser.parse(~S"""
-      const foo = 1;
-      test "foobar" {}
-      """).code
+      assert [_, %Test{location: {2, 1}}] =
+               Parser.parse(~S"""
+               const foo = 1;
+               test "foobar" {}
+               """).code
     end
   end
 end

@@ -11,19 +11,20 @@ defmodule Zig.Parser.Test do
         _,
         _
       ) do
+    ast =
+      args
+      |> parse
+      |> Map.replace!(:doc_comment, comment)
+      |> Parser.put_location(start)
 
-    ast = args
-    |> parse
-    |> Map.replace!(:doc_comment, comment)
-    |> Parser.put_location(start)
-    
     {rest, [ast | rest_args], context}
   end
 
   def post_traverse(rest, [{:TestDecl, [start | args]} | rest_args], context, _, _) do
-    ast = args
-    |> parse
-    |> Parser.put_location(start)
+    ast =
+      args
+      |> parse
+      |> Parser.put_location(start)
 
     {rest, [ast | rest_args], context}
   end

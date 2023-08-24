@@ -3,9 +3,12 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
 
   alias Zig.Parser
   alias Zig.Parser.Block
+  alias Zig.Parser.Const
+  alias Zig.Parser.Enum
   alias Zig.Parser.ErrorSet
   alias Zig.Parser.Function
   alias Zig.Parser.If
+  alias Zig.Parser.Struct
   alias Zig.Parser.StructLiteral
   alias Zig.Parser.Switch
 
@@ -238,6 +241,123 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
   describe "switch" do
     test "switch" do
       assert [%{value: %Switch{}}] = Parser.parse("const foo = switch (bar) {};").code
+    end
+  end
+
+  describe "structs" do
+    test "basic structs work" do
+      assert [
+               %{
+                 value: %Struct{
+                   packed: false,
+                   extern: false,
+                   backed: nil
+                 }
+               }
+             ] = Parser.parse("const foo = struct {};").code
+    end
+
+    test "integer backed structs" do
+      assert [%{value: %Struct{backed: :u8}}] = Parser.parse("const foo = struct (u8) {};").code
+    end
+
+    test "packed structs work" do
+      assert [%{value: %Struct{packed: true}}] =
+               Parser.parse("const foo = packed struct {};").code
+    end
+
+    test "extern structs work" do
+      assert [%{value: %Struct{extern: true}}] =
+               Parser.parse("const foo = extern struct {};").code
+    end
+
+    test "struct const decl" do
+      assert [%{value: %Struct{decls: [%Const{}]}}] =
+               Parser.parse("const foo = struct { const a = .bar; };").code
+    end
+
+    test "struct fun decl" do
+      assert [%{value: %Struct{decls: [%Function{}]}}] =
+               Parser.parse("const foo = struct { fn a() void {} };").code
+    end
+
+    test "struct field" do
+      assert [%{value: %Struct{fields: %{foo: :u8}}}] =
+               Parser.parse("const foo = struct { foo: u8 };").code
+    end
+
+    test "multi field" do
+      assert [%{value: %Struct{fields: %{foo: :u8, bar: :u8}}}] =
+               Parser.parse("const foo = struct { foo: u8, bar: u8 };").code
+    end
+
+    test "struct field with assignment" do
+      assert [%{value: %Struct{fields: %{foo: {:u8, {:integer, 10}}}}}] =
+               Parser.parse("const foo = struct { foo: u8 = 10 };").code
+    end
+
+    test "get location" do
+      assert [_, %{value: %Struct{location: {2, 13}}}] =
+               Parser.parse(~S"""
+               const bar = 1;
+               const foo = struct {};
+               """).code
+    end
+  end
+
+  describe "enums" do
+    test "basic enums work" do
+      assert [
+               %{
+                 value: %Enum{
+                   packed: false,
+                   extern: false
+                 }
+               }
+             ] = Parser.parse("const foo = enum {};").code
+    end
+
+    test "packed enums work" do
+      assert [%{value: %Enum{packed: true}}] =
+               Parser.parse("const foo = packed enum {};").code
+    end
+
+    test "extern enums work" do
+      assert [%{value: %Enum{extern: true}}] =
+               Parser.parse("const foo = extern enum {};").code
+    end
+
+    test "enum const decl" do
+      assert [%{value: %Enum{decls: [%Const{}]}}] =
+               Parser.parse("const foo = enum { const a = .bar; };").code
+    end
+
+    test "enum fun decl" do
+      assert [%{value: %Enum{decls: [%Function{}]}}] =
+               Parser.parse("const foo = enum { fn a() void {} };").code
+    end
+
+    test "enum field" do
+      assert [%{value: %Enum{fields: [:foo]}}] =
+               Parser.parse("const foo = enum { foo };").code
+    end
+
+    test "multi field" do
+      assert [%{value: %Enum{fields: [:foo, :bar]}}] =
+               Parser.parse("const foo = enum { foo, bar };").code
+    end
+
+    test "field with assignment" do
+      assert [%{value: %Enum{fields: [{:foo, {:integer, 1}}]}}] =
+               Parser.parse("const foo = enum { foo = 1 };").code
+    end
+
+    test "get location" do
+      assert [_, %{value: %Enum{location: {2, 13}}}] =
+               Parser.parse(~S"""
+               const bar = 1;
+               const foo = enum {};
+               """).code
     end
   end
 end

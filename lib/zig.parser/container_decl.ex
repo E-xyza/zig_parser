@@ -22,4 +22,8 @@ defmodule Zig.Parser.ContainerDecl do
   defp parse([:struct | rest_args]) do
     Struct.parse(rest_args)
   end
+
+  defp parse([:enum | rest_args]) do
+    Zig.Parser.Enum.parse(rest_args)
+  end
 end
