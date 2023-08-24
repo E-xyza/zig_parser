@@ -11,6 +11,7 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
   alias Zig.Parser.Struct
   alias Zig.Parser.StructLiteral
   alias Zig.Parser.Switch
+  alias Zig.Parser.Union
 
   # TESTS:
   #
@@ -358,6 +359,70 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
                const bar = 1;
                const foo = enum {};
                """).code
+    end
+  end
+
+  describe "unions" do
+    test "basic unions work" do
+      assert [
+               %{
+                 value: %Union{
+                   packed: false,
+                   extern: false
+                 }
+               }
+             ] = Parser.parse("const foo = union {};").code
+    end
+
+    test "packed unions work" do
+      assert [%{value: %Union{packed: true}}] =
+               Parser.parse("const foo = packed union {};").code
+    end
+
+    test "extern unions work" do
+      assert [%{value: %Union{extern: true}}] =
+               Parser.parse("const foo = extern union {};").code
+    end
+
+    test "backed unions work" do
+      assert [%{value: %Union{tag: :tag_type}}] =
+               Parser.parse("const foo = union(tag_type) {};").code
+    end
+
+    test "union const decl" do
+      assert [%{value: %Union{decls: [%Const{}]}}] =
+               Parser.parse("const foo = union { const a = .bar; };").code
+    end
+
+    test "union fun decl" do
+      assert [%{value: %Union{decls: [%Function{}]}}] =
+               Parser.parse("const foo = union { fn a() void {} };").code
+    end
+
+    test "union field" do
+      assert [%{value: %Union{fields: %{foo: :u8}}}] =
+               Parser.parse("const foo = union { foo: u8 };").code
+    end
+
+    test "multi field" do
+      assert [%{value: %Union{fields: %{foo: :u8, bar: :u8}}}] =
+               Parser.parse("const foo = union { foo: u8, bar: u8 };").code
+    end
+
+    test "get location" do
+      assert [_, %{value: %Union{location: {2, 13}}}] =
+               Parser.parse(~S"""
+               const bar = 1;
+               const foo = union {};
+               """).code
+    end
+  end
+
+  describe "opaque" do
+    test "opaque works" do
+      assert [
+               %{value: :opaque}
+             ] = Parser.parse("const foo = opaque {};").code
     end
   end
 end
