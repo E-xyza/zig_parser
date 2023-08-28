@@ -9,13 +9,14 @@ defmodule ZigParser.MixProject do
       start_permanent: Mix.env() == :prod,
       description: "a zig parser in elixir",
       package: package(),
-      deps: deps()
+      deps: deps(),
+      elixirc_paths: elixirc_paths(Mix.env())
     ]
   end
 
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger, :ssl, :inets]
     ]
   end
 
@@ -27,6 +28,9 @@ defmodule ZigParser.MixProject do
       }
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/_support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
     [

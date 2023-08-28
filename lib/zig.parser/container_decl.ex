@@ -4,10 +4,11 @@ defmodule Zig.Parser.ContainerDecl do
   alias Zig.Parser.Union
 
   def post_traverse(rest, [{:ContainerDecl, [start | args]} | rest_args], context, _, _) do
-    container = case parse(args) do
-      :opaque -> :opaque
-      container -> Parser.put_location(container, start)
-    end
+    container =
+      case parse(args) do
+        :opaque -> :opaque
+        container -> Parser.put_location(container, start)
+      end
 
     {rest, [container | rest_args], context}
   end
