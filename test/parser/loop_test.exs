@@ -126,5 +126,9 @@ defmodule Zig.Parser.Test.LoopTest do
       assert [%{value: %While{else_payload: :err}}] =
                Parser.parse("const foo = while (condition) {} else |err| {};").code
     end
+
+    test "non-statement while loop" do
+      assert [%{value: %{code: [%While{}]}}] = Parser.parse("const foo = comptime {while (condition) {}};").code
+    end
   end
 end

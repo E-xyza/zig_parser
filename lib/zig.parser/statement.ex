@@ -1,5 +1,7 @@
 defmodule Zig.Parser.Statement do
   alias Zig.Parser.Block
+  alias Zig.Parser.If
+  alias Zig.Parser.Switch
 
   def post_traverse(rest, [{:Statement, args} | rest_args], context, _, _) do
     {rest, [parse(args) | rest_args], context}
@@ -39,6 +41,14 @@ defmodule Zig.Parser.Statement do
 
   defp parse([:errdefer | rest_args]) do
     {:errdefer, parse(rest_args)}
+  end
+
+  defp parse([:if | rest_args]) do
+    If.parse(rest_args)
+  end
+
+  defp parse(args = [:switch | _]) do
+    Switch.parse(args)
   end
 
   defp parse([statement, :SEMICOLON]), do: statement

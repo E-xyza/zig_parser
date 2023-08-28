@@ -37,7 +37,7 @@ defmodule Zig.Parser.Test.TypeExprTest do
 
   describe "the questionmark prefix" do
     test "tags as optional_type" do
-      assert [%{value: {:optional_type, :u8}}] = Parser.parse("const foo = ?u8;").code
+      assert [%{value: {:optional, :u8}}] = Parser.parse("const foo = ?u8;").code
     end
   end
 

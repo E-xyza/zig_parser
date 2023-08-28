@@ -5,6 +5,7 @@ defmodule Zig.Parser.Pointer do
     :type,
     :count,
     :location,
+    :addrspace,
     const: false,
     volatile: false,
     allowzero: false
@@ -59,6 +60,16 @@ defmodule Zig.Parser.Pointer do
     def parse([unquote(qualifier) | rest]) do
       %{parse(rest) | unquote(qualifier) => true}
     end
+  end
+
+  for property <- ~w[addrspace]a do
+    def parse([{unquote(property), value} | rest]) do
+      %{parse(rest) | unquote(property) => value}
+    end
+  end
+
+  def parse([:QUESTIONMARK, type]) do
+    parse([{:optional, type}])
   end
 
   def parse([type]), do: %__MODULE__{type: type}

@@ -16,7 +16,7 @@ defmodule Zig.Parser.TypeExpr do
   defp parse([:LBRACKET | _] = array), do: Array.parse(array)
   defp parse([:* | _] = pointer), do: Pointer.parse(pointer)
   defp parse([:** | rest]), do: %Pointer{count: :one, type: parse([:* | rest])}
-  defp parse([:QUESTIONMARK, rest]), do: {:optional_type, rest}
-  defp parse([:anyframe, :MINUSRARROW, rest]), do: {:anyframe, rest}
+  defp parse([:QUESTIONMARK | rest]), do: {:optional, parse(rest)}
+  defp parse([:anyframe, :MINUSRARROW | rest]), do: {:anyframe, parse(rest)}
   defp parse([singleton]), do: singleton
 end

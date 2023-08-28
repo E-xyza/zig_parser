@@ -8,24 +8,25 @@ defmodule Zig.Parser do
   alias Zig.Parser.AssignExpr
   alias Zig.Parser.Block
   alias Zig.Parser.Collected
+  alias Zig.Parser.ComptimeDecl
   alias Zig.Parser.ContainerDecl
   alias Zig.Parser.ContainerDeclarations
   alias Zig.Parser.Decl
   alias Zig.Parser.ErrorUnionExpr
-  alias Zig.Parser.VarDecl
   alias Zig.Parser.Expr
   alias Zig.Parser.For
   alias Zig.Parser.InitList
   alias Zig.Parser.Test
-  alias Zig.Parser.ComptimeDecl
   alias Zig.Parser.Function
+  alias Zig.Parser.ParamDecl
+  alias Zig.Parser.ParseError
   alias Zig.Parser.PrimaryExpr
   alias Zig.Parser.PrimaryTypeExpr
   alias Zig.Parser.Statement
   alias Zig.Parser.TypeExpr
-  alias Zig.Parser.ParamDecl
-  alias Zig.Parser.ParseError
-
+  alias Zig.Parser.VarDecl
+  alias Zig.Parser.While
+  
   @keywords ~w[addrspace align allowzero and anyframe anytype asm async await break callconv catch comptime const continue defer else enum errdefer error export extern fn for if inline noalias nosuspend noinline opaque or orelse packed pub resume return linksection struct suspend switch test threadlocal try union unreachable usingnamespace var volatile while]a
   @keyword_mapping Enum.map(@keywords, &{:"KEYWORD_#{&1}", [token: &1]})
 
@@ -197,6 +198,7 @@ defmodule Zig.Parser do
                       post_traverse: {Function, :post_traverse, []}
                     ],
                     ForStatement: [tag: true, post_traverse: {For, :post_traverse, []}],
+                    WhileStatement: [tag: true, post_traverse: {While, :post_traverse, []}],
                     Statement: [tag: true, post_traverse: {Statement, :post_traverse, []}],
                     # keywords that add inline
                     LoopStatement: [tag: true, post_traverse: :add_inline],
@@ -319,6 +321,10 @@ defmodule Zig.Parser do
 
   defp add_inline(rest, [{_tag, [:inline, payload]} | rest_args], context, _loc, _col) do
     {rest, [%{payload | inline: true} | rest_args], context}
+  end
+
+  defp add_inline(rest, [{_tag, [payload]} | rest_args], context, _loc, _col) do
+    {rest, [payload | rest_args], context}
   end
 
   defp pseudofunction(

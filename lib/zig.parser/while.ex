@@ -13,6 +13,10 @@ defmodule Zig.Parser.While do
 
   alias Zig.Parser.Block
 
+  def post_traverse(rest, [{:WhileStatement, [:while | args]} | rest_args], context, _, _) do
+    {rest, [parse(args) | rest_args], context}
+  end
+
   def parse([:LPAREN, condition, :RPAREN | rest]) do
     parse_payload(%__MODULE__{condition: condition}, rest)
   end
