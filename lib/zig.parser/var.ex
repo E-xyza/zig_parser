@@ -38,4 +38,6 @@ defmodule Zig.Parser.Var do
   def parse([name | rest]) do
     %{parse(rest) | name: name}
   end
+
+  def parse([]), do: %__MODULE__{}
 end

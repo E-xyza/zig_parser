@@ -101,4 +101,10 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
                Parser.parse("var foo: u32 linksection(.foo) = undefined;").code
     end
   end
+
+  describe "corner cases" do
+    test "var doesn't need a value, per the parser" do
+      assert [%Var{}] = Parser.parse("extern var foo: u8;").code
+    end
+  end
 end

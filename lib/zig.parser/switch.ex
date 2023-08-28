@@ -40,7 +40,7 @@ defmodule Zig.Parser.Switch do
   defp parse_pattern([{:SwitchItem, items}, :COMMA | rest], so_far) do
     parse_pattern(rest, [parse_items(items, []) | so_far])
   end
-  
+
   defp parse_pattern([:else, :"=>" | rest], []) do
     {:else, rest}
   end

@@ -27,12 +27,12 @@ defmodule Zig.Parser.Test.FunctionTest do
     end
 
     test "can obtain link section" do
-      assert [%Function{linksection: :foo}] =
+      assert [%Function{linksection: {:enum_literal, :foo}}] =
                Parser.parse("fn foo() linksection(.foo) void {}").code
     end
 
     test "can obtain call convention" do
-      assert [%Function{callconv: :C}] =
+      assert [%Function{callconv: {:enum_literal, :C}}] =
                Parser.parse("fn foo() callconv(.C) void {}").code
     end
 
@@ -89,6 +89,12 @@ defmodule Zig.Parser.Test.FunctionTest do
 
     test "can be a vararg" do
       assert [%{params: [%{type: :...}]}] = Parser.parse("fn foo(...) void {}").code
+    end
+  end
+
+  describe "function type odds and ends" do
+    test "function type with decorator" do
+      assert [%{value: %Function{}}] = Parser.parse("const x = fn () callconv(WINAPI) void;").code
     end
   end
 end

@@ -29,8 +29,8 @@ defmodule Zig.Parser.Function do
   end
 
   # type declaration
-  def parse([:LPAREN, {:ParamDeclList, params}, :RPAREN, type]) do
-    %__MODULE__{params: parse_params(params, []), type: type}
+  def parse([:LPAREN, {:ParamDeclList, params}, :RPAREN | rest]) do
+    parse_decl(rest, %__MODULE__{params: parse_params(params, [])})
   end
 
   def parse([name, :LPAREN, {:ParamDeclList, params}, :RPAREN | rest]) do
@@ -45,11 +45,11 @@ defmodule Zig.Parser.Function do
     parse_decl(rest, %{fun_struct | alignment: align})
   end
 
-  defp parse_decl([{:callconv, {:enum_literal, callconv}} | rest], fun_struct) do
+  defp parse_decl([{:callconv, callconv} | rest], fun_struct) do
     parse_decl(rest, %{fun_struct | callconv: callconv})
   end
 
-  defp parse_decl([{:linksection, {:enum_literal, linksection}} | rest], fun_struct) do
+  defp parse_decl([{:linksection, linksection} | rest], fun_struct) do
     parse_decl(rest, %{fun_struct | linksection: linksection})
   end
 

@@ -26,7 +26,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.TypeExpr
   alias Zig.Parser.VarDecl
   alias Zig.Parser.While
-  
+
   @keywords ~w[addrspace align allowzero and anyframe anytype asm async await break callconv catch comptime const continue defer else enum errdefer error export extern fn for if inline noalias nosuspend noinline opaque or orelse packed pub resume return linksection struct suspend switch test threadlocal try union unreachable usingnamespace var volatile while]a
   @keyword_mapping Enum.map(@keywords, &{:"KEYWORD_#{&1}", [token: &1]})
 

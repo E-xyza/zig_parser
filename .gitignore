@@ -26,3 +26,5 @@ zig_parser-*.tar
 /tmp/
 
 /test/_support/zig-*
+
+/test/one_test.exs
