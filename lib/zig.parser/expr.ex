@@ -61,11 +61,11 @@ defmodule Zig.Parser.Expr do
 
   # consider emplacement of information in the catch block.
   defp parse([value, :catch, :|, payload, :|, code]) do
-    {:catch, %{}, [value, code, payload: payload]}
+    {:catch, %OperatorOptions{}, [value, code, payload: payload]}
   end
 
   defp parse([value, :catch, code]) do
-    {:catch, %{}, [value, code]}
+    {:catch, %OperatorOptions{}, [value, code]}
   end
 
   defp parse([arg]), do: arg
