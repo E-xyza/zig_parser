@@ -24,7 +24,7 @@ defmodule Zig.Parser.While do
   defp parse_payload(while, [:|, payload, :| | rest]) do
     while
     |> Map.replace!(:payload, payload)
-    |> parse_block(rest)
+    |> parse_continue(rest)
   end
 
   defp parse_payload(while, [:|, :*, payload, :| | rest]) do

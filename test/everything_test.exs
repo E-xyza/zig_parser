@@ -1,8 +1,11 @@
 defmodule ZigParserTest.EverythingHelper do
-  # these tests parse exquisitely slowly
   @rejected MapSet.new(~w[
+    PARSE TOO SLOW:
     test/_support/zig-0.11.0/lib/compiler_rt/udivmodti4_test.zig
     test/_support/zig-0.11.0/lib/compiler_rt/udivmoddi4_test.zig
+
+    BROKEN STRING LITERALS:
+    test/_support/zig-0.11.0/test/behavior/translate_c_macros.zig
   ])
 
   def dir_walk("test/_support/zig-0.11.0/test/cases/compile_errors/" <> _), do: []

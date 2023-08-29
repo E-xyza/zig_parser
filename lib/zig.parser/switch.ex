@@ -15,6 +15,12 @@ defmodule Zig.Parser.Switch do
       {pattern, [:|, capture, :|, expr, :COMMA | rest]} ->
         parse_prongs(rest, [{pattern, capture, expr} | so_far])
 
+      {pattern, [:|, :*, capture, :|, expr, :COMMA]} ->
+        Enum.reverse([{pattern, {:*, capture}, expr} | so_far])
+
+      {pattern, [:|, :*, capture, :|, expr, :COMMA | rest]} ->
+        parse_prongs(rest, [{pattern, {:*, capture}, expr} | so_far])
+
       {pattern, [expr, :COMMA]} ->
         Enum.reverse([{pattern, expr} | so_far])
 
@@ -23,6 +29,9 @@ defmodule Zig.Parser.Switch do
 
       {pattern, [:|, capture, :|, expr]} ->
         Enum.reverse([{pattern, capture, expr} | so_far])
+
+      {pattern, [:|, :*, capture, :|, expr]} ->
+        Enum.reverse([{pattern, {:*, capture}, expr} | so_far])
 
       {pattern, [expr]} ->
         Enum.reverse([{pattern, expr} | so_far])
