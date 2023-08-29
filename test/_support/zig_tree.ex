@@ -1,6 +1,6 @@
 defmodule ZigParserTest.ZigTree do
   def ensure_zig_directory do
-    unless File.dir?("test/_support/zig") do
+    unless File.dir?("test/_support/zig-0.11.0") do
       build_zig_directory()
     end
   end

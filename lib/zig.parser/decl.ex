@@ -14,7 +14,7 @@ defmodule Zig.Parser.Decl do
     %{parse(rest) | export: true}
   end
 
-  defp parse([:extern, extern | rest]) when is_binary(extern) do
+  defp parse([:extern, {:string, extern} | rest]) when is_binary(extern) do
     %{parse(rest) | extern: extern}
   end
 

@@ -7,19 +7,6 @@ defmodule Zig.Parser.Collected do
     {rest, [string | args_rest], context}
   end
 
-  def post_traverse(rest, ["@" <> special_identifier | args_rest], context, _, _, :IDENTIFIER) do
-    id_atom =
-      special_identifier
-      |> String.trim(~S("))
-      |> String.to_atom()
-
-    {rest, [{:builtin, id_atom} | args_rest], context}
-  end
-
-  def post_traverse(rest, [collected | args_rest], context, _, _, :IDENTIFIER) do
-    {rest, [String.to_atom(collected) | args_rest], context}
-  end
-
   def post_traverse(rest, ["0x" <> hex | args_rest], context, _, _, :INTEGER) do
     {rest, [{:integer, String.to_integer(remove_underscore(hex), 16)} | args_rest], context}
   end
@@ -34,10 +21,6 @@ defmodule Zig.Parser.Collected do
 
   def post_traverse(rest, [integer | args_rest], context, _, _, :INTEGER) do
     {rest, [{:integer, String.to_integer(remove_underscore(integer))} | args_rest], context}
-  end
-
-  def post_traverse(rest, ["'", char, "'" | args_rest], context, _, _, :CHAR_LITERAL) do
-    {rest, [{:char, char} | args_rest], context}
   end
 
   def post_traverse(rest, [float_str | args_rest], context, _, _, :FLOAT) do

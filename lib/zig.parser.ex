@@ -90,7 +90,7 @@ defmodule Zig.Parser do
   @operators ~w[COMMA DOT DOT2 COLON LBRACE LBRACKET LPAREN MINUSRARROW LETTERC QUESTIONMARK RBRACE RBRACKET RPAREN SEMICOLON]a
   @operator_mapping Enum.map(@operators, &{&1, [token: true]})
 
-  @collecteds ~w[IDENTIFIER INTEGER FLOAT STRINGLITERAL BUILTINIDENTIFIER line_string]a
+  @collecteds ~w[INTEGER FLOAT BUILTINIDENTIFIER line_string]a
   @collected_mapping Enum.map(
                        @collecteds,
                        &{&1, [collect: true, post_traverse: {Collected, :post_traverse, [&1]}]}
@@ -106,8 +106,7 @@ defmodule Zig.Parser do
                     ],
                     char_escape: [
                       post_traverse: :char_escape,
-                      tag: true,
-                      collect: true
+                      tag: true
                     ],
                     doc_comment: [post_traverse: :doc_comment, tag: true],
                     line_comment: [post_traverse: :line_comment, tag: true, start_position: true],
@@ -140,12 +139,18 @@ defmodule Zig.Parser do
                       post_traverse: {PrimaryExpr, :post_traverse, []}
                     ],
                     skip: [ignore: true],
+                    line_string: [tag: true],
+                    IDENTIFIER: [post_traverse: :identifier],
                     STRINGLITERALSINGLE: [
-                      tag: true,
-                      post_traverse: :string_literal_single
+                      tag: :string,
+                      post_traverse: :literal_stringlike
                     ],
                     CHAR_LITERAL: [
-                      post_traverse: {Collected, :post_traverse, [:CHAR_LITERAL]}
+                      tag: :char,
+                      post_traverse: :literal_stringlike
+                    ],
+                    STRINGLITERAL: [
+                      post_traverse: :string_literal
                     ],
                     ComptimeDecl: [
                       tag: true,
@@ -229,7 +234,7 @@ defmodule Zig.Parser do
 
   defparsecp(:parser, zig_parser)
 
-  defparsecp(:utf8, utf8_char(not: 0))
+  defparsecp(:utf8, utf8_char(not: 0..255))
 
   def parse(string) do
     case parser(string) do
@@ -264,8 +269,7 @@ defmodule Zig.Parser do
       |> elem(0)
       |> List.to_string()
 
-        {rest, [{:doc_comment, doc_comment} | rest_args], context}
-
+    {rest, [{:doc_comment, doc_comment} | rest_args], context}
   end
 
   defp line_comment(
@@ -290,13 +294,38 @@ defmodule Zig.Parser do
     {rest, rest_args, %{context | comments: [comment_data | context.comments]}}
   end
 
-  defp char_escape(rest, [{:char_escape, [escape_string]} | rest_args], context, _, _) do
-    {rest, [process_escape(escape_string) | rest_args], context}
+  defp char_escape(rest, [{:char_escape, [~S"\x" | number]} | rest_args], context, _, _) do
+    {rest, [List.to_integer(number, 16) | rest_args], context}
   end
 
-  defp string_literal_single(rest, [{:STRINGLITERALSINGLE, literal} | rest_args], context, _, _) do
-    remove_ends = Enum.slice(literal, 1..-2//1)
-    {rest, [List.to_string(remove_ends) | rest_args], context}
+  defp char_escape(rest, [{:char_escape, [~S"\u{" | descriptor]} | rest_args], context, _, _) do
+    unicode =
+      descriptor
+      # removes trailing "}"
+      |> Enum.slice(0..-2)
+      |> List.to_integer(16)
+
+    {rest, [unicode | rest_args], context}
+  end
+
+  @escaped %{?t => ?\t, ?r => ?\r, ?n => ?\n, ?' => ?\', ?" => ?\", ?\\ => ?\\}
+  @escaped_chars Map.keys(@escaped)
+
+  defp char_escape(rest, [{:char_escape, ["\\", escaped]} | rest_args], context, _, _)
+       when escaped in @escaped_chars do
+    {rest, [Map.fetch!(@escaped, escaped) | rest_args], context}
+  end
+
+  defp char_escape(_, _, _, _, _), do: {:error, "escape not recognized"}
+
+  defp literal_stringlike(rest, [{tag, literal} | rest_args], context, _, _) do
+    content =
+      case {tag, Enum.slice(literal, 1..-2//1)} do
+        {:string, trimmed} -> List.to_string(trimmed)
+        {:char, [char]} -> char
+      end
+
+    {rest, [{tag, content} | rest_args], context}
   end
 
   def post_traverse("", [Root: [{:doc_comment, doc_comment} | code]], context, _, _) do
@@ -307,25 +336,31 @@ defmodule Zig.Parser do
     {"", [], struct(context, code: code)}
   end
 
-  @escaped %{?t => ?\t, ?r => ?\r, ?n => ?\n, ?' => ?', ?" => ?", ?\\ => ?\\}
-  defp process_escape(<<92, char>>), do: Map.fetch!(@escaped, char)
-
-  defp process_escape("\\u{" <> what) do
-    what
-    |> String.trim_trailing("}")
-    |> String.to_integer(16)
-  end
-
-  defp process_escape(<<"\\x"::binary, number::binary-2>>) do
-    String.to_integer(number, 16)
-  end
-
   defp add_inline(rest, [{_tag, [:inline, payload]} | rest_args], context, _loc, _col) do
     {rest, [%{payload | inline: true} | rest_args], context}
   end
 
   defp add_inline(rest, [{_tag, [payload]} | rest_args], context, _loc, _col) do
     {rest, [payload | rest_args], context}
+  end
+
+  defp identifier(rest, [{:string, identifier}, "@" | rest_args], context, _loc, _col) do
+    {rest, [{:builtin, String.to_atom(identifier)} | rest_args], context}
+  end
+
+  defp identifier(rest, charlist, context, _loc, _col) do
+    identifier = charlist
+    |> Enum.reverse
+    |> List.to_atom
+    {rest, [identifier], context}
+  end
+
+  defp string_literal(rest, args, context, _loc, _col) do
+    arg = case args do
+      [{:string, _} = string] -> string
+      string_list -> {:string, Enum.join(string_list, "")}
+    end
+    {rest, [arg], context}
   end
 
   defp pseudofunction(
