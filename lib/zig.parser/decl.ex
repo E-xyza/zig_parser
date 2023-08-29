@@ -10,7 +10,9 @@ defmodule Zig.Parser.Decl do
 
   # decorators
 
-  defp parse([:export | rest]), do: %{parse(rest) | export: true}
+  defp parse([:export | rest]) do
+    %{parse(rest) | export: true}
+  end
 
   defp parse([:extern, extern | rest]) when is_binary(extern), do: %{parse(rest) | extern: extern}
 

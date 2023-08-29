@@ -9,7 +9,6 @@ defmodule Zig.Parser.Switch do
 
   defp parse_prongs(prongs, so_far) do
     case parse_pattern(prongs, []) do
-
       {pattern, [:|, capture, :|, expr, :COMMA]} ->
         Enum.reverse([{pattern, capture, expr} | so_far])
 

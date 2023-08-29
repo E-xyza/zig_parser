@@ -53,5 +53,9 @@ defmodule Zig.Parser.Statement do
 
   defp parse([statement, :SEMICOLON]), do: statement
 
+  defp parse([label, :COLON, statement]) do
+    %{statement | label: label}
+  end
+
   defp parse([content]), do: content
 end

@@ -18,7 +18,7 @@ defmodule Zig.Parser.Collected do
       |> String.trim(~S("))
       |> String.to_atom()
 
-    {rest, [id_atom | args_rest], context}
+    {rest, [{:builtin, id_atom} | args_rest], context}
   end
 
   def post_traverse(rest, [collected | args_rest], context, _, _, :IDENTIFIER) do

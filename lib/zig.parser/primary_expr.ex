@@ -30,6 +30,7 @@ defmodule Zig.Parser.PrimaryExpr do
   defp parse([:break]), do: :break
   defp parse([:break, :COLON, tag]), do: {:break, tag}
   defp parse([:break, :COLON, tag, expr]), do: {:break, tag, expr}
+  defp parse([:break, expr]), do: {:break, :_, expr}
 
   defp parse([:continue]), do: :continue
   defp parse([:continue, :COLON, tag]), do: {:continue, tag}

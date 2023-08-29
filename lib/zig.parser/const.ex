@@ -8,6 +8,7 @@ defmodule Zig.Parser.Const do
     :addrspace,
     :doc_comment,
     pub: false,
+    export: false,
     comptime: false
   ]
 

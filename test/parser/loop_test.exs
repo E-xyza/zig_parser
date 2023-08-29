@@ -81,7 +81,8 @@ defmodule Zig.Parser.Test.LoopTest do
     end
 
     test "for loop with short capture" do
-      assert [%{value: %For{block: {:try, _}}}] = Parser.parse("const foo = for (buf[4]) |elem| try expect(elem == 0);").code
+      assert [%{value: %For{block: {:try, _}}}] =
+               Parser.parse("const foo = for (buf[4]) |elem| try expect(elem == 0);").code
     end
   end
 

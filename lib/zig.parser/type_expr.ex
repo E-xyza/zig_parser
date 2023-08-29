@@ -13,7 +13,8 @@ defmodule Zig.Parser.TypeExpr do
 
   @pointer_next ~w[RBRACKET * COLON]a
 
-  defp parse([{:PrefixTypeOp, [:LBRACKET, next | _] = prefix} | rest]) when next in @pointer_next do
+  defp parse([{:PrefixTypeOp, [:LBRACKET, next | _] = prefix} | rest])
+       when next in @pointer_next do
     Pointer.parse(prefix, parse(rest))
   end
 

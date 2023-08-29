@@ -1,7 +1,7 @@
 defmodule Zig.Parser.For do
   defstruct [:block, :label, :else, :location, inline: false, iterators: [], captures: []]
 
-  alias Zig.Parser.Block
+  @terminators [[], [:SEMICOLON]]
 
   def post_traverse(rest, [{:ForStatement, [:for | args]} | rest_args], context, _, _) do
     {rest, [parse(args) | rest_args], context}
@@ -61,9 +61,9 @@ defmodule Zig.Parser.For do
     |> parse_capture(rest)
   end
 
-  defp parse_else(for_struct, []), do: for_struct
+  defp parse_else(for_struct, terminator) when terminator in @terminators, do: for_struct
 
-  defp parse_else(for_struct, [:else, %Block{} = block]) do
+  defp parse_else(for_struct, [:else, block | terminator]) when terminator in @terminators do
     Map.replace!(for_struct, :else, block)
   end
 end
