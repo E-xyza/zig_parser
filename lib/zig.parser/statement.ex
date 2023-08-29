@@ -8,7 +8,10 @@ defmodule Zig.Parser.Statement do
   end
 
   defp parse([:comptime | rest_args]) do
-    %{parse(rest_args) | comptime: true}
+    case parse(rest_args) do
+      %{comptime: _} = parsed -> %{parsed | comptime: true}
+      parsed -> {:comptime, parsed}
+    end
   end
 
   defp parse([:nosuspend | rest_args]) do
