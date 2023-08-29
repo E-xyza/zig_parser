@@ -102,15 +102,16 @@ defmodule Zig.Parser do
   @parser_options [
                     container_doc_comment: [
                       tag: :doc_comment,
-                      collect: true
+                      post_traverse: :doc_comment
                     ],
                     char_escape: [
                       post_traverse: :char_escape,
                       tag: true,
                       collect: true
                     ],
-                    doc_comment: [post_traverse: :doc_comment, tag: true, collect: true],
+                    doc_comment: [post_traverse: :doc_comment, tag: true],
                     line_comment: [post_traverse: :line_comment, tag: true, start_position: true],
+                    line_string: [post_traverse: :process_line_string],
                     AssignExpr: [
                       tag: true,
                       post_traverse: {AssignExpr, :post_traverse, []}
@@ -255,8 +256,16 @@ defmodule Zig.Parser do
     {code, args, struct(__MODULE__, context)}
   end
 
-  defp doc_comment(rest, [{:doc_comment, [comment]} | rest_args], context, _, _) do
-    {rest, [{:doc_comment, trim_doc_comment(comment, "///")} | rest_args], context}
+  defp doc_comment(rest, [{:doc_comment, args} | rest_args], context, _, _) do
+    doc_comment =
+      args
+      |> Enum.reverse()
+      |> Enum.reduce({[], true}, &multiline_filter/2)
+      |> elem(0)
+      |> List.to_string()
+
+        {rest, [{:doc_comment, doc_comment} | rest_args], context}
+
   end
 
   defp line_comment(
@@ -266,7 +275,7 @@ defmodule Zig.Parser do
          _,
          _
        ) do
-    comment_data = {IO.iodata_to_binary(comment), position}
+    comment_data = {List.to_string(comment), position}
     {rest, rest_args, %{context | comments: [comment_data | context.comments]}}
   end
 
@@ -277,7 +286,7 @@ defmodule Zig.Parser do
          _,
          _
        ) do
-    comment_data = {IO.iodata_to_binary(["//", comment]), position}
+    comment_data = {List.to_string([?/, ?/, comment]), position}
     {rest, rest_args, %{context | comments: [comment_data | context.comments]}}
   end
 
@@ -285,21 +294,12 @@ defmodule Zig.Parser do
     {rest, [process_escape(escape_string) | rest_args], context}
   end
 
-  defp trim_doc_comment(doc_comment, separator) do
-    doc_comment
-    |> String.split("\n")
-    |> Enum.map(&String.trim/1)
-    |> Enum.map(&String.trim_leading(&1, separator))
-    |> Enum.join("\n")
-  end
-
   defp string_literal_single(rest, [{:STRINGLITERALSINGLE, literal} | rest_args], context, _, _) do
     remove_ends = Enum.slice(literal, 1..-2//1)
     {rest, [List.to_string(remove_ends) | rest_args], context}
   end
 
-  def post_traverse("", [Root: [{:doc_comment, [doc_comment]} | code]], context, _, _) do
-    doc_comment = trim_doc_comment(doc_comment, "//!")
+  def post_traverse("", [Root: [{:doc_comment, doc_comment} | code]], context, _, _) do
     {"", [], struct(context, code: code, doc_comment: doc_comment)}
   end
 
@@ -317,7 +317,7 @@ defmodule Zig.Parser do
   end
 
   defp process_escape(<<"\\x"::binary, number::binary-2>>) do
-    String.to_integer(number)
+    String.to_integer(number, 16)
   end
 
   defp add_inline(rest, [{_tag, [:inline, payload]} | rest_args], context, _loc, _col) do
@@ -337,6 +337,23 @@ defmodule Zig.Parser do
        ) do
     {rest, [{name, payload} | rest_args], context}
   end
+
+  defp process_line_string(rest, args, context, _loc, _col) do
+    new_args =
+      args
+      |> Enum.reduce({[], false}, &multiline_filter/2)
+      |> elem(0)
+      |> List.to_string()
+
+    {rest, [new_args], context}
+  end
+
+  defp multiline_filter("\\\\", {so_far, true}), do: {so_far, false}
+  defp multiline_filter("///", {so_far, true}), do: {so_far, false}
+  defp multiline_filter("//!", {so_far, true}), do: {so_far, false}
+  defp multiline_filter(?\n, {so_far, false}), do: {[?\n | so_far], true}
+  defp multiline_filter(_any, {so_far, false}), do: {so_far, false}
+  defp multiline_filter(any, {so_far, true}), do: {[any | so_far], true}
 
   @doc false
   def put_location(%_{} = struct, location) do

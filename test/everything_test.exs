@@ -67,66 +67,14 @@ defmodule ZigParserTest.EverythingHelper do
     test/_support/zig-0.11.0/lib/std/Build/Step/CheckObject.zig
     test/_support/zig-0.11.0/lib/std/http/Server.zig
     test/_support/zig-0.11.0/lib/std/http/Client.zig
-
-    NOT AN IODATA TERM ERROR
-    test/_support/zig-0.11.0/src/Module.zig
-    test/_support/zig-0.11.0/lib/compiler_rt/arm.zig
-    test/_support/zig-0.11.0/src/link/C.zig
-    test/_support/zig-0.11.0/test/translate_c.zig
-    test/_support/zig-0.11.0/src/main.zig
-    test/_support/zig-0.11.0/src/codegen/llvm/Builder.zig
-    test/_support/zig-0.11.0/src/arch/x86_64/abi.zig
-    test/_support/zig-0.11.0/lib/std/os/windows/ws2_32.zig
-    test/_support/zig-0.11.0/lib/std/os/windows/ntstatus.zig
-    test/_support/zig-0.11.0/lib/std/zig/c_builtins.zig
-    test/_support/zig-0.11.0/lib/std/json/scanner.zig
-    test/_support/zig-0.11.0/lib/std/Build/Step/ConfigHeader.zig
-    test/_support/zig-0.11.0/lib/std/fmt/parse_float/FloatInfo.zig
-    test/_support/zig-0.11.0/lib/std/fmt/parse_float/decimal.zig
-    test/_support/zig-0.11.0/lib/std/fmt/parse_float/convert_eisel_lemire.zig
-    test/_support/zig-0.11.0/lib/std/math.zig
-    test/_support/zig-0.11.0/lib/std/Thread.zig
-    test/_support/zig-0.11.0/lib/std/meta.zig
-    test/_support/zig-0.11.0/lib/std/crypto/kyber_d00.zig
-    test/_support/zig-0.11.0/lib/std/crypto/ascon.zig
-    test/_support/zig-0.11.0/lib/std/sort/block.zig
-    test/_support/zig-0.11.0/lib/std/crypto/pcurves/p256/p256_64.zig
-    test/_support/zig-0.11.0/lib/std/crypto/pcurves/p256/p256_scalar_64.zig
-    test/_support/zig-0.11.0/lib/std/crypto/pcurves/p384/p384_64.zig
-    test/_support/zig-0.11.0/lib/std/crypto/pcurves/p384/p384_scalar_64.zig
-    test/_support/zig-0.11.0/lib/std/crypto/pcurves/secp256k1/secp256k1_64.zig
-    test/_support/zig-0.11.0/lib/std/crypto/pcurves/secp256k1/secp256k1_scalar_64.zig
-    test/_support/zig-0.11.0/lib/std/crypto/aes/soft.zig
-    test/_support/zig-0.11.0/lib/std/crypto/hash_composition.zig
-    test/_support/zig-0.11.0/lib/std/fs/test.zig
-    test/_support/zig-0.11.0/lib/std/hash_map.zig
-    test/_support/zig-0.11.0/lib/std/math/big/int.zig
-    test/_support/zig-0.11.0/lib/std/macho.zig
-    test/_support/zig-0.11.0/test/run_translated_c.zig
-    test/_support/zig-0.11.0/lib/std/zig/parser_test.zig
-
-    NOT TEXTUAL INTEGER
-    test/_support/zig-0.11.0/test/tests.zig
     test/_support/zig-0.11.0/src/arch/x86_64/encoder.zig
     test/_support/zig-0.11.0/lib/std/zig/tokenizer.zig
-    test/_support/zig-0.11.0/lib/std/json/test.zig
-    test/_support/zig-0.11.0/lib/std/json/JSONTestSuite_test.zig
-    test/_support/zig-0.11.0/lib/std/compress/deflate/decompressor.zig
-    test/_support/zig-0.11.0/lib/std/pdb.zig
-    test/_support/zig-0.11.0/lib/std/net.zig
-    test/_support/zig-0.11.0/lib/std/compress/xz/test.zig
-    test/_support/zig-0.11.0/lib/std/crypto/poly1305.zig
-    test/_support/zig-0.11.0/lib/std/crypto/siphash.zig
-    test/_support/zig-0.11.0/lib/std/io/tty.zig
     test/_support/zig-0.11.0/lib/std/Progress.zig
-    test/_support/zig-0.11.0/lib/std/unicode.zig
-    test/_support/zig-0.11.0/lib/std/elf.zig
-    test/_support/zig-0.11.0/lib/std/crypto/sha3.zig
-    test/_support/zig-0.11.0/lib/std/leb128.zig
-    test/_support/zig-0.11.0/lib/build_runner.zig
-    test/_support/zig-0.11.0/lib/c.zig
-    test/_support/zig-0.11.0/test/compile_errors.zig
-    test/_support/zig-0.11.0/lib/std/json/dynamic_test.zig
+    test/_support/zig-0.11.0/lib/std/net.zig
+    test/_support/zig-0.11.0/src/Module.zig
+    test/_support/zig-0.11.0/src/codegen/llvm/Builder.zig
+    test/_support/zig-0.11.0/lib/std/json/scanner.zig
+    test/_support/zig-0.11.0/lib/std/Build/Step/ConfigHeader.zig
   ])
 
   def dir_walk("test/_support/zig-0.11.0/test/cases/compile_errors" <> _), do: []
@@ -153,9 +101,9 @@ parent_dir = "test/_support/zig-0.11.0"
 subdirs = ~W[lib src test]
 
 subdirs
-|> Enum.map(&Path.join(parent_dir, &1))
-|> Enum.flat_map(&EverythingHelper.dir_walk/1)
-|> Enum.reject(&(&1 == []))
+|> Stream.map(&Path.join(parent_dir, &1))
+|> Stream.flat_map(&EverythingHelper.dir_walk/1)
+|> Stream.reject(&(&1 == []))
 |> Enum.each(fn [first | _] = files ->
   dir = Path.dirname(first)
 
