@@ -8,9 +8,14 @@ defmodule ZigParserTest.EverythingHelper do
     test/_support/zig-0.11.0/test/behavior/translate_c_macros.zig
     test/_support/zig-0.11.0/test/behavior/ptrcast.zig
     test/_support/zig-0.11.0/test/behavior/basic.zig
+    test/_support/zig-0.11.0/src/print_zir.zig
+    test/_support/zig-0.11.0/src/print_air.zig
+    test/_support/zig-0.11.0/src/print_env.zig
+    test/_support/zig-0.11.0/src/translate_c.zig
+    test/_support/zig-0.11.0/src/print_targets.zig
   ])
 
-  def dir_walk("test/_support/zig-0.11.0/test/cases/compile_errors/" <> _), do: []
+  def dir_walk("test/_support/zig-0.11.0/test/cases/compile_errors" <> _), do: []
 
   def dir_walk(dir) do
     {dirs, files} =
@@ -56,17 +61,9 @@ all_files =
           describe dir do
             for file <- files do
               test file do
-                # try do
                 unquote(file)
                 |> File.read!()
                 |> Zig.Parser.parse()
-
-                # rescue
-                #  e in FunctionClauseError ->
-                #    if e.module == Zig.Parser.Statement and e.function == :parse do
-                #      IO.puts(IO.ANSI.yellow() <> unquote(file) <> IO.ANSI.reset())
-                #    end
-                # end
               end
             end
           end

@@ -20,25 +20,13 @@ defmodule Zig.Parser.Expr do
     defp parse([unquote(tag), expr]), do: {unquote(tag), expr}
   end
 
-  defp parse([value, :catch, code]) do
-    {:catch, value, code}
+  defp parse([value, :catch, :|, payload, :|, code | rest]) do
+    parse([{:catch, value, payload, code} | rest])
   end
 
-  defp parse([value, :catch, :|, payload, :|, code]) do
-    {:catch, value, payload, code}
+  defp parse([value, :catch, code | rest]) do
+    parse([{:catch, value, code} | rest])
   end
 
   defp parse([arg]), do: arg
-
-  defp parse([e, {:empty}]) do
-    {:empty, e}
-  end
-
-  defp parse([e, list]) when is_list(list) do
-    {:array, e, list}
-  end
-
-  defp parse([e, map]) when is_map(map) do
-    {:struct, e, map}
-  end
 end
