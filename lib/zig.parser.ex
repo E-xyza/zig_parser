@@ -321,7 +321,7 @@ defmodule Zig.Parser do
   defp literal_stringlike(rest, [{tag, literal} | rest_args], context, _, _) do
     content =
       case {tag, Enum.slice(literal, 1..-2//1)} do
-        {:string, trimmed} -> List.to_string(trimmed)
+        {:string, trimmed} -> IO.iodata_to_binary(trimmed)
         {:char, [char]} -> char
       end
 

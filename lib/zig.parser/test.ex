@@ -33,6 +33,10 @@ defmodule Zig.Parser.Test do
     %__MODULE__{block: block}
   end
 
+  defp parse([:test, {:string, name}, %Block{} = block]) do
+    %__MODULE__{name: name, block: block}
+  end
+
   defp parse([:test, name, %Block{} = block]) do
     %__MODULE__{name: name, block: block}
   end

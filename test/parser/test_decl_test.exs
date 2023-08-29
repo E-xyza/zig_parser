@@ -10,7 +10,7 @@ defmodule Zig.Parser.Test.TestDeclTest do
     end
 
     test "parse a named test" do
-      assert [%Test{name: {:string, "foobar"}}] = Parser.parse(~S(test "foobar" {})).code
+      assert [%Test{name: "foobar"}] = Parser.parse(~S(test "foobar" {})).code
     end
 
     test "gets the location" do
