@@ -41,6 +41,10 @@ defmodule Zig.Parser.PrimaryExpr do
   defp parse([:return]), do: :return
   defp parse([:return, expr]), do: {:return, expr}
 
+  defp parse([:inline | rest]) do
+    %{parse(rest) | inline: true}
+  end
+
   defp parse([label, :COLON | rest]) do
     %{parse(rest) | label: label}
   end
