@@ -77,9 +77,11 @@ defmodule Zig.Parser.Test.LoopTest do
 
     test "tagged for loop" do
       assert [%{value: %For{label: :tag}}] =
-               Parser.parse("""
-               const foo = tag: for (array) | item | {};
-               """).code
+               Parser.parse("const foo = tag: for (array) | item | {};").code
+    end
+
+    test "for loop with short capture" do
+      assert [%{value: %For{block: {:try, _}}}] = Parser.parse("const foo = for (buf[4]) |elem| try expect(elem == 0);").code
     end
   end
 

@@ -10,13 +10,28 @@ defmodule Zig.Parser.TypeExpr do
 
   defp parse([literalterm = {literal, _}]) when literal in @literals, do: literalterm
   defp parse([:DOT, enum]), do: {:enumliteral, enum}
-  defp parse([:LBRACKET, :RBRACKET | _] = slice), do: Pointer.parse(slice)
-  defp parse([:LBRACKET, :COLON | _] = slice), do: Pointer.parse(slice)
-  defp parse([:LBRACKET, :* | _] = manyptr), do: Pointer.parse(manyptr)
-  defp parse([:LBRACKET | _] = array), do: Array.parse(array)
-  defp parse([:* | _] = pointer), do: Pointer.parse(pointer)
-  defp parse([:** | rest]), do: %Pointer{count: :one, type: parse([:* | rest])}
-  defp parse([:QUESTIONMARK | rest]), do: {:optional, parse(rest)}
-  defp parse([:anyframe, :MINUSRARROW | rest]), do: {:anyframe, parse(rest)}
+
+  @pointer_next ~w[RBRACKET * COLON]a
+
+  defp parse([{:PrefixTypeOp, [:LBRACKET, next | _] = prefix} | rest]) when next in @pointer_next do
+    Pointer.parse(prefix, parse(rest))
+  end
+
+  defp parse([{:PrefixTypeOp, [:LBRACKET | _] = array} | rest]) do
+    Array.parse(array, parse(rest))
+  end
+
+  defp parse([{:PrefixTypeOp, [:* | _] = pointer} | rest]) do
+    Pointer.parse(pointer, parse(rest))
+  end
+
+  defp parse([{:PrefixTypeOp, [:** | prefix_rest]} | rest]) do
+    parse([{:PrefixTypeOp, [:*]}, {:PrefixTypeOp, [:* | prefix_rest]} | rest])
+  end
+
+  defp parse([{:PrefixTypeOp, [:anyframe, :MINUSRARROW]} | rest]), do: {:anyframe, parse(rest)}
+
+  defp parse([{:PrefixTypeOp, [:QUESTIONMARK]} | rest]), do: {:optional, parse(rest)}
+
   defp parse([singleton]), do: singleton
 end

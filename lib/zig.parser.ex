@@ -172,6 +172,7 @@ defmodule Zig.Parser do
                       tag: true,
                       post_traverse: {VarDecl, :post_traverse, []}
                     ],
+                    PrefixTypeOp: [tag: true],
                     PrimaryTypeExpr: [
                       tag: true,
                       post_traverse: {PrimaryTypeExpr, :post_traverse, []}

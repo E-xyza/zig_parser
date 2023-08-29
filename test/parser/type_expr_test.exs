@@ -4,6 +4,7 @@ defmodule Zig.Parser.Test.TypeExprTest do
   alias Zig.Parser
   alias Zig.Parser.Array
   alias Zig.Parser.Pointer
+  alias Zig.Parser.StructLiteral
 
   # note that PrimaryTypeExpr is generally tested in primary_type_expr_.exs
   #
@@ -113,7 +114,7 @@ defmodule Zig.Parser.Test.TypeExprTest do
     end
 
     test "with detailed alignment" do
-      assert [%{value: %Pointer{count: :one, alignment: {{:integer, 64}, 1, 1}}}] =
+      assert [%{value: %Pointer{count: :one, alignment: {{:integer, 64}, {:integer, 1}, {:integer, 1}}}}] =
                Parser.parse("const foo = *align(64:1:1) u8;").code
     end
 
@@ -187,7 +188,7 @@ defmodule Zig.Parser.Test.TypeExprTest do
     end
 
     test "with detailed alignment" do
-      assert [%{value: %Pointer{count: :many, alignment: {{:integer, 64}, 1, 1}}}] =
+      assert [%{value: %Pointer{count: :many, alignment: {{:integer, 64}, {:integer, 1}, {:integer, 1}}}}] =
                Parser.parse("const foo = [*]align(64:1:1) u8;").code
     end
 
@@ -372,6 +373,15 @@ defmodule Zig.Parser.Test.TypeExprTest do
                     {:call, :quux, [:mlem]}}
                }
              ] = Parser.parse("const foo = bar[2](baz)!quux(mlem);").code
+    end
+  end
+
+  describe "array type expr" do
+    test "complex description" do
+      assert [%{
+        type: %Pointer{count: :slice, type: %Pointer{type: :T, count: :many}},
+        value: {:&, %StructLiteral{type: %Array{count: :_, type: %Pointer{count: :many, type: :T}}}}
+      }] = Parser.parse("const x: [][*]T = &[_][*]T{};").code
     end
   end
 end

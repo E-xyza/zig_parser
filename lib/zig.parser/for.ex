@@ -42,7 +42,7 @@ defmodule Zig.Parser.For do
     parse_capture(for_struct, rest)
   end
 
-  defp parse_capture(for_struct, [:|, block = %Block{} | rest]) do
+  defp parse_capture(for_struct, [:|, block | rest]) do
     for_struct
     |> Map.update!(:captures, &Enum.reverse/1)
     |> Map.replace!(:block, block)
