@@ -96,5 +96,9 @@ defmodule Zig.Parser.Test.FunctionTest do
     test "function type with decorator" do
       assert [%{value: %Function{}}] = Parser.parse("const x = fn () callconv(WINAPI) void;").code
     end
+
+    test "optional comma is ok" do
+      [%{value: %Function{}}] = Parser.parse("const x = fn (u8,) void;").code
+    end
   end
 end

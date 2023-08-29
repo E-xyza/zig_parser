@@ -38,16 +38,16 @@ all_files =
 
           for file <- files do
             test file do
-              try do
+              #try do
                 unquote(file)
                 |> File.read!
                 |> Zig.Parser.parse
-              rescue
-                e in FunctionClauseError ->
-                  if unquote(file) =~ "test/_support/zig-0.11.0/test" do
-                    IO.puts(unquote(file))
-                  end
-              end
+              #rescue
+              #  e in FunctionClauseError ->
+              #    if unquote(file) =~ "test/_support/zig-0.11.0/test" do
+              #      IO.puts(unquote(file))
+              #    end
+              #end
             end
           end
         end

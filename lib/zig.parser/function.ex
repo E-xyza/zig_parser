@@ -59,10 +59,12 @@ defmodule Zig.Parser.Function do
 
   defp parse_decl([type], fun_struct), do: %{fun_struct | type: type}
 
-  defp parse_params([identifier, :COMMA | rest], so_far),
-    do: parse_params(rest, [identifier | so_far])
+  defp parse_params([identifier, :COMMA], so_far), do: Enum.reverse(so_far, [identifier])
 
   defp parse_params([identifier], so_far), do: Enum.reverse(so_far, [identifier])
+
+  defp parse_params([identifier, :COMMA | rest], so_far),
+    do: parse_params(rest, [identifier | so_far])
 
   defp parse_params([], []), do: []
 end
