@@ -9,8 +9,15 @@ defmodule Zig.Parser.Const do
     :doc_comment,
     pub: false,
     export: false,
+    extern: false,
     comptime: false
   ]
+
+  @terminators [[], [:SEMICOLON]]
+
+  def parse([:COLON, type | terminator]) when terminator in @terminators do
+    %__MODULE__{type: type}
+  end
 
   def parse([:COLON, type | rest]) do
     %{parse(rest) | type: type}

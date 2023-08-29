@@ -50,8 +50,8 @@ defmodule Zig.Parser.Statement do
     If.parse(rest_args)
   end
 
-  defp parse(args = [:switch | _]) do
-    Switch.parse(args)
+  defp parse([:switch | rest_args]) do
+    Switch.parse(rest_args)
   end
 
   defp parse([statement, :SEMICOLON]), do: statement

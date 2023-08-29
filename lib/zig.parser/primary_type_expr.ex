@@ -1,6 +1,7 @@
 defmodule Zig.Parser.PrimaryTypeExpr do
   alias Zig.Parser.ErrorSet
   alias Zig.Parser.Function
+  alias Zig.Parser.If
   alias Zig.Parser.StructLiteral
   alias Zig.Parser.Switch
 
@@ -128,8 +129,11 @@ defmodule Zig.Parser.PrimaryTypeExpr do
     %{expr | label: label}
   end
 
+  # IfExpr
+  defp parse([:if | ifexpr]), do: If.parse(ifexpr)
+
   # SwitchExpr
-  defp parse(switch = [:switch | _rest]), do: Switch.parse(switch)
+  defp parse([:switch | switch]), do: Switch.parse(switch)
 
   defp parse([any]), do: any
 

@@ -11,8 +11,6 @@ defmodule Zig.Parser.While do
     inline: false
   ]
 
-  alias Zig.Parser.Block
-
   def post_traverse(rest, [{:WhileStatement, [:while | args]} | rest_args], context, _, _) do
     {rest, [parse(args) | rest_args], context}
   end
@@ -43,17 +41,17 @@ defmodule Zig.Parser.While do
 
   defp parse_continue(while, rest), do: parse_block(while, rest)
 
-  defp parse_block(while, [%Block{} = block | rest]) do
-    while
-    |> Map.replace!(:block, block)
-    |> parse_else(rest)
-  end
-
   defp parse_else(while, []), do: while
 
   defp parse_else(while, [:else, block]), do: %{while | else: block}
 
   defp parse_else(while, [:else, :|, payload, :|, block]) do
     %{while | else: block, else_payload: payload}
+  end
+
+  defp parse_block(while, [block | rest]) do
+    while
+    |> Map.replace!(:block, block)
+    |> parse_else(rest)
   end
 end
