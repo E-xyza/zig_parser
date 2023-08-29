@@ -7,6 +7,8 @@ defmodule Zig.Parser.ErrorSet do
     parse(list, [])
   end
 
+  defp parse([], []), do: %__MODULE__{values: []}
+
   defp parse([identifier | terminator], so_far) when terminator in @terminators do
     %__MODULE__{values: Enum.reverse([identifier | so_far])}
   end

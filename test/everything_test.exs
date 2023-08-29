@@ -14,9 +14,10 @@ defmodule ZigParserTest.EverythingHelper do
       |> Enum.map(&Path.join(dir, &1))
       |> Enum.split_with(&File.dir?/1)
 
-    zig_files = files
-    |> Enum.filter(&(Path.extname(&1) == ".zig"))
-    |> Enum.reject(&(&1 in @rejected))
+    zig_files =
+      files
+      |> Enum.filter(&(Path.extname(&1) == ".zig"))
+      |> Enum.reject(&(&1 in @rejected))
 
     [zig_files | Enum.flat_map(dirs, &dir_walk(&1))]
   end

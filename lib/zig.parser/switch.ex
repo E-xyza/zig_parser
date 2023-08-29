@@ -43,6 +43,15 @@ defmodule Zig.Parser.Switch do
     {items, rest}
   end
 
+  defp parse_pattern([{:SwitchItem, items}, :COMMA, :"=>" | rest], so_far) do
+    items =
+      [parse_items(items, []) | so_far]
+      |> Enum.reverse()
+      |> List.flatten()
+
+    {items, rest}
+  end
+
   defp parse_pattern([{:SwitchItem, items}, :COMMA | rest], so_far) do
     parse_pattern(rest, [parse_items(items, []) | so_far])
   end

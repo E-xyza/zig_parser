@@ -71,5 +71,12 @@ defmodule Zig.Parser.Test.SwitchTest do
 
       assert [{[integer: 1], {:enum_literal, :foo}}] = prongs
     end
+
+    test "optional comma in prong" do
+      assert [%{value: %Switch{prongs: prongs}}] =
+               Parser.parse("const foo = switch (foo) {1, => .foo};").code
+
+      assert [{[integer: 1], {:enum_literal, :foo}}] = prongs
+    end
   end
 end
