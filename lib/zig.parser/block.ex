@@ -27,7 +27,13 @@ defmodule Zig.Parser.Block do
     {rest, [block | rest_args], context}
   end
 
-  def post_traverse(rest, [{:BlockExpr, [start, label, :COLON, %Block{} = code]} | rest_args], context, _, _) do
+  def post_traverse(
+        rest,
+        [{:BlockExpr, [start, label, :COLON, %Block{} = code]} | rest_args],
+        context,
+        _,
+        _
+      ) do
     block =
       code
       |> Parser.put_location(start)

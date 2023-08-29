@@ -39,6 +39,14 @@ defmodule Zig.Parser.ContainerDeclarations do
     parse(rest, new_attrs, so_far)
   end
 
+  defp parse([{:usingnamespace, namespace} | rest], attrs, so_far) do
+    if attrs do
+      parse(rest, nil, [{:usingnamespace, Keyword.keys(attrs), namespace} | so_far])
+    else
+      parse(rest, nil, [{:usingnamespace, namespace} | so_far])
+    end
+  end
+
   defp parse([term | rest], nil, so_far) do
     parse(rest, nil, [term | so_far])
   end

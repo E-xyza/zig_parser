@@ -307,8 +307,8 @@ defmodule Zig.Parser do
     {"", [], struct(context, code: code)}
   end
 
-  @escaped %{?t => ?\t, ?n => ?\n, ?' => ?', ?" => ?", ?\\ => ?\\}
-  defp process_escape(<<92, char>>), do: @escaped[char]
+  @escaped %{?t => ?\t, ?r => ?\r, ?n => ?\n, ?' => ?', ?" => ?", ?\\ => ?\\}
+  defp process_escape(<<92, char>>), do: Map.fetch!(@escaped, char)
 
   defp process_escape("\\u{" <> what) do
     what

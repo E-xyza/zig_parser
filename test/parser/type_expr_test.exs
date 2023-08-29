@@ -303,7 +303,7 @@ defmodule Zig.Parser.Test.TypeExprTest do
     end
 
     test "works for an identifier + open ended range" do
-      assert [%{value: {:ref, [:bar, {:range, {:integer, 0}}]}}] =
+      assert [%{value: {:ref, [:bar, {:range, {:integer, 0}, :...}]}}] =
                Parser.parse("const foo = bar[0..];").code
     end
 

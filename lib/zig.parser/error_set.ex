@@ -1,5 +1,5 @@
 defmodule Zig.Parser.ErrorSet do
-  defstruct [:values, :location]
+  defstruct [:values, :location, comments: %{}]
 
   @terminators [[], [:COMMA]]
 
@@ -15,5 +15,11 @@ defmodule Zig.Parser.ErrorSet do
 
   defp parse([identifier, :COMMA | rest], so_far) do
     parse(rest, [identifier | so_far])
+  end
+
+  defp parse([{:doc_comment, comment}, identifier | rest], so_far) do
+    [identifier | rest]
+    |> parse(so_far)
+    |> Map.update!(:comments, &Map.put(&1, identifier, comment))
   end
 end
