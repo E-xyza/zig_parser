@@ -11,6 +11,8 @@ defmodule Zig.Parser.While do
     inline: false
   ]
 
+  @terminators [[], [:SEMICOLON]]
+
   def post_traverse(rest, [{:WhileStatement, [:while | args]} | rest_args], context, _, _) do
     {rest, [parse(args) | rest_args], context}
   end
@@ -41,7 +43,7 @@ defmodule Zig.Parser.While do
 
   defp parse_continue(while, rest), do: parse_block(while, rest)
 
-  defp parse_else(while, []), do: while
+  defp parse_else(while, terminator) when terminator in @terminators, do: while
 
   defp parse_else(while, [:else, block]), do: %{while | else: block}
 

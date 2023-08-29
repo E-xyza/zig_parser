@@ -42,7 +42,11 @@ defmodule Zig.Parser.ErrorUnionExpr do
   end
 
   defp parse_indexed(ref, [start, :DOT2, :RBRACKET | rest]) do
-    parse_grouped([group(ref, {:range, start}) | rest])
+    parse_grouped([group(ref, {:range, start, :...}) | rest])
+  end
+
+  defp parse_indexed(ref, [start, :DOT2, :COLON, sentinel, :RBRACKET | rest]) do
+    parse_grouped([group(ref, {:range, start, :..., sentinel}) | rest])
   end
 
   defp parse_indexed(ref, [start, :DOT2, stop, :RBRACKET | rest]) do

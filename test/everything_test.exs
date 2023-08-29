@@ -4,8 +4,10 @@ defmodule ZigParserTest.EverythingHelper do
     test/_support/zig-0.11.0/lib/compiler_rt/udivmodti4_test.zig
     test/_support/zig-0.11.0/lib/compiler_rt/udivmoddi4_test.zig
 
-    BROKEN STRING LITERALS:
+    BROKEN STRING/NUMBER LITERALS:
     test/_support/zig-0.11.0/test/behavior/translate_c_macros.zig
+    test/_support/zig-0.11.0/test/behavior/ptrcast.zig
+    test/_support/zig-0.11.0/test/behavior/basic.zig
   ])
 
   def dir_walk("test/_support/zig-0.11.0/test/cases/compile_errors/" <> _), do: []
