@@ -114,6 +114,11 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
                Parser.parse("const foo = error {abc};").code
     end
 
+    test "trailing comma" do
+      assert [%{value: %ErrorSet{values: [:abc]}}] =
+               Parser.parse("const foo = error {abc,};").code
+    end
+
     test "with more than one error" do
       assert [%{value: %ErrorSet{values: [:abc, :bcd]}}] =
                Parser.parse("const foo = error {abc, bcd};").code
@@ -209,11 +214,11 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
     end
 
     test "can be a an identifier with special string" do
-      assert [%{value: :"foo-bar"}] = Parser.parse(~S(const foo = @"foo-bar";)).code
+      assert [%{value: {:builtin, :"foo-bar"}}] = Parser.parse(~S(const foo = @"foo-bar";)).code
     end
 
     test "can be a an identifier with really special string" do
-      assert [%{value: :"🚀"}] = Parser.parse(~S(const foo = @"🚀";)).code
+      assert [%{value: {:builtin, :"🚀"}}] = Parser.parse(~S(const foo = @"🚀";)).code
     end
   end
 

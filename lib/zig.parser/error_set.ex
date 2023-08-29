@@ -1,11 +1,13 @@
 defmodule Zig.Parser.ErrorSet do
   defstruct [:values, :location]
 
+  @terminators [[], [:COMMA]]
+
   def parse([:LBRACE, {:IdentifierList, list}, :RBRACE]) do
     parse(list, [])
   end
 
-  defp parse([identifier], so_far) do
+  defp parse([identifier | terminator], so_far) when terminator in @terminators do
     %__MODULE__{values: Enum.reverse([identifier | so_far])}
   end
 
