@@ -93,4 +93,19 @@ defmodule Zig.Parser.Test.OperatorsTest do
       end
     end
   end
+
+  describe "operator precedence" do
+    test "multiplication before addition" do
+      assert [%{value: {:+, {:*, :a, :b}, :c}}] =
+               Parser.parse("const foo = a * b + c;").code
+
+      assert [%{value: {:+, :a, {:*, :b, :c}}}] =
+               Parser.parse("const foo = a + b * c;").code
+    end
+
+    test "parentheses override" do
+      assert [%{value: {:*, :a, {:+, :b, :c}}}] =
+               Parser.parse("const foo = a * (b + c);").code
+    end
+  end
 end

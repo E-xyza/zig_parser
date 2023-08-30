@@ -4,6 +4,8 @@ defmodule Zig.Parser do
 
   defstruct [:doc_comment, code: [], dependencies: [], comments: []]
 
+  @external_resource "lib/grammar/grammar.y"
+
   alias Zig.Parser.Asm
   alias Zig.Parser.AssignExpr
   alias Zig.Parser.Block
@@ -234,7 +236,13 @@ defmodule Zig.Parser do
 
   defparsecp(:parser, zig_parser)
 
-  defparsecp(:utf8, utf8_char(not: 0..255))
+  defparsecp(:utf8, utf8_char(not: 0..127) |> map(:char_to_string))
+
+  defp char_to_string(char) do
+    char
+    |> List.wrap()
+    |> List.to_string()
+  end
 
   def parse(string) do
     case parser(string) do
@@ -295,7 +303,7 @@ defmodule Zig.Parser do
   end
 
   defp char_escape(rest, [{:char_escape, [~S"\x" | number]} | rest_args], context, _, _) do
-    {rest, [List.to_integer(number, 16) | rest_args], context}
+    {rest, [<<List.to_integer(number, 16)>> | rest_args], context}
   end
 
   defp char_escape(rest, [{:char_escape, [~S"\u{" | descriptor]} | rest_args], context, _, _) do
@@ -304,11 +312,13 @@ defmodule Zig.Parser do
       # removes trailing "}"
       |> Enum.slice(0..-2)
       |> List.to_integer(16)
+      |> List.wrap()
+      |> List.to_string()
 
     {rest, [unicode | rest_args], context}
   end
 
-  @escaped %{?t => ?\t, ?r => ?\r, ?n => ?\n, ?' => ?\', ?" => ?\", ?\\ => ?\\}
+  @escaped %{?t => "\t", ?r => "\r", ?n => "\n", ?' => "'", ?" => "\"", ?\\ => "\\"}
   @escaped_chars Map.keys(@escaped)
 
   defp char_escape(rest, [{:char_escape, ["\\", escaped]} | rest_args], context, _, _)
@@ -320,10 +330,9 @@ defmodule Zig.Parser do
 
   defp literal_stringlike(rest, [{tag, literal} | rest_args], context, _, _) do
     content =
-      case {tag, Enum.slice(literal, 1..-2//1)} do
-        {:string, trimmed} -> IO.iodata_to_binary(trimmed)
-        {:char, [char]} -> char
-      end
+      literal
+      |> Enum.slice(1..-2//1)
+      |> IO.iodata_to_binary()
 
     {rest, [{tag, content} | rest_args], context}
   end
@@ -349,17 +358,21 @@ defmodule Zig.Parser do
   end
 
   defp identifier(rest, charlist, context, _loc, _col) do
-    identifier = charlist
-    |> Enum.reverse
-    |> List.to_atom
+    identifier =
+      charlist
+      |> Enum.reverse()
+      |> List.to_atom()
+
     {rest, [identifier], context}
   end
 
   defp string_literal(rest, args, context, _loc, _col) do
-    arg = case args do
-      [{:string, _} = string] -> string
-      string_list -> {:string, Enum.join(string_list, "")}
-    end
+    arg =
+      case args do
+        [{:string, _} = string] -> string
+        string_list -> {:string, Enum.join(string_list, "")}
+      end
+
     {rest, [arg], context}
   end
 

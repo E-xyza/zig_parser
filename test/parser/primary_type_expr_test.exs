@@ -55,21 +55,19 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
 
   describe "char literal" do
     test "basic ascii" do
-      assert [%{value: {:char, ?a}}] = Parser.parse("const foo = 'a';").code
+      assert [%{value: {:char, "a"}}] = Parser.parse("const foo = 'a';").code
     end
 
     test "utf-8 literal" do
-      assert [%{value: {:char, ?🚀}}] = Parser.parse("const foo = '🚀';").code
+      assert [%{value: {:char, "🚀"}}] = Parser.parse("const foo = '🚀';").code
     end
 
-    @tag :skip
     test "escaped char" do
-      assert [%{value: {:char, ?\t}}] = Parser.parse(~S"const foo = '\n';").code
+      assert [%{value: {:char, "\n"}}] = Parser.parse(~S"const foo = '\n';").code
     end
 
-    @tag :skip
     test "escaped hex" do
-      assert [%{value: {:call, ?🚀}}] = Parser.parse(~S"const foo = '\u{1F680}';").code
+      assert [%{value: {:char, "🚀"}}] = Parser.parse(~S"const foo = '\u{1F680}';").code
     end
   end
 

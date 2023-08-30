@@ -24,7 +24,7 @@ VarDecl <- (KEYWORD_const / KEYWORD_var) IDENTIFIER (COLON TypeExpr)? ByteAlign?
 
 ContainerField
     <- doc_comment? KEYWORD_comptime? IDENTIFIER (COLON TypeExpr)? ByteAlign? (EQUAL Expr)?
-     / doc_comment? KEYWORD_comptime? (IDENTIFIER COLON)? !KEYWORD_fn TypeExpr ByteAlign? (EQUAL Expr)?
+     / doc_comment? KEYWORD_comptime? !KEYWORD_fn TypeExpr ByteAlign? (EQUAL Expr)?
 
 # *** Block Level ***
 Statement
