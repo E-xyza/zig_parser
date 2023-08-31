@@ -54,16 +54,9 @@ subdirs
         describe dir do
           for file <- files do
             test file do
-              try do
-                unquote(file)
-                |> File.read!()
-                |> Zig.Parser.parse()
-              rescue
-                e in FunctionClauseError ->
-                  unless e.module == Zig.Parser.Asm do
-                    reraise e, __STACKTRACE__
-                  end
-              end
+              unquote(file)
+              |> File.read!()
+              |> Zig.Parser.parse()
             end
           end
         end

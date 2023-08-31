@@ -13,26 +13,50 @@ defmodule Zig.Parser.Asm do
   end
 
   defp parse([:volatile | rest], asm) do
-    parse(rest, %{asm | volatile: true})
+    parse_code(rest, %{asm | volatile: true})
   end
 
-  defp parse([:LPAREN, {:string, code}, :COLON | rest], asm) do
-    parse(rest, %{asm | code: code})
+  defp parse(rest, asm), do: parse_code(rest, asm)
+
+  defp parse_code([:LPAREN, code | rest], asm) do
+    next_asm = %{asm | code: code}
+
+    case rest do
+      [:COLON | more] ->
+        parse_rest(more, next_asm)
+
+      [:RPAREN] ->
+        next_asm
+    end
   end
 
-  defp parse([{:AsmOutputList, outputs}, :COLON | rest], asm) do
-    parse(rest, %{asm | outputs: parse_io(outputs, [])})
+  defp parse_rest([{:AsmOutputList, outputs} | rest], asm) do
+    next_asm = %{asm | outputs: parse_io(outputs, [])}
+
+    case rest do
+      [:COLON | more] ->
+        parse_rest(more, next_asm)
+
+      [:RPAREN] ->
+        next_asm
+    end
   end
 
-  defp parse([{:AsmInputList, inputs}, :COLON | rest], asm) do
-    parse(rest, %{asm | inputs: parse_io(inputs, [])})
+  defp parse_rest([{:AsmInputList, inputs} | rest], asm) do
+    next_asm = %{asm | inputs: parse_io(inputs, [])}
+
+    case rest do
+      [:COLON | more] ->
+        parse_rest(more, next_asm)
+
+      [:RPAREN] ->
+        next_asm
+    end
   end
 
-  defp parse([{:StringList, clobbers}, :RPAREN], asm) do
+  defp parse_rest([{:StringList, clobbers}, :RPAREN], asm) do
     %{asm | clobbers: parse_clobbers(clobbers, [])}
   end
-
-  defp parse([:RPAREN], asm), do: asm
 
   defp parse_io(
          [

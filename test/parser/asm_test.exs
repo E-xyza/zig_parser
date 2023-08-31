@@ -15,7 +15,7 @@ defmodule Zig.Parser.AsmTest do
     # AsmClobbers <- COLON StringList
 
     test "basic asm expression" do
-      assert [%{value: %Asm{code: "syscall"}}] =
+      assert [%{value: %Asm{code: {:string, "syscall"}}}] =
                Parser.parse(~S|const foo = asm("syscall" : : : );|).code
     end
 
@@ -87,7 +87,7 @@ defmodule Zig.Parser.AsmTest do
     end
 
     test "with multiline string" do
-      assert [%{value: %Asm{code: code}}] =
+      assert [%{value: %Asm{code: {:string, code}}}] =
                Parser.parse(~S"""
                const foo = asm(
                  \\ this is
@@ -97,6 +97,18 @@ defmodule Zig.Parser.AsmTest do
                """).code
 
       assert code == " this is\n some\n assembler code\n"
+    end
+  end
+
+  describe "degenerate asm segments" do
+    test "just the asm" do
+      assert [_] =
+               Parser.parse(~S"""
+               const foo =
+                 asm (
+                   \\.globl this_is_my_alias;
+                 );
+               """).code
     end
   end
 end
