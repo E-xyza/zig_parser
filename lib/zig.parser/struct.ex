@@ -11,6 +11,12 @@ defmodule Zig.Parser.Struct do
     |> do_parse(rest)
   end
 
+  defp do_parse(struct, [name, :COLON, type, :COMMA | rest]) do
+    struct
+    |> Map.update!(:fields, &Map.put(&1, name, type))
+    |> do_parse(rest)
+  end
+
   defp do_parse(struct, [name, :COLON, type | rest]) do
     struct
     |> Map.update!(:fields, &Map.put(&1, name, type))
