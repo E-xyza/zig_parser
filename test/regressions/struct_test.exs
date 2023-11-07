@@ -10,8 +10,8 @@ defmodule ZigParserTest.Regressions.StructParseTest do
 
   describe "regression 07 Dec 2023" do
     test "zig parser can structs with both fields and decls" do
-        
-      assert [%Const{name: :foo, value: %Struct{decls: [%Const{name: :blah}]}}] = Parser.parse("""
+      assert [%Const{name: :foo, value: %Struct{decls: [%Const{name: :blah}]}}] =
+               Parser.parse("""
                const foo = struct{
                   value: i32,
                   const blah = 1;

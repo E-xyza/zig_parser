@@ -286,18 +286,34 @@ defmodule Zig.Parser.Test.PrimaryTypeExprTest do
     end
 
     test "struct field" do
-      assert [%{value: %Struct{fields: %{foo: :u8}}}] =
+      assert [%{value: %Struct{fields: [%{name: :foo, type: :u8}]}}] =
                Parser.parse("const foo = struct { foo: u8 };").code
     end
 
     test "multi field" do
-      assert [%{value: %Struct{fields: %{foo: :u8, bar: :u8}}}] =
+      assert [%{value: %Struct{fields: [%{name: :bar, type: :u8}, %{name: :foo, type: :u8}]}}] =
                Parser.parse("const foo = struct { foo: u8, bar: u8 };").code
     end
 
     test "struct field with assignment" do
-      assert [%{value: %Struct{fields: %{foo: {:u8, {:integer, 10}}}}}] =
+      assert [%{value: %Struct{fields: [%{name: :foo, type: :u8, value: {:integer, 10}}]}}] =
                Parser.parse("const foo = struct { foo: u8 = 10 };").code
+    end
+
+    test "struct field with doc comment" do
+      assert [
+               %{
+                 value: %Struct{
+                   fields: [%{name: :foo, type: :u8, doc_comment: " this is a comment" <> _}]
+                 }
+               }
+             ] =
+               Parser.parse("""
+               const foo = struct { 
+                 /// this is a comment
+                 foo: u8 
+               };
+               """).code
     end
 
     test "get location" do
