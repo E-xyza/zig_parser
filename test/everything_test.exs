@@ -1,14 +1,13 @@
 defmodule ZigParserTest.EverythingHelper do
   @rejected MapSet.new(~w[
-    PARSE TOO SLOW:
-    test/_support/zig-0.11.0/lib/compiler_rt/udivmodti4_test.zig
-    test/_support/zig-0.11.0/lib/compiler_rt/udivmoddi4_test.zig
+  #  PARSE TOO SLOW:
+    test/_support/zig-0.12.0/lib/compiler_rt/udivmodti4_test.zig
+    
+  #  PARSER ERROR FOR CONTAINER-DECLS
+  #  test/_support/zig-0.12.0/src/arch/x86_64 test/_support/zig-0.12.0/src/arch/x86_64/encoder.zig
+  #])
 
-    PARSER ERROR FOR CONTAINER-DECLS
-    test/_support/zig-0.11.0/src/arch/x86_64 test/_support/zig-0.11.0/src/arch/x86_64/encoder.zig
-  ])
-
-  def dir_walk("test/_support/zig-0.11.0/test/cases/compile_errors" <> _), do: []
+  def dir_walk("test/_support/zig-0.12.0/test/cases/compile_errors" <> _), do: []
 
   def dir_walk(dir) do
     {dirs, files} =
@@ -28,7 +27,7 @@ end
 
 alias ZigParserTest.EverythingHelper
 
-parent_dir = "test/_support/zig-0.11.0"
+parent_dir = "test/_support/zig-0.12.0"
 subdirs = ~W[lib src test]
 
 subdirs
