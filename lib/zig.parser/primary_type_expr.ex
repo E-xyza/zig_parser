@@ -33,7 +33,7 @@ defmodule Zig.Parser.PrimaryTypeExpr do
   def _parse(a), do: parse(a)
 
   defp parse([{:builtin, name}, :LPAREN, {:ExprList, args}, :RPAREN]) do
-    {:call, name, parse_args(args, [])}
+    {:call, name, Zig.Parser._parse_args(args, [])}
   end
 
   defp parse([:DOT, map]) when is_map(map) do
@@ -85,8 +85,4 @@ defmodule Zig.Parser.PrimaryTypeExpr do
   defp parse([:switch | switch]), do: Switch.parse(switch)
 
   defp parse([any]), do: any
-
-  defp parse_args([], _), do: []
-  defp parse_args([arg], so_far), do: Enum.reverse([arg | so_far])
-  defp parse_args([arg, :COMMA | rest], so_far), do: parse_args(rest, [arg | so_far])
 end

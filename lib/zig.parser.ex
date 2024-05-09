@@ -415,4 +415,8 @@ defmodule Zig.Parser do
   def put_location(%_{} = struct, location) do
     Map.replace!(struct, :location, {location.line, location.column})
   end
+
+  def _parse_args([], _), do: []
+  def _parse_args([arg], so_far), do: Enum.reverse([arg | so_far])
+  def _parse_args([arg, :COMMA | rest], so_far), do: _parse_args(rest, [arg | so_far])
 end

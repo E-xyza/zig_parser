@@ -102,6 +102,17 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
     end
   end
 
+  describe "multi-assignment" do
+    test "can assign multiple consts" do
+      # note this must be in comptime block since multi-assignment is not allowed
+      # in the global scope.
+      assert [%{code: [{:=, [
+        %Const{name: :result},
+        %Const{name: :overflow}
+      ], {:call, :fun, [:a, :b]}}]}] = Parser.parse("comptime { const result, const overflow = fun(a, b);}").code
+    end
+  end
+
   describe "corner cases" do
     test "var doesn't need a value, per the parser" do
       assert [%Var{}] = Parser.parse("extern var foo: u8;").code

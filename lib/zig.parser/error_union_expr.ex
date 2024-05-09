@@ -28,7 +28,7 @@ defmodule Zig.Parser.ErrorUnionExpr do
   end
 
   defp parse_grouped([ref, :LPAREN, {:ExprList, args}, :RPAREN | rest]) do
-    parse_grouped([{:call, ref, args} | rest])
+    parse_grouped([{:call, ref, Zig.Parser._parse_args(args, [])} | rest])
   end
 
   defp parse_grouped([expr1, :!, expr2 | rest]) do
