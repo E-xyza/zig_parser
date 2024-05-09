@@ -17,5 +17,9 @@ defmodule Zig.Parser.AssignExpr do
     {operator, left, right}
   end
 
+  defp parse_assign([left, :"-|", right]) do
+    {:"-|=", left, right}
+  end
+
   defp parse_assign([singleton]), do: singleton
 end

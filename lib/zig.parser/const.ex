@@ -32,4 +32,6 @@ defmodule Zig.Parser.Const do
   def extend(const, [:=, value, :SEMICOLON | rest]) do
     {%{const | value: value}, rest}
   end
+
+  def extend(const, [:SEMICOLON | rest]), do: {const, rest}
 end
