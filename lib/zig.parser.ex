@@ -119,6 +119,10 @@ defmodule Zig.Parser do
                       tag: true,
                       post_traverse: {AssignExpr, :post_traverse, []}
                     ],
+                    SingleAssignExpr: [
+                      tag: :AssignExpr,
+                      post_traverse: {AssignExpr, :post_traverse, []}
+                    ],
                     TestDecl: [
                       tag: true,
                       start_position: true,
@@ -314,7 +318,7 @@ defmodule Zig.Parser do
     unicode =
       descriptor
       # removes trailing "}"
-      |> Enum.slice(0..-2)
+      |> Enum.slice(0..-2//1)
       |> List.to_integer(16)
       |> List.wrap()
       |> List.to_string()

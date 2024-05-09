@@ -40,4 +40,6 @@ defmodule Zig.Parser.Var do
   def extend(var, [:=, value, :SEMICOLON | rest]) do
     {%{var | value: value}, rest}
   end
+
+  def extend(var, [:SEMICOLON | rest]), do: {var, rest}
 end
