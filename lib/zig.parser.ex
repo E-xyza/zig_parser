@@ -12,7 +12,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.Collected
   alias Zig.Parser.ComptimeDecl
   alias Zig.Parser.ContainerDecl
-  alias Zig.Parser.ContainerDeclarations
+  alias Zig.Parser.ContainerDeclaration
   alias Zig.Parser.Decl
   alias Zig.Parser.ErrorUnionExpr
   alias Zig.Parser.Expr
@@ -26,7 +26,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.PrimaryTypeExpr
   alias Zig.Parser.Statement
   alias Zig.Parser.TypeExpr
-  alias Zig.Parser.VarDecl
+  alias Zig.Parser.GlobalVarDecl
   alias Zig.Parser.While
 
   @keywords ~w[addrspace align allowzero and anyframe anytype asm async await break callconv catch comptime const continue defer else enum errdefer error export extern fn for if inline noalias nosuspend noinline opaque or orelse packed pub resume return linksection struct suspend switch test threadlocal try union unreachable usingnamespace var volatile while]a
@@ -131,9 +131,9 @@ defmodule Zig.Parser do
                       tag: true,
                       post_traverse: {ContainerDecl, :post_traverse, []}
                     ],
-                    ContainerDeclarations: [
+                    ContainerDeclaration: [
                       tag: true,
-                      post_traverse: {ContainerDeclarations, :post_traverse, []}
+                      post_traverse: {ContainerDeclaration, :post_traverse, []}
                     ],
                     PrimaryExpr: [
                       start_position: true,
@@ -175,10 +175,10 @@ defmodule Zig.Parser do
                       post_traverse: {InitList, :post_traverse, []}
                     ],
                     ParamDecl: [tag: true, post_traverse: {ParamDecl, :post_traverse, []}],
-                    VarDecl: [
+                    GlobalVarDecl: [
                       start_position: true,
                       tag: true,
-                      post_traverse: {VarDecl, :post_traverse, []}
+                      post_traverse: {GlobalVarDecl, :post_traverse, []}
                     ],
                     PrefixTypeOp: [tag: true],
                     PrimaryTypeExpr: [

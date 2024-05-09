@@ -1,9 +1,9 @@
-defmodule Zig.Parser.VarDecl do
+defmodule Zig.Parser.GlobalVarDecl do
   alias Zig.Parser
   alias Zig.Parser.Const
   alias Zig.Parser.Var
 
-  def post_traverse(rest, [{:VarDecl, [start, :const | args]} | rest_args], context, _loc, _row) do
+  def post_traverse(rest, [{:GlobalVarDecl, [start, :const | args]} | rest_args], context, _loc, _row) do
     const =
       args
       |> Const.parse()
@@ -12,7 +12,7 @@ defmodule Zig.Parser.VarDecl do
     {rest, [const | rest_args], context}
   end
 
-  def post_traverse(rest, [{:VarDecl, [start, :var | args]} | rest_args], context, _loc, _row) do
+  def post_traverse(rest, [{:GlobalVarDecl, [start, :var | args]} | rest_args], context, _loc, _row) do
     var =
       args
       |> Var.parse()

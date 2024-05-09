@@ -39,7 +39,7 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
 
   describe "when given a top level basic var block" do
     # tests:
-    # TopLevelVar <- (KEYWORD_export / KEYWORD_extern STRINGLITERALSINGLE?)? KEYWORD_threadlocal? VarDecl
+    # TopLevelVar <- (KEYWORD_export / KEYWORD_extern STRINGLITERALSINGLE?)? KEYWORD_threadlocal? GlobalVarDecl
     # and all of the pieces that come with this part of the function proto, plus distinguishing between
     # var and const
 
@@ -87,7 +87,7 @@ defmodule Zig.Parser.Test.TopLevelVarTest do
 
   describe "when given contents of the var decl" do
     # tests:
-    # VarDecl <- (KEYWORD_const / KEYWORD_var) IDENTIFIER (COLON TypeExpr)? ByteAlign? LinkSection? (EQUAL Expr)? SEMICOLON
+    # GlobalVarDecl <- (KEYWORD_const / KEYWORD_var) IDENTIFIER (COLON TypeExpr)? ByteAlign? LinkSection? (EQUAL Expr)? SEMICOLON
     # and all of the pieces that come with this part of the var decl proto, plus distinguishing between
     # var and const
 

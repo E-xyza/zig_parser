@@ -10,7 +10,7 @@ defmodule Zig.Parser.Test.StatementTest do
   #
   # TESTS:
   # Statement
-  #   <- KEYWORD_comptime? VarDecl
+  #   <- KEYWORD_comptime? GlobalVarDecl
   #    / KEYWORD_comptime BlockExprStatement
   #    / KEYWORD_nosuspend BlockExprStatement
   #    / KEYWORD_suspend BlockExprStatement

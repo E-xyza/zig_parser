@@ -8,7 +8,7 @@ defmodule Zig.Parser.Test.ContainerDeclTest do
   # TESTS:
   # Decl
   #   <- (KEYWORD_export / KEYWORD_extern STRINGLITERALSINGLE? / (KEYWORD_inline / KEYWORD_noinline))? FnProto (SEMICOLON / Block)
-  #      / (KEYWORD_export / KEYWORD_extern STRINGLITERALSINGLE?)? KEYWORD_threadlocal? VarDecl
+  #      / (KEYWORD_export / KEYWORD_extern STRINGLITERALSINGLE?)? KEYWORD_threadlocal? GlobalVarDecl
   #      / KEYWORD_usingnamespace Expr SEMICOLON
 
   describe "FnProto decorator with no block" do
