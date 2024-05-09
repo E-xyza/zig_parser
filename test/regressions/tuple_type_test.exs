@@ -12,7 +12,7 @@ defmodule ZigParserTest.Regressions.TupleTypeTest do
     @tag :skip
     test "zig parser can han" do
       assert %{code: [%Const{value: _}]} =
-               Parser.parse(~S"const foo = struct { bar.baz };") |> dbg(limit: 25)
+               Parser.parse(~S"const foo = struct { bar.baz };")
     end
   end
 end

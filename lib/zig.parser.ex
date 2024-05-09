@@ -17,6 +17,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.ErrorUnionExpr
   alias Zig.Parser.Expr
   alias Zig.Parser.For
+  alias Zig.Parser.GlobalVarDecl
   alias Zig.Parser.InitList
   alias Zig.Parser.Test
   alias Zig.Parser.Function
@@ -26,7 +27,8 @@ defmodule Zig.Parser do
   alias Zig.Parser.PrimaryTypeExpr
   alias Zig.Parser.Statement
   alias Zig.Parser.TypeExpr
-  alias Zig.Parser.GlobalVarDecl
+  alias Zig.Parser.VarDeclProto
+  alias Zig.Parser.VarDeclExprStatement
   alias Zig.Parser.While
 
   @keywords ~w[addrspace align allowzero and anyframe anytype asm async await break callconv catch comptime const continue defer else enum errdefer error export extern fn for if inline noalias nosuspend noinline opaque or orelse packed pub resume return linksection struct suspend switch test threadlocal try union unreachable usingnamespace var volatile while]a
@@ -175,10 +177,10 @@ defmodule Zig.Parser do
                       post_traverse: {InitList, :post_traverse, []}
                     ],
                     ParamDecl: [tag: true, post_traverse: {ParamDecl, :post_traverse, []}],
-                    GlobalVarDecl: [
+                    VarDeclProto: [
                       start_position: true,
                       tag: true,
-                      post_traverse: {GlobalVarDecl, :post_traverse, []}
+                      post_traverse: {VarDeclProto, :post_traverse, []}
                     ],
                     PrefixTypeOp: [tag: true],
                     PrimaryTypeExpr: [
@@ -209,6 +211,8 @@ defmodule Zig.Parser do
                     ForStatement: [tag: true, post_traverse: {For, :post_traverse, []}],
                     WhileStatement: [tag: true, post_traverse: {While, :post_traverse, []}],
                     Statement: [tag: true, post_traverse: {Statement, :post_traverse, []}],
+                    GlobalVarDecl: [post_traverse: {GlobalVarDecl, :post_traverse, []}],
+                    VarDeclExprStatement: [post_traverse: {VarDeclExprStatement, :post_traverse, []}],
                     # keywords that add inline
                     LoopStatement: [tag: true, post_traverse: :add_inline],
                     # basic pseudofunction keywords

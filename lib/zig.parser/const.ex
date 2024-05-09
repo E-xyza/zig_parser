@@ -23,11 +23,13 @@ defmodule Zig.Parser.Const do
     %{parse(rest) | type: type}
   end
 
-  def parse([:=, value, :SEMICOLON]) do
-    %__MODULE__{value: value}
-  end
-
   def parse([name | rest]) do
     %{parse(rest) | name: name}
+  end
+
+  def parse([]), do: %__MODULE__{}
+
+  def extend(const, [:=, value, :SEMICOLON | rest]) do
+    {%{const | value: value}, rest}
   end
 end

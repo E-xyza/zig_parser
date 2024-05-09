@@ -31,13 +31,13 @@ defmodule Zig.Parser.Var do
     %{parse(rest) | alignment: alignment}
   end
 
-  def parse([:=, value, :SEMICOLON]) do
-    %__MODULE__{value: value}
-  end
-
   def parse([name | rest]) do
     %{parse(rest) | name: name}
   end
 
   def parse([]), do: %__MODULE__{}
+
+  def extend(var, [:=, value, :SEMICOLON | rest]) do
+    {%{var | value: value}, rest}
+  end
 end

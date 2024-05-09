@@ -10,7 +10,7 @@ defmodule Zig.Parser.Test.StatementTest do
   #
   # TESTS:
   # Statement
-  #   <- KEYWORD_comptime? GlobalVarDecl
+  #   <- KEYWORD_comptime? VarDeclProto
   #    / KEYWORD_comptime BlockExprStatement
   #    / KEYWORD_nosuspend BlockExprStatement
   #    / KEYWORD_suspend BlockExprStatement
@@ -120,6 +120,10 @@ defmodule Zig.Parser.Test.StatementTest do
         assert [%{code: [{unquote(assign_op), :a, :b}]}] =
                  Parser.parse("comptime {a #{unquote(assign_op)} b;}").code
       end
+    end
+
+    test "regression" do
+      Parser.parse("comptime {a += b;}")
     end
   end
 end
