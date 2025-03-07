@@ -2,7 +2,7 @@
 
 Parses Zig files.
 
-Note: This version of Zig.Parser is pinned to Zig 0.11.x
+Note: This version of Zig.Parser is pinned to Zig 0.14.x
 
 Future versions of Zig.Parser will be pinned to Zig version releases, so that
 The Zig PEG spec will be kept in-line, the version it's pinned to will be 
@@ -20,7 +20,7 @@ by adding `zig_parser` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:zig_parser, "~> 0.2.0"}
+    {:zig_parser, "~> 0.5.0"}
   ]
 end
 ```

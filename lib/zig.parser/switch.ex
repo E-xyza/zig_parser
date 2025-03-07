@@ -1,5 +1,5 @@
 defmodule Zig.Parser.Switch do
-  defstruct [:subject, :prongs, :location]
+  defstruct [:subject, :prongs, :location, :label]
 
   def parse([:LPAREN, subject, :RPAREN, :LBRACE, {:SwitchProngList, prongs}, :RBRACE]) do
     %__MODULE__{subject: subject, prongs: parse_prongs(prongs, [])}

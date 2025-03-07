@@ -78,5 +78,34 @@ defmodule Zig.Parser.Test.SwitchTest do
 
       assert [{[integer: 1], {:enum_literal, :foo}}] = prongs
     end
+
+    test "can be a dereferenced expr" do
+      Parser.parse("""
+      const foo = switch (bar) {
+      }.baz();
+      """)
+    end
+  end
+
+  describe "labelled switch" do
+    test "works" do
+      Parser.parse("const val = s: switch (six) {};") 
+    end
+
+    test "labelled continue" do
+      Parser.parse("""
+      const result = s: switch (@as(u32, 1)) {
+              1 => continue :s 123,
+      };
+      """)
+    end
+
+    test "labelled switch that is a loop." do
+      Parser.parse("""
+      fn doTheTest() !void {
+          eval: switch (val) {}
+      }
+      """)
+    end
   end
 end
