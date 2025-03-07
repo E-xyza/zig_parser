@@ -11,6 +11,7 @@ defmodule Zig.Parser.Function do
     :alignment,
     :linksection,
     :callconv,
+    :addrspace,
     impliciterror: false,
     builtin: false,
     extern: false,
@@ -39,6 +40,10 @@ defmodule Zig.Parser.Function do
 
   def parse([name, :LPAREN, {:ExprList, params}, :RPAREN]) do
     %__MODULE__{name: name, params: params}
+  end
+
+  defp parse_decl([{:addrspace, addrspace} | rest], fun_struct) do
+    parse_decl(rest, %{fun_struct | addrspace: addrspace})
   end
 
   defp parse_decl([{:align, align} | rest], fun_struct) do

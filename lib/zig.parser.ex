@@ -216,7 +216,9 @@ defmodule Zig.Parser do
                     WhileStatement: [tag: true, post_traverse: {While, :post_traverse, []}],
                     Statement: [tag: true, post_traverse: {Statement, :post_traverse, []}],
                     GlobalVarDecl: [post_traverse: {GlobalVarDecl, :post_traverse, []}],
-                    VarDeclExprStatement: [post_traverse: {VarDeclExprStatement, :post_traverse, []}],
+                    VarDeclExprStatement: [
+                      post_traverse: {VarDeclExprStatement, :post_traverse, []}
+                    ],
                     # keywords that add inline
                     LoopStatement: [tag: true, post_traverse: :add_inline],
                     # basic pseudofunction keywords

@@ -1,5 +1,5 @@
 defmodule Zig.Parser.VarDeclExprStatement do
-  alias Zig.Parser.Const 
+  alias Zig.Parser.Const
   alias Zig.Parser.Var
 
   def post_traverse(rest, args, context, _, _) do
@@ -14,20 +14,24 @@ defmodule Zig.Parser.VarDeclExprStatement do
     case Enum.reverse(args) do
       [_, :COMMA | _] = multi_assign ->
         parse_multi_assign(multi_assign, [])
+
       [%m{} = const_or_var | rest] when m in [Const, Var] ->
         {struct, new_rest} = m.extend(const_or_var, rest)
         [struct | new_rest]
+
       [left, operator, right, :SEMICOLON | rest] when operator in @assign_operators ->
         [{operator, left, right} | rest]
+
       [left, :"-|", right, :SEMICOLON | rest] ->
         [{:"-|=", left, right} | rest]
+
       [content, :SEMICOLON] ->
         [content]
     end
   end
 
   defp parse_multi_assign([assign, :COMMA | rest], so_far) do
-    parse_multi_assign(rest, [ assign | so_far])
+    parse_multi_assign(rest, [assign | so_far])
   end
 
   defp parse_multi_assign([assign, :=, value, :SEMICOLON | rest], so_far) do

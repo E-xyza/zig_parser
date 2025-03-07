@@ -4,6 +4,7 @@ defmodule Zig.Parser.PrimaryExpr do
   alias Zig.Parser.If
   alias Zig.Parser.StructLiteral
   alias Zig.Parser.While
+  alias Zig.Parser.Switch
 
   def post_traverse(rest, [{:PrimaryExpr, [start | args]} | args_rest], context, _, _) do
     expr =
@@ -26,6 +27,7 @@ defmodule Zig.Parser.PrimaryExpr do
   defp parse([:if | rest]), do: If.parse(rest)
   defp parse([:for | rest]), do: For.parse(rest)
   defp parse([:while | rest]), do: While.parse(rest)
+  defp parse([:switch | rest]), do: Switch.parse(rest)
 
   defp parse([:break]), do: :break
   defp parse([:break, :COLON, tag]), do: {:break, tag}
@@ -34,6 +36,7 @@ defmodule Zig.Parser.PrimaryExpr do
 
   defp parse([:continue]), do: :continue
   defp parse([:continue, :COLON, tag]), do: {:continue, tag}
+  defp parse([:continue, :COLON, tag, expr]), do: {:continue, tag, expr}
 
   defp parse([:nosuspend, expr]), do: {:nosuspend, expr}
   defp parse([:resume, expr]), do: {:resume, expr}
