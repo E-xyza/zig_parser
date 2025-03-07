@@ -18,4 +18,3 @@ defmodule ZigParserTest.Regressions.SwitchParseTest do
     end
   end
 end
-

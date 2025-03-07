@@ -3,7 +3,13 @@ defmodule Zig.Parser.VarDeclProto do
   alias Zig.Parser.Const
   alias Zig.Parser.Var
 
-  def post_traverse(rest, [{:VarDeclProto, [start, :const | args]} | rest_args], context, _loc, _row) do
+  def post_traverse(
+        rest,
+        [{:VarDeclProto, [start, :const | args]} | rest_args],
+        context,
+        _loc,
+        _row
+      ) do
     const =
       args
       |> Const.parse()
@@ -12,7 +18,13 @@ defmodule Zig.Parser.VarDeclProto do
     {rest, [const | rest_args], context}
   end
 
-  def post_traverse(rest, [{:VarDeclProto, [start, :var | args]} | rest_args], context, _loc, _row) do
+  def post_traverse(
+        rest,
+        [{:VarDeclProto, [start, :var | args]} | rest_args],
+        context,
+        _loc,
+        _row
+      ) do
     var =
       args
       |> Var.parse()

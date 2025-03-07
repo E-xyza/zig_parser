@@ -80,32 +80,35 @@ defmodule Zig.Parser.Test.SwitchTest do
     end
 
     test "can be a dereferenced expr" do
-      Parser.parse("""
-      const foo = switch (bar) {
-      }.baz();
-      """)
+      assert [%{value: {:call, {:ref, [switch, :baz]}, []}}] =
+               Parser.parse("""
+               const foo = switch (bar) {
+               }.baz();
+               """).code
+
+      assert %Switch{prongs: [], subject: :bar} = switch
     end
   end
 
   describe "labelled switch" do
     test "works" do
-      Parser.parse("const val = s: switch (six) {};") 
+      assert [%{value: %Switch{label: :s}}] = Parser.parse("const val = s: switch (six) {};").code
     end
 
     test "labelled continue" do
-      Parser.parse("""
+      assert [%{value: %Switch{prongs: [{[integer: 1], {:continue, :s, _}}], label: :s}}] = Parser.parse("""
       const result = s: switch (@as(u32, 1)) {
               1 => continue :s 123,
       };
-      """)
+      """).code
     end
 
     test "labelled switch that is a loop." do
-      Parser.parse("""
+      assert [%{block: %{code: [%Switch{label: :eval}]}}] = Parser.parse("""
       fn doTheTest() !void {
           eval: switch (val) {}
       }
-      """)
+      """).code
     end
   end
 end
