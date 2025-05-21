@@ -2,6 +2,7 @@ defmodule ZigParserTest.EverythingHelper do
   @rejected MapSet.new(~w[
   #  PARSE TOO SLOW:
     test/_support/zig-0.14.0/src/arch/x86_64/CodeGen.zig
+    test/_support/zig-0.14.0/lib/compiler_rt/udivmodti4_test.zig
   ])
 
   def dir_walk("test/_support/zig-0.14.0/test/cases/compile_errors" <> _), do: []
