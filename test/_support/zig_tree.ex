@@ -39,7 +39,7 @@ defmodule ZigParserTest.ZigTree do
     {:ok, _} = Application.ensure_all_started(:inets)
 
     headers = []
-    request = {~C'https://ziglang.org/builds/zig-0.14.0.tar.xz', headers}
+    request = {~C'https://ziglang.org/download/0.14.0/zig-0.14.0.tar.xz', headers}
 
     http_options = [
       timeout: 600_000,
