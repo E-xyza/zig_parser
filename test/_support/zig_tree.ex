@@ -16,13 +16,42 @@ defmodule ZigParserTest.ZigTree do
     end
   end
 
+  @otp_version :otp_release
+               |> :erlang.system_info()
+               |> List.to_integer()
+
+  if @otp_version >= 25 do
+    defp ssl_opts do
+      [
+        verify: :verify_peer,
+        cacerts: :public_key.cacerts_get()
+      ]
+    end
+  else
+    defp ssl_opts do
+      # unfortunately in otp 24 there is not a clean way of obtaining cacerts
+      []
+    end
+  end
+
   defp download_zig_zipfile do
     {:ok, _} = Application.ensure_all_started(:ssl)
     {:ok, _} = Application.ensure_all_started(:inets)
 
     headers = []
     request = {~C'https://ziglang.org/builds/zig-0.14.0.tar.xz', headers}
-    http_options = [timeout: 600_000]
+
+    http_options = [
+      timeout: 600_000,
+      ssl:
+        [
+          depth: 100,
+          customize_hostname_check: [
+            match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
+          ]
+        ] ++ ssl_opts()
+    ]
+
     options = [body_format: :binary]
 
     case :httpc.request(:get, request, http_options, options) do
