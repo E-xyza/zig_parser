@@ -255,7 +255,10 @@ defmodule Zig.Parser do
   end
 
   def parse(string) do
-    case parser(string) do
+    string
+    |> String.replace("\r\n", "\n")
+    |> parser
+    |> case do
       {:ok, _, "", parser, _, _} ->
         %{
           parser
