@@ -14,13 +14,12 @@ to handle other features.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `zig_parser` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `zig_parser` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:zig_parser, "~> 0.5.0"}
+    {:zig_parser, "~> 0.5.1"}
   ]
 end
 ```
