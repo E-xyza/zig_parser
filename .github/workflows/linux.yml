@@ -47,8 +47,8 @@ jobs:
     - uses: actions/cache@v3
       id: zig-cache
       with:
-        path: test/_support/zig-0.14.0
-        key: ${{ runner.os }}-zig-${{ steps.zig-version.outputs.stdout }}
+        path: test/_support/zig-0.15.1
+        key: ${{ runner.os }}-zig-0.15.1
 
     - name: Run Tests
       env:
