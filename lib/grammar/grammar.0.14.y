@@ -12,6 +12,7 @@ ComptimeDecl <- KEYWORD_comptime Block
 Decl
     <- (KEYWORD_export / KEYWORD_extern STRINGLITERALSINGLE? / KEYWORD_inline / KEYWORD_noinline)? FnProto (SEMICOLON / Block)
      / (KEYWORD_export / KEYWORD_extern STRINGLITERALSINGLE?)? KEYWORD_threadlocal? GlobalVarDecl
+     / KEYWORD_usingnamespace Expr SEMICOLON
 
 FnProto <- KEYWORD_fn IDENTIFIER? LPAREN ParamDeclList RPAREN ByteAlign? AddrSpace? LinkSection? CallConv? EXCLAMATIONMARK? TypeExpr
 
@@ -125,7 +126,8 @@ TypeExpr <- PrefixTypeOp* ErrorUnionExpr
 ErrorUnionExpr <- SuffixExpr (EXCLAMATIONMARK TypeExpr)?
 
 SuffixExpr
-    <- PrimaryTypeExpr (SuffixOp / FnCallArguments)*
+    <- KEYWORD_async PrimaryTypeExpr SuffixOp* FnCallArguments
+     / PrimaryTypeExpr (SuffixOp / FnCallArguments)*
 
 PrimaryTypeExpr
     <- BUILTINIDENTIFIER FnCallArguments
@@ -179,7 +181,7 @@ AsmInput <- COLON AsmInputList AsmClobbers?
 
 AsmInputItem <- LBRACKET IDENTIFIER RBRACKET STRINGLITERAL LPAREN Expr RPAREN
 
-AsmClobbers <- COLON PrimaryTypeExpr
+AsmClobbers <- COLON StringList
 
 # *** Helper grammar ***
 BreakLabel <- COLON IDENTIFIER
@@ -301,6 +303,7 @@ PrefixOp
      / MINUSPERCENT
      / AMPERSAND
      / KEYWORD_try
+     / KEYWORD_await
 
 PrefixTypeOp
     <- QUESTIONMARK
@@ -347,6 +350,8 @@ SwitchProngList <- (SwitchProng COMMA)* SwitchProng?
 AsmOutputList <- (AsmOutputItem COMMA)* AsmOutputItem?
 
 AsmInputList <- (AsmInputItem COMMA)* AsmInputItem?
+
+StringList <- (STRINGLITERAL COMMA)* STRINGLITERAL?
 
 ParamDeclList <- (ParamDecl COMMA)* ParamDecl?
 
@@ -519,6 +524,8 @@ KEYWORD_and         <- 'and'         end_of_word
 KEYWORD_anyframe    <- 'anyframe'    end_of_word
 KEYWORD_anytype     <- 'anytype'     end_of_word
 KEYWORD_asm         <- 'asm'         end_of_word
+KEYWORD_async       <- 'async'       end_of_word
+KEYWORD_await       <- 'await'       end_of_word
 KEYWORD_break       <- 'break'       end_of_word
 KEYWORD_callconv    <- 'callconv'    end_of_word
 KEYWORD_catch       <- 'catch'       end_of_word
@@ -555,13 +562,14 @@ KEYWORD_threadlocal <- 'threadlocal' end_of_word
 KEYWORD_try         <- 'try'         end_of_word
 KEYWORD_union       <- 'union'       end_of_word
 KEYWORD_unreachable <- 'unreachable' end_of_word
+KEYWORD_usingnamespace <- 'usingnamespace' end_of_word
 KEYWORD_var         <- 'var'         end_of_word
 KEYWORD_volatile    <- 'volatile'    end_of_word
 KEYWORD_while       <- 'while'       end_of_word
 
 keyword <- KEYWORD_addrspace / KEYWORD_align / KEYWORD_allowzero / KEYWORD_and
-         / KEYWORD_anyframe / KEYWORD_anytype / KEYWORD_asm
-         / KEYWORD_break / KEYWORD_callconv / KEYWORD_catch
+         / KEYWORD_anyframe / KEYWORD_anytype / KEYWORD_asm / KEYWORD_async
+         / KEYWORD_await / KEYWORD_break / KEYWORD_callconv / KEYWORD_catch
          / KEYWORD_comptime / KEYWORD_const / KEYWORD_continue / KEYWORD_defer
          / KEYWORD_else / KEYWORD_enum / KEYWORD_errdefer / KEYWORD_error / KEYWORD_export
          / KEYWORD_extern / KEYWORD_fn / KEYWORD_for / KEYWORD_if
@@ -570,4 +578,4 @@ keyword <- KEYWORD_addrspace / KEYWORD_align / KEYWORD_allowzero / KEYWORD_and
          / KEYWORD_pub / KEYWORD_resume / KEYWORD_return / KEYWORD_linksection
          / KEYWORD_struct / KEYWORD_suspend / KEYWORD_switch / KEYWORD_test
          / KEYWORD_threadlocal / KEYWORD_try / KEYWORD_union / KEYWORD_unreachable
-         / KEYWORD_var / KEYWORD_volatile / KEYWORD_while
+         / KEYWORD_usingnamespace / KEYWORD_var / KEYWORD_volatile / KEYWORD_while

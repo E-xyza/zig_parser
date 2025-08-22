@@ -6,12 +6,12 @@ defmodule Zig.Parser.Expr do
 
   # implements the shunting yard algorithm to get correct pairing of operators.
 
-  @prefix_operators ~w[! - ~ -% & try await]a
+  @prefix_operators ~w[! - ~ -% & try]a
 
   @infix_operators ~w[
     * / % ** *% *| ||
-    + - ++ +% -% +| -| 
-    << >> <<| 
+    + - ++ +% -% +| -|
+    << >> <<|
     & ^ | orelse catch
     == != < > <= >= and or]a
 
