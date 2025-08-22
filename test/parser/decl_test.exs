@@ -9,7 +9,7 @@ defmodule Zig.Parser.Test.ContainerDeclTest do
   # Decl
   #   <- (KEYWORD_export / KEYWORD_extern STRINGLITERALSINGLE? / (KEYWORD_inline / KEYWORD_noinline))? FnProto (SEMICOLON / Block)
   #      / (KEYWORD_export / KEYWORD_extern STRINGLITERALSINGLE?)? KEYWORD_threadlocal? VarDeclProto
-  #      / KEYWORD_usingnamespace Expr SEMICOLON
+  #      Expr SEMICOLON
 
   describe "FnProto decorator with no block" do
     test "export works" do
@@ -69,24 +69,6 @@ defmodule Zig.Parser.Test.ContainerDeclTest do
                const foo = 1;
                var abc: int32 = undefined;
                """).code
-    end
-  end
-
-  describe "usingnamespace works" do
-    alias Zig.Parser.Struct
-
-    test "with an identifier" do
-      assert [{:usingnamespace, :std}] = Parser.parse("usingnamespace std;").code
-    end
-
-    test "with a struct" do
-      assert [{:usingnamespace, %Struct{}}] =
-               Parser.parse("usingnamespace struct{};").code
-    end
-
-    test "with an import" do
-      assert [{:usingnamespace, {:call, :import, [string: "std"]}}] =
-               Parser.parse("usingnamespace @import(\"std\");").code
     end
   end
 end

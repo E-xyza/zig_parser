@@ -357,23 +357,6 @@ defmodule Zig.Parser.Test.TypeExprTest do
     end
   end
 
-  describe "async function call" do
-    test "works in the simple case" do
-      assert [%{value: {:async, {:call, :bar, []}}}] =
-               Parser.parse("const foo = async bar();").code
-    end
-
-    test "works in the more complex case" do
-      assert [
-               %{
-                 value:
-                   {:async, {:call, {:ref, [:bar, :baz, {:index, {:integer, 3}}, :quux]}, []}}
-               }
-             ] =
-               Parser.parse("const foo = async bar.baz[3].quux();").code
-    end
-  end
-
   describe "as error unions" do
     test "basic error union" do
       assert [%{value: {:errorunion, :bar, :baz}}] = Parser.parse("const foo = bar!baz;").code

@@ -28,8 +28,6 @@ defmodule Zig.Parser.Decl do
 
   defp parse([:threadlocal | rest]), do: %{parse(rest) | threadlocal: true}
 
-  defp parse([:usingnamespace, payload, :SEMICOLON]), do: {:usingnamespace, payload}
-
   defp parse([%Function{} = function, :SEMICOLON]), do: function
 
   defp parse([%Function{} = function, %Block{} = block]), do: %{function | block: block}

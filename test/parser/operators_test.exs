@@ -84,7 +84,7 @@ defmodule Zig.Parser.Test.OperatorsTest do
     end
   end
 
-  @unary_operators ~w[! - -% ~ & try await]a
+  @unary_operators ~w[! - -% ~ & try]a
 
   describe "unary prefix operators in expressions" do
     for op <- @unary_operators do

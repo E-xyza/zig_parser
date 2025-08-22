@@ -3,8 +3,6 @@ defmodule Zig.Parser.ErrorUnionExpr do
     {rest, [parse(args) | rest_args], context}
   end
 
-  defp parse([:async | rest]), do: {:async, parse(rest)}
-
   defp parse([identifier]), do: identifier
 
   defp parse([_ | _] = args) do
