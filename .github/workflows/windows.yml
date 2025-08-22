@@ -35,6 +35,4 @@ jobs:
         run: mix compile
   
       - name: Run Tests
-        env:
-          RUNNING_CI: "TRUE"
         run: mix test

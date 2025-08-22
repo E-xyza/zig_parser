@@ -1,4 +1,4 @@
-if match?({:unix, _}, :os.type()) do
+if match?({:unix, _}, :os.type()) and System.get_env("RUNNING_CI", "false") != "true" do
   defmodule ZigParserTest.EverythingHelper do
     @rejected MapSet.new(~w[
   #  PARSE TOO SLOW:
