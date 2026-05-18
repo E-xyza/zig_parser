@@ -9,6 +9,8 @@ jobs:
     strategy:
       matrix:
         pair:
+          - otp-version: '28.0'
+            elixir-version: '1.19.0'
           - otp-version: '27.3'
             elixir-version: '1.18.3'
           - otp-version: '27.3'
@@ -47,8 +49,8 @@ jobs:
     - uses: actions/cache@v3
       id: zig-cache
       with:
-        path: test/_support/zig-0.15.1
-        key: ${{ runner.os }}-zig-0.15.1
+        path: test/_support/zig-0.16.0
+        key: ${{ runner.os }}-zig-0.16.0
 
     - name: Run Tests
       env:
