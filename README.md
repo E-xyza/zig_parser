@@ -2,7 +2,7 @@
 
 Parses Zig files.
 
-Note: This version of Zig.Parser is pinned to Zig 0.14.x
+Note: This version of Zig.Parser is pinned to Zig 0.16.x
 
 Future versions of Zig.Parser will be pinned to Zig version releases, so that
 The Zig PEG spec will be kept in-line, the version it's pinned to will be 
@@ -19,7 +19,7 @@ The package can be installed by adding `zig_parser` to your list of dependencies
 ```elixir
 def deps do
   [
-    {:zig_parser, "~> 0.5.1"}
+    {:zig_parser, "~> 0.7.0"}
   ]
 end
 ```
