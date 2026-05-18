@@ -2,11 +2,11 @@ if match?({:unix, _}, :os.type()) and System.get_env("RUNNING_CI", "false") != "
   defmodule ZigParserTest.EverythingHelper do
     @rejected MapSet.new(~w[
   #  PARSE TOO SLOW:
-    test/_support/zig-0.15.1/src/arch/x86_64/CodeGen.zig
-    test/_support/zig-0.15.1/lib/compiler_rt/udivmodti4_test.zig
+    test/_support/zig-0.16.0/src/codegen/x86_64/CodeGen.zig
+    test/_support/zig-0.16.0/lib/compiler_rt/udivmodti4_test.zig
   ])
 
-    def dir_walk("test/_support/zig-0.15.1/test/cases/compile_errors" <> _), do: []
+    def dir_walk("test/_support/zig-0.16.0/test/cases/compile_errors" <> _), do: []
 
     def dir_walk(dir) do
       {dirs, files} =
@@ -26,7 +26,7 @@ if match?({:unix, _}, :os.type()) and System.get_env("RUNNING_CI", "false") != "
 
   alias ZigParserTest.EverythingHelper
 
-  parent_dir = "test/_support/zig-0.15.1"
+  parent_dir = "test/_support/zig-0.16.0"
   subdirs = ~W[lib src test]
 
   subdirs

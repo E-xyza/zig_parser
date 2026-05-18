@@ -21,5 +21,23 @@ defmodule Zig.Parser.AssignExpr do
     {:"-|=", left, right}
   end
 
-  defp parse_assign([singleton]), do: singleton
+  # Multi-value destructuring: a, b = value
+  defp parse_assign([first | rest]) do
+    case parse_multi_assign(rest, [first]) do
+      {:multi, targets, value} -> {:=, targets, value}
+      :not_multi -> first
+    end
+  end
+
+  defp parse_multi_assign([:COMMA, expr | rest], targets) do
+    parse_multi_assign(rest, [expr | targets])
+  end
+
+  defp parse_multi_assign([:=, value], targets) do
+    {:multi, Enum.reverse(targets), value}
+  end
+
+  defp parse_multi_assign([], [_single]) do
+    :not_multi
+  end
 end

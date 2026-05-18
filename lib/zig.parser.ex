@@ -28,7 +28,7 @@ defmodule Zig.Parser do
   alias Zig.Parser.Statement
   alias Zig.Parser.TypeExpr
   alias Zig.Parser.VarDeclProto
-  alias Zig.Parser.VarDeclExprStatement
+  alias Zig.Parser.VarAssignStatement
   alias Zig.Parser.While
 
   @keywords ~w[addrspace align allowzero and anyframe anytype asm break callconv catch comptime const continue defer else enum errdefer error export extern fn for if inline noalias nosuspend noinline opaque or orelse packed pub resume return linksection struct suspend switch test threadlocal try union unreachable var volatile while]a
@@ -94,7 +94,7 @@ defmodule Zig.Parser do
   @operators ~w[COMMA DOT DOT2 COLON LBRACE LBRACKET LPAREN MINUSRARROW LETTERC QUESTIONMARK RBRACE RBRACKET RPAREN SEMICOLON]a
   @operator_mapping Enum.map(@operators, &{&1, [token: true]})
 
-  @collecteds ~w[INTEGER FLOAT BUILTINIDENTIFIER line_string]a
+  @collecteds ~w[INTEGER FLOAT BUILTINIDENTIFIER]a
   @collected_mapping Enum.map(
                        @collecteds,
                        &{&1, [collect: true, post_traverse: {Collected, :post_traverse, [&1]}]}
@@ -114,7 +114,7 @@ defmodule Zig.Parser do
                     ],
                     doc_comment: [post_traverse: :doc_comment, tag: true],
                     line_comment: [post_traverse: :line_comment, tag: true, start_position: true],
-                    line_string: [post_traverse: :process_line_string],
+                    line_string: [collect: true, post_traverse: :process_line_string],
                     AssignExpr: [
                       tag: true,
                       post_traverse: {AssignExpr, :post_traverse, []}
@@ -147,7 +147,6 @@ defmodule Zig.Parser do
                       post_traverse: {PrimaryExpr, :post_traverse, []}
                     ],
                     skip: [ignore: true],
-                    line_string: [tag: true],
                     IDENTIFIER: [post_traverse: :identifier],
                     STRINGLITERALSINGLE: [
                       tag: :string,
@@ -214,10 +213,12 @@ defmodule Zig.Parser do
                     ],
                     ForStatement: [tag: true, post_traverse: {For, :post_traverse, []}],
                     WhileStatement: [tag: true, post_traverse: {While, :post_traverse, []}],
+                    BlockStatement: [tag: true, post_traverse: {Statement, :post_traverse, []}],
                     Statement: [tag: true, post_traverse: {Statement, :post_traverse, []}],
+                    ExprStatement: [tag: true, post_traverse: {Statement, :post_traverse, []}],
                     GlobalVarDecl: [post_traverse: {GlobalVarDecl, :post_traverse, []}],
-                    VarDeclExprStatement: [
-                      post_traverse: {VarDeclExprStatement, :post_traverse, []}
+                    VarAssignStatement: [
+                      post_traverse: {VarAssignStatement, :post_traverse, []}
                     ],
                     # keywords that add inline
                     LoopStatement: [tag: true, post_traverse: :add_inline],
@@ -226,8 +227,6 @@ defmodule Zig.Parser do
                     ByteAlign: [tag: true, post_traverse: :pseudofunction],
                     LinkSection: [tag: true, post_traverse: :pseudofunction],
                     AddrSpace: [tag: true, post_traverse: :pseudofunction],
-                    # substituted functions:
-                    mb_utf8_literal: [alias: :utf8],
                     # Top level
                     Root: [tag: true, post_traverse: :post_traverse]
                   ] ++
@@ -245,14 +244,6 @@ defmodule Zig.Parser do
     |> parsec(:Root)
 
   defparsecp(:parser, zig_parser)
-
-  defparsecp(:utf8, utf8_char(not: 0..127) |> map(:char_to_string))
-
-  defp char_to_string(char) do
-    char
-    |> List.wrap()
-    |> List.to_string()
-  end
 
   def parse(string) do
     string
@@ -288,7 +279,7 @@ defmodule Zig.Parser do
       |> Enum.reverse()
       |> Enum.reduce({[], true}, &multiline_filter/2)
       |> elem(0)
-      |> List.to_string()
+      |> IO.iodata_to_binary()
 
     {rest, [{:doc_comment, doc_comment} | rest_args], context}
   end
@@ -300,7 +291,7 @@ defmodule Zig.Parser do
          _,
          _
        ) do
-    comment_data = {List.to_string(comment), position}
+    comment_data = {IO.iodata_to_binary(comment), position}
     {rest, rest_args, %{context | comments: [comment_data | context.comments]}}
   end
 
@@ -311,7 +302,7 @@ defmodule Zig.Parser do
          _,
          _
        ) do
-    comment_data = {List.to_string([?/, ?/, comment]), position}
+    comment_data = {IO.iodata_to_binary([?/, ?/, comment]), position}
     {rest, rest_args, %{context | comments: [comment_data | context.comments]}}
   end
 
@@ -383,7 +374,7 @@ defmodule Zig.Parser do
     arg =
       case args do
         [{:string, _} = string] -> string
-        string_list -> {:string, Enum.join(string_list, "")}
+        string_list -> {:string, string_list |> Enum.reverse() |> IO.iodata_to_binary()}
       end
 
     {rest, [arg], context}
@@ -400,11 +391,13 @@ defmodule Zig.Parser do
   end
 
   defp process_line_string(rest, args, context, _loc, _col) do
+    # Strip the leading \\ and trailing spaces (but keep the newline)
+    str = IO.iodata_to_binary(args)
+
     new_args =
-      args
-      |> Enum.reduce({[], false}, &multiline_filter/2)
-      |> elem(0)
-      |> List.to_string()
+      str
+      |> String.replace_prefix("\\\\", "")
+      |> String.replace(~r/\n[ ]*$/, "\n")
 
     {rest, [new_args], context}
   end

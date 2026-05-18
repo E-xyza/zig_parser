@@ -1,4 +1,4 @@
-defmodule Zig.Parser.VarDeclExprStatement do
+defmodule Zig.Parser.VarAssignStatement do
   alias Zig.Parser.Const
   alias Zig.Parser.Var
 
@@ -6,8 +6,6 @@ defmodule Zig.Parser.VarDeclExprStatement do
     {rest, parse(args), context}
   end
 
-  # NOTE: this duplicates functionality in `AssignExpr`.
-  # this is due to the organization of `grammar.y`
   @assign_operators ~w[*= /= %= += -= <<= >>= &= ^= |= *%= +%= -%= *|= +|= -|= <<|= =]a
 
   defp parse(args) do

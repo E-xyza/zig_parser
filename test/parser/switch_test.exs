@@ -90,6 +90,20 @@ defmodule Zig.Parser.Test.SwitchTest do
     end
   end
 
+  describe "packed struct/union switch prong items" do
+    test "struct literal as switch prong item" do
+      assert [%{value: %Switch{prongs: prongs}}] =
+               Parser.parse("""
+               const result = switch (u) {
+                   .{ .b = 3 } => true,
+                   else => false,
+               };
+               """).code
+
+      assert [{[%Zig.Parser.StructLiteral{values: %{b: {:integer, 3}}}], true} | _] = prongs
+    end
+  end
+
   describe "labelled switch" do
     test "works" do
       assert [%{value: %Switch{label: :s}}] = Parser.parse("const val = s: switch (six) {};").code

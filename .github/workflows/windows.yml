@@ -13,8 +13,8 @@ jobs:
       - name: Setup Elixir
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: '1.18.3'  # adjust as needed
-          otp-version: '27.3'       # adjust as needed
+          elixir-version: '1.19.0'
+          otp-version: '28.0'
 
       - uses: actions/cache@v3
         id: deps-cache
