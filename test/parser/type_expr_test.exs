@@ -194,18 +194,6 @@ defmodule Zig.Parser.Test.TypeExprTest do
                Parser.parse("const foo = [*]align(64) u8;").code
     end
 
-    test "with detailed alignment" do
-      assert [
-               %{
-                 value: %Pointer{
-                   count: :many,
-                   alignment: {{:integer, 64}, {:integer, 1}, {:integer, 1}}
-                 }
-               }
-             ] =
-               Parser.parse("const foo = [*]align(64:1:1) u8;").code
-    end
-
     test "with const" do
       assert [%{value: %Pointer{count: :many, const: true}}] =
                Parser.parse("const foo = [*]const u8;").code

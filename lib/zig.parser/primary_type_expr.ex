@@ -78,6 +78,11 @@ defmodule Zig.Parser.PrimaryTypeExpr do
     %{expr | label: label}
   end
 
+  # Labeled SwitchExpr (from LabeledTypeExpr)
+  defp parse([label, :COLON, :switch | switch]) do
+    %{Switch.parse(switch) | label: label}
+  end
+
   # IfExpr
   defp parse([:if | ifexpr]), do: If.parse(ifexpr)
 
