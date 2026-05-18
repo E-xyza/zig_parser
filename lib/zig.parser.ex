@@ -227,8 +227,6 @@ defmodule Zig.Parser do
                     ByteAlign: [tag: true, post_traverse: :pseudofunction],
                     LinkSection: [tag: true, post_traverse: :pseudofunction],
                     AddrSpace: [tag: true, post_traverse: :pseudofunction],
-                    # substituted functions:
-                    mb_utf8_literal: [alias: :utf8],
                     # Top level
                     Root: [tag: true, post_traverse: :post_traverse]
                   ] ++
@@ -246,12 +244,6 @@ defmodule Zig.Parser do
     |> parsec(:Root)
 
   defparsecp(:parser, zig_parser)
-
-  defparsecp(:utf8, utf8_char(not: 0..127) |> map(:char_to_string))
-
-  defp char_to_string(char) do
-    List.to_string([char])
-  end
 
   def parse(string) do
     string
