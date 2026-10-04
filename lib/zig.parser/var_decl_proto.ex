@@ -13,7 +13,7 @@ defmodule Zig.Parser.VarDeclProto do
     const =
       args
       |> Const.parse()
-      |> Parser.put_location(start)
+      |> Parser.put_location(start, context.source)
 
     {rest, [const | rest_args], context}
   end
@@ -28,7 +28,7 @@ defmodule Zig.Parser.VarDeclProto do
     var =
       args
       |> Var.parse()
-      |> Parser.put_location(start)
+      |> Parser.put_location(start, context.source)
 
     {rest, [var | rest_args], context}
   end

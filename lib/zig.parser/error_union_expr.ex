@@ -9,6 +9,12 @@ defmodule Zig.Parser.ErrorUnionExpr do
     parse_grouped(args)
   end
 
+  # zig 0.17 dropped the DOTQUESTIONMARK token: `.?` is now spelled as the two
+  # tokens DOT QUESTIONMARK.  This must precede the generic field access clause.
+  defp parse_grouped([ref, :DOT, :QUESTIONMARK | rest]) do
+    parse_grouped([group(ref, :"?") | rest])
+  end
+
   defp parse_grouped([ref, :DOT, next | rest]) do
     parse_grouped([group(ref, next) | rest])
   end
@@ -24,6 +30,7 @@ defmodule Zig.Parser.ErrorUnionExpr do
   defp parse_grouped([ref, :".?" | rest]) do
     parse_grouped([group(ref, :"?") | rest])
   end
+
 
   defp parse_grouped([ref, :LPAREN, {:ExprList, args}, :RPAREN | rest]) do
     parse_grouped([{:call, ref, Zig.Parser._parse_args(args, [])} | rest])

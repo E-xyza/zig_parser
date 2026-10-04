@@ -24,23 +24,35 @@ defmodule Zig.Parser.Function do
     fun_struct =
       args
       |> parse
-      |> Parser.put_location(start)
+      |> Parser.put_location(start, context.source)
 
     {rest, [fun_struct | rest_args], context}
   end
 
-  # type declaration
-  def parse([:LPAREN, {:ParamDeclList, params}, :RPAREN | rest]) do
-    parse_decl(rest, %__MODULE__{params: parse_params(params, [])})
+  # In zig 0.17 ParamDeclList carries its own parentheses, so LPAREN/RPAREN
+  # arrive inside the tagged list rather than around it.
+
+  # type declaration (anonymous fn proto)
+  def parse([{:ParamDeclList, params} | rest]) do
+    parse_decl(rest, %__MODULE__{params: params |> strip_parens() |> parse_params([])})
   end
 
-  def parse([name, :LPAREN, {:ParamDeclList, params}, :RPAREN | rest]) do
-    parse_decl(rest, %__MODULE__{name: name, params: parse_params(params, [])})
+  def parse([name, {:ParamDeclList, params} | rest]) do
+    parse_decl(rest, %__MODULE__{name: name, params: params |> strip_parens() |> parse_params([])})
   end
 
   def parse([name, :LPAREN, {:ExprList, params}, :RPAREN]) do
     %__MODULE__{name: name, params: params}
   end
+
+  defp strip_parens([:LPAREN | rest]) do
+    case :lists.reverse(rest) do
+      [:RPAREN | middle] -> :lists.reverse(middle)
+      _ -> rest
+    end
+  end
+
+  defp strip_parens(params), do: params
 
   defp parse_decl([{:addrspace, addrspace} | rest], fun_struct) do
     parse_decl(rest, %{fun_struct | addrspace: addrspace})

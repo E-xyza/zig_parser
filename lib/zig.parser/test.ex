@@ -15,7 +15,7 @@ defmodule Zig.Parser.Test do
       args
       |> parse
       |> Map.replace!(:doc_comment, comment)
-      |> Parser.put_location(start)
+      |> Parser.put_location(start, context.source)
 
     {rest, [ast | rest_args], context}
   end
@@ -24,7 +24,7 @@ defmodule Zig.Parser.Test do
     ast =
       args
       |> parse
-      |> Parser.put_location(start)
+      |> Parser.put_location(start, context.source)
 
     {rest, [ast | rest_args], context}
   end

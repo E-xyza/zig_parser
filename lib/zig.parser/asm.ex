@@ -7,7 +7,7 @@ defmodule Zig.Parser.Asm do
     asm =
       args
       |> parse(%__MODULE__{})
-      |> Parser.put_location(start)
+      |> Parser.put_location(start, context.source)
 
     {rest, [asm | args_rest], context}
   end

@@ -57,12 +57,18 @@ defmodule Zig.Parser.Test.OperatorsTest do
       & ^ | orelse
       << >> <<|
       + - ++ +% -% +| -|
-      || * / % ** *% *|]a
+      || * / % *% *|]a
 
     for op <- @binary_operators do
       test "#{op}" do
         assert [%{value: {unquote(op), :a, :b}}] =
                  Parser.parse("const foo = a #{unquote(op)} b;").code
+      end
+    end
+
+    test "** was removed in zig 0.17 in favor of @splat" do
+      assert_raise Zig.Parser.ParseError, fn ->
+        Parser.parse("const foo = a ** b;")
       end
     end
   end

@@ -8,12 +8,9 @@ defmodule Zig.Parser.Statement do
     {rest, [parse_block_statement(args) | rest_args], context}
   end
 
-  # ExprStatement: if, labeled statements, nosuspend, comptime block
-  def post_traverse(rest, [{:ExprStatement, args} | rest_args], context, _, _) do
-    {rest, [parse_expr_statement(args) | rest_args], context}
-  end
-
-  # Statement: ExprStatement, suspend, or simple assignment
+  # Statement: in zig 0.17 the old ExprStatement rule was folded into Statement,
+  # so this one clause covers both: the expression forms (if, labeled statements,
+  # nosuspend, comptime block) and suspend / simple assignment.
   def post_traverse(rest, [{:Statement, args} | rest_args], context, _, _) do
     {rest, [parse_statement(args) | rest_args], context}
   end
@@ -95,6 +92,12 @@ defmodule Zig.Parser.Statement do
   end
 
   defp parse_statement([statement, :SEMICOLON]), do: statement
+
+  # the expression-statement forms, folded in from the old ExprStatement rule
+  defp parse_statement([:nosuspend | _] = args), do: parse_expr_statement(args)
+  defp parse_statement([:if | _] = args), do: parse_expr_statement(args)
+  defp parse_statement([:switch | _] = args), do: parse_expr_statement(args)
+  defp parse_statement([_, :COLON | _] = args), do: parse_expr_statement(args)
 
   defp parse_statement([content]), do: content
 end

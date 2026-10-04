@@ -17,13 +17,13 @@ defmodule Zig.Parser.Block do
     block =
       code
       |> parse
-      |> Parser.put_location(start)
+      |> Parser.put_location(start, context.source)
 
     {rest, [block | rest_args], context}
   end
 
   def post_traverse(rest, [{:BlockExpr, [start, %Block{} = code]} | rest_args], context, _, _) do
-    block = Parser.put_location(code, start)
+    block = Parser.put_location(code, start, context.source)
     {rest, [block | rest_args], context}
   end
 
@@ -36,7 +36,7 @@ defmodule Zig.Parser.Block do
       ) do
     block =
       code
-      |> Parser.put_location(start)
+      |> Parser.put_location(start, context.source)
       |> Map.replace!(:label, label)
 
     {rest, [block | rest_args], context}

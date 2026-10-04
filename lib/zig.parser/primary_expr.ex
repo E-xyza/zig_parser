@@ -9,7 +9,7 @@ defmodule Zig.Parser.PrimaryExpr do
   def post_traverse(rest, [{:PrimaryExpr, [start | args]} | args_rest], context, _, _) do
     expr =
       case parse(args) do
-        struct_value when is_struct(struct_value) -> Parser.put_location(struct_value, start)
+        struct_value when is_struct(struct_value) -> Parser.put_location(struct_value, start, context.source)
         tuple_value when is_tuple(tuple_value) -> tuple_value
         atom_value when is_atom(atom_value) -> atom_value
       end

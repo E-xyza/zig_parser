@@ -1,9 +1,9 @@
 defmodule Zig.Parser.ContainerDeclaration do
-  def post_traverse(rest, [{:ContainerDeclaration, []} | rest_args], context, _loc, _row) do
+  def post_traverse(rest, [{:ContainerDecl, []} | rest_args], context, _loc, _row) do
     {rest, rest_args, context}
   end
 
-  def post_traverse(rest, [{:ContainerDeclaration, args} | rest_args], context, _loc, _row) do
+  def post_traverse(rest, [{:ContainerDecl, args} | rest_args], context, _loc, _row) do
     new_args =
       args
       |> parse(nil, [])

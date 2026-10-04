@@ -64,8 +64,10 @@ defmodule Zig.Parser.Test.StatementTest do
       [%{code: [{:errdefer, %Block{}}]}] = Parser.parse("comptime {errdefer {}}").code
     end
 
-    test "can be errdefer with a payload" do
-      [%{code: [{:errdefer, :err, %Block{}}]}] = Parser.parse("comptime {errdefer |err| {}}").code
+    test "the errdefer capture was removed in zig 0.17" do
+      assert_raise Zig.Parser.ParseError, fn ->
+        Parser.parse("comptime {errdefer |err| {}}")
+      end
     end
   end
 
@@ -92,9 +94,10 @@ defmodule Zig.Parser.Test.StatementTest do
       assert [%{code: [{:errdefer, %If{}}]}] = Parser.parse("comptime {errdefer if (x) y;}").code
     end
 
-    test "can be errdefer with payload" do
-      assert [%{code: [{:errdefer, :err, %If{}}]}] =
-               Parser.parse("comptime {errdefer |err| if (x) y;}").code
+    test "the errdefer capture was removed in zig 0.17" do
+      assert_raise Zig.Parser.ParseError, fn ->
+        Parser.parse("comptime {errdefer |err| if (x) y;}")
+      end
     end
   end
 
